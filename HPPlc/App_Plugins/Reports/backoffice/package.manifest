@@ -14,8 +14,8 @@
     "~/App_Plugins/Reports/backoffice/Angular/UserLoginController.js",
     "~/App_Plugins/Reports/backoffice/Angular/WorkSheetDownloadController.js",
     "~/App_Plugins/Reports/backoffice/Angular/CouponCodeController.js",
-    "~/App_Plugins/Reports/backoffice/Angular/CouponCodeLogController.js"
-
+    "~/App_Plugins/Reports/backoffice/Angular/CouponCodeLogController.js",
+    "~/App_Plugins/Reports/backoffice/Angular/BulkMediaUploadController.js"
   ],
   "css": [
     "~/App_Plugins/Reports/backoffice/Css/reports.css"

@@ -19,10 +19,10 @@ namespace HPPlc.Models.S3Buckets
         private static readonly RegionEndpoint bucketRegion = RegionEndpoint.APSouth1;
         private static readonly string accesskey = ConfigurationManager.AppSettings["AWSAccessKey"];
         private static readonly string secretkey = ConfigurationManager.AppSettings["AWSSecretKey"];
-		private static readonly string folderName = "Invoice";//ConfigurationManager.AppSettings["BucketFileSystem:MediaPrefix"];
+        //private static readonly string folderName = "Invoice";//ConfigurationManager.AppSettings["BucketFileSystem:MediaPrefix"];
         private static readonly string BucketHostname = ConfigurationManager.AppSettings["BucketFileSystem:BucketHostname"];
 
-        public Responce sendMyFileToS3Async(byte[] stream, string fileName)
+        public Responce sendMyFileToS3Async(byte[] stream, string fileName, string folderName = "Invoice", string subFolderName = "")
         {
             Responce responce = new Responce();
             try
@@ -36,7 +36,9 @@ namespace HPPlc.Models.S3Buckets
 
                 if (stream != null && stream.Length > 0)
                 {
-                    fileName = folderName + "/" + fileName;
+                    fileName = folderName != "media"
+                        ? folderName + "/" + fileName
+                        : folderName + "/" + subFolderName + "/" + fileName;
                     var s3Client = new AmazonS3Client(accesskey, secretkey, bucketRegion);
                     TransferUtility utility = new TransferUtility(s3Client);
                     PutObjectRequest putRequest = new PutObjectRequest
@@ -47,7 +49,9 @@ namespace HPPlc.Models.S3Buckets
                     };
                     PutObjectResponse response1 = s3Client.PutObject(putRequest);
                     responce.StatusCode = System.Net.HttpStatusCode.OK;
-                    responce.Result = BucketHostname + "/" + fileName;//uploaded file url
+                    responce.Result = folderName != "media"
+                        ? BucketHostname + "/" + fileName
+                        : "/" + fileName;//uploaded file url
                 }
                 else
                 {

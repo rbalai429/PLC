@@ -52,23 +52,31 @@ body.pre870 .dtge-dialog .umb-overlay {
     top: 0 !important;
     bottom: 0 !important;
 }
+
 .scroll-y {
     overflow-y: scroll;
 }
+
 .pt-1 {
     padding-top: 1px !important;
 }
+
 .pt-2 {
     padding-top: 2px !important;
 }
+
 .pt-3 {
     padding-top: 3px !important;
 }
+
 .pt-4 {
     padding-top: 4px !important;
-}.pt-5{
-    padding-top:5px !important;
 }
+
+.pt-5 {
+    padding-top: 5px !important;
+}
+
 .pb-1 {
     padding-bottom: 1px;
 }
@@ -108,9 +116,11 @@ body.pre870 .dtge-dialog .umb-overlay {
 .pl-5 {
     padding-left: 5px;
 }
-.ml-5{
-    margin-left:5px !important;
+
+.ml-5 {
+    margin-left: 5px !important;
 }
+
 .custom-form-search {
     display: flex;
     align-items: center;
@@ -123,19 +133,21 @@ body.pre870 .dtge-dialog .umb-overlay {
         display: flex;
         align-items: center;
     }
+
 .form-search.custom-form-search .left-addon input[type=text] {
     width: 100%;
 }
+
 .form-search.custom-form-search .left-addon input[type=date] {
     width: auto;
 }
 
-.form-search.custom-form-search .left-addon label{
-    margin-right:10px;
+.form-search.custom-form-search .left-addon label {
+    margin-right: 10px;
 }
 
-.form-search.custom-form-search .left-addon:last-child{
-    margin-right:0;
+.form-search.custom-form-search .left-addon:last-child {
+    margin-right: 0;
 }
 
 
@@ -145,67 +157,86 @@ body.pre870 .dtge-dialog .umb-overlay {
     display: block;
     margin-top: 100px;
 }
-.history-item__avatar{
-z-index:9;
+
+.history-item__avatar {
+    z-index: 9;
 }
-.history-item__break{
-    min-width:150px;
+
+.history-item__break {
+    min-width: 150px;
 }
-.coupon-code-body{
-    display:flex;
-    width:100%;
+
+.coupon-code-body {
+    display: flex;
+    width: 100%;
 }
+
     .coupon-code-body label {
-        margin:0px;
-        padding-top:10px;
-        padding-bottom:10px;
-        padding-right:10px;
+        margin: 0px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        padding-right: 10px;
     }
+
     .coupon-code-body input[type=radio] {
         margin: 0px;
         padding: 5px;
-        margin-right:5px;
+        margin-right: 5px;
     }
+
 #CreateCouponCode .umb-group-builder__property {
     border-bottom: 0px;
     padding: 0px 0;
 }
+
 .flax-300 .umb-group-builder__property-meta {
     flex: 0 0 300px;
 }
+
 .flax-220 .umb-group-builder__property-meta {
     flex: 0 0 220px;
 }
+
 .flax-200 .umb-group-builder__property-meta {
     flex: 0 0 200px;
 }
+
 #CreateCouponCode .coupon-code-body input[type=text] {
     width: 100%;
 }
+
 .text-danger {
     color: #d42054;
 }
+
 .text-danger-border {
     border-color: #d42054 !important;
 }
+
 .text-success-border {
     border-color: green !important;
 }
-.display-inline{
-    display:-webkit-inline-box;
+
+.display-inline {
+    display: -webkit-inline-box;
 }
-input[type=checkbox], input[type=radio]{
-    margin:0px;
+
+input[type=checkbox], input[type=radio] {
+    margin: 0px;
 }
-.form-check-inline{
-    margin:0px 5px 0px 5px;
+
+.form-check-inline {
+    margin: 0px 5px 0px 5px;
 }
+
 .pt-45 {
     padding-top: 45px
 }
+
 .umb-toggle__toggle-with {
     width: 53px;
 }
+
 #IsActivebtn .umb-load-indicator-isactive {
     list-style: none;
     padding: 0;
@@ -214,9 +245,25 @@ input[type=checkbox], input[type=radio]{
     font-size: 0;
     margin: -6px 0 0 70px;
 }
-.border-dotted{
-    border-style:dotted
+
+.border-dotted {
+    border-style: dotted
 }
+
 #ViewCouponCode .umb-group-builder__property {
     width: 100%;
+}
+
+#LocalMediaUploadForm .umb-table {
+    padding: 15px;
+}
+
+.bulk-media-upload-container #dvFinalButton {
+    padding: 0 0 15px 15px;
+}
+
+.bulk-media-upload-container #downloadExcelBtn {
+    border-color: #2bc37c #2bc37c #1d8454;
+    background-color: #2bc37c;
+    padding: 6px 14px;
 }

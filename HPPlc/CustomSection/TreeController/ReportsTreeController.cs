@@ -84,6 +84,7 @@ namespace HPPlc.CustomSection.Reports.TreeController
             nodes.Add(CreateTreeNode("2", "-1", queryStrings, "No Record Found User Data", "icon-presentation", false, string.Format("{0}/{1}/{2}", "Reports", "Views", "NoRecordFoundSearch")));
 
             nodes.Add(CreateTreeNode("2", "-1", queryStrings, "User Transaction Data", "icon-presentation", false, string.Format("{0}/{1}/{2}", "Reports", "Views", "UserTransaction")));
+            nodes.Add(CreateTreeNode("2", "-1", queryStrings, "Bulk Media Upload", "icon-presentation", false, string.Format("{0}/{1}/{2}", "Reports", "Views", "BulkMediaUpload")));
             return nodes;
 
         }

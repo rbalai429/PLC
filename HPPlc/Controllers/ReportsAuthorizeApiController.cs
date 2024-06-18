@@ -28,6 +28,12 @@ using System.Globalization;
 using Umbraco.Core.Models;
 using Umbraco.Web.PublishedModels;
 using Umbraco.Core.Services;
+using HP_PLC_Doc.Controllers;
+using System.Configuration;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using NPoco.Expressions;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Information;
+using System.Text;
 
 namespace HPPlc.Controllers
 {
@@ -1185,12 +1191,12 @@ namespace HPPlc.Controllers
                         //Add rows to DataTable.
                         //if (!String.IsNullOrEmpty(row.Cell(0).GetString()))
                         //{
-                            dt.Rows.Add();
-                            int i = 0;
-                            foreach (IXLCell cell in row.Cells(false))
-                            {
-                                dt.Rows[dt.Rows.Count - 1][i] = cell.Value.ToString();
-                                i++;
+                        dt.Rows.Add();
+                        int i = 0;
+                        foreach (IXLCell cell in row.Cells(false))
+                        {
+                            dt.Rows[dt.Rows.Count - 1][i] = cell.Value.ToString();
+                            i++;
                             //}
                         }
                     }
@@ -1211,18 +1217,18 @@ namespace HPPlc.Controllers
             if (objclsUploadWorksheetExcel != null)
             {
                 string jsonData = objclsUploadWorksheetExcel.JsonData;
-                 dt = (DataTable)Newtonsoft.Json.JsonConvert.DeserializeObject(jsonData, (typeof(DataTable)));
+                dt = (DataTable)Newtonsoft.Json.JsonConvert.DeserializeObject(jsonData, (typeof(DataTable)));
             }
 
             //var save = cMSBulkUploadController.Worksheetplansave("en-US", "3-4", dt);
             //var save = cMSBulkUploadController.Worksheetplansave(objclsUploadWorksheetExcel.Language, objclsUploadWorksheetExcel.AgeGroupe, dt);
-            if (objclsUploadWorksheetExcel.ProgramType =="1" || objclsUploadWorksheetExcel.ProgramType == "2"|| objclsUploadWorksheetExcel.ProgramType == "3")
+            if (objclsUploadWorksheetExcel.ProgramType == "1" || objclsUploadWorksheetExcel.ProgramType == "2" || objclsUploadWorksheetExcel.ProgramType == "3")
             {
                 var save = cMSBulkUploadController.BulkUpload_WS(objclsUploadWorksheetExcel.Language, objclsUploadWorksheetExcel.ProgramType, objclsUploadWorksheetExcel.AgeGroupe, dt);
                 return save;
 
             }
-             else
+            else
             {
                 var save = cMSBulkUploadController.Specialofferplansave(objclsUploadWorksheetExcel.Language, objclsUploadWorksheetExcel.ProgramType, objclsUploadWorksheetExcel.AgeGroupe, dt);
                 return save;
@@ -1381,7 +1387,8 @@ namespace HPPlc.Controllers
                                                .OfType<WorksheetListingAgeWise>()?.Where(c => c.AgeGroup.Name == AgeGroup);
                         var classRoot = classRoot_teachers.Where(x => x.ContentType.Alias == "teacherProgramItems")?.OfType<TeacherProgramItems>();
                         _variationContextAccessor.VariationContext = new VariationContext(languagekey.ToLower());
-                        try {
+                        try
+                        {
                             if (classRoot_teachers.Any())
                             {
                                 _variationContextAccessor.VariationContext = new VariationContext(languagekey.ToLower());
@@ -1425,8 +1432,9 @@ namespace HPPlc.Controllers
                                 }
                             }
                         }
-                        catch { 
-                        
+                        catch
+                        {
+
                         }
                     }
                 }
@@ -1935,6 +1943,140 @@ namespace HPPlc.Controllers
             return result;
 
         }
+        #endregion
+
+        #region bulk media upload
+
+        [System.Web.Http.HttpPost]
+        public Responce BulkMediaUpload()
+        {
+            Responce responce = new Responce();
+            try
+            {
+                var files = HttpContext.Current.Request.Files;
+
+                if (files.Count <= 0)
+                {
+                    responce.Message = "Please Select Media File";
+                    responce.StatusCode = HttpStatusCode.NotAcceptable;
+
+                    return responce;
+                }
+
+                List<string> responseMediaPaths = new List<string>();
+
+                for (var i = 0; i < files.Count; i++)
+                {
+                    var file = files[i];
+                    var fileName = NormalizeWhiteSpace(file.FileName).Replace(" ", "-");
+
+                    PdfGeneratorController contpdf = new PdfGeneratorController();
+                    byte[] bytes = ConvertStreamToByteArray(file.InputStream);
+
+                    if (bytes != null && bytes.Length > 0)
+                    {
+                        System.IO.File.WriteAllBytes(System.Web.Hosting.HostingEnvironment.MapPath("/media/") + fileName, bytes);
+                        string BucketHostname = ConfigurationManager.AppSettings["SiteUrl"];
+
+                        S3BucketHelper s3BucketHelper = new S3BucketHelper();
+                        var subFolderName = RandomString().ToLower();
+                        var uploadResponse = s3BucketHelper.sendMyFileToS3Async(bytes, fileName, "media", subFolderName);
+
+                        if (uploadResponse.StatusCode == HttpStatusCode.OK)
+                            responseMediaPaths.Add(uploadResponse.Result.ToString());
+                    }
+                }
+
+                responce.Result = responseMediaPaths;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(reporting: typeof(ReportsAuthorizeApiController), ex, message: "BulkMediaUpload");
+                responce.Message = ex.Message;
+                responce.StatusCode = HttpStatusCode.ExpectationFailed;
+
+                return responce;
+            }
+
+            responce.StatusCode = HttpStatusCode.OK;
+            return responce;
+        }
+
+        private static string NormalizeWhiteSpace(string input)
+        {
+            // ========= stringbuilder =========
+            StringBuilder tmpbuilder = new StringBuilder(input.Length);
+            bool inspaces = false;
+            string scopy = input;
+            tmpbuilder.Length = 0;
+
+            for (int k = 0; k < input.Length; ++k)
+            {
+                char c = scopy[k];
+
+                if (inspaces)
+                {
+                    if (c != ' ')
+                    {
+                        inspaces = false;
+                        tmpbuilder.Append(c);
+                    }
+                }
+                else if (c == ' ')
+                {
+                    inspaces = true;
+                    tmpbuilder.Append(' ');
+                }
+                else
+                    tmpbuilder.Append(c);
+            }
+
+            return tmpbuilder.ToString();
+        }
+
+        public static string RandomString(int length = 6)
+        {
+            Random random = new Random();
+
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        private static byte[] ConvertStreamToByteArray(Stream input)
+        {
+            byte[] buffer = new byte[16 * 1024];
+            using (MemoryStream ms = new MemoryStream())
+            {
+                int read;
+                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    ms.Write(buffer, 0, read);
+                }
+                return ms.ToArray();
+            }
+        }
+
+        [System.Web.Http.HttpGet]
+        public virtual HttpResponseMessage ExportBulkMediaSheet(string filesPath)
+        {
+            HttpResponseMessage result = null;
+
+            if (string.IsNullOrWhiteSpace(filesPath))
+                return result;
+
+            var clsExpertHelper = new clsExpertHelper();
+
+            var files = filesPath.Split(',').ToList();
+
+            byte[] bytes = clsExpertHelper.GenerateBuldMediaExcel(files, "Bulk Media Upload List");
+            result = Request.CreateResponse();
+            result.Content = new ByteArrayContent(bytes);
+            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+            result.Content.Headers.ContentDisposition.FileName = "BulkMediaUploadList-" + DateTime.Now.ToString("dd-MM-yyyy") + ".xlsx";
+            return result;
+        }
+
         #endregion
     }
 }

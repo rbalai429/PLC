@@ -1210,8 +1210,10 @@
     <Content Include="App_Plugins\Reports\backoffice\Angular\Services\ReportsService.js" />
     <Content Include="App_Plugins\Reports\backoffice\Angular\UserLoginController.js" />
     <Content Include="App_Plugins\Reports\backoffice\Angular\WebinarController.js" />
+    <Content Include="App_Plugins\Reports\backoffice\Angular\BulkMediaUploadController.js" />
     <Content Include="App_Plugins\Reports\backoffice\Angular\WorkSheetDownloadController.js" />
     <Content Include="App_Plugins\Reports\backoffice\Css\reports.css" />
+    <Content Include="App_Plugins\Reports\backoffice\lang\en-US.xml" />
     <Content Include="App_Plugins\Reports\backoffice\Views\AgeGroupSynonimsNameForAdvanceSearch.html" />
     <Content Include="App_Plugins\Reports\backoffice\Views\CouponCode.html" />
     <Content Include="App_Plugins\Reports\backoffice\Views\CouponCodeLog.html" />
@@ -1233,6 +1235,7 @@
     <Content Include="App_Plugins\Reports\backoffice\Views\UserTransaction.html" />
     <Content Include="App_Plugins\Reports\backoffice\Views\WebinarLists.html" />
     <Content Include="App_Plugins\Reports\backoffice\Views\WebinarReports.html" />
+    <Content Include="App_Plugins\Reports\backoffice\Views\BulkMediaUpload.html" />
     <Content Include="App_Plugins\Reports\backoffice\Views\WorksheetBulkUpload.html" />
     <Content Include="App_Plugins\Reports\backoffice\Views\WorksheetBulkUploadUpdate.html" />
     <Content Include="App_Plugins\Reports\backoffice\Views\WorkSheetDownload.html" />
@@ -4380,7 +4383,6 @@
     <Content Include="Views\MicroLearningRoot.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Plugins\Reports\backoffice\Lang\" />
     <Folder Include="ExcelFile\CouponCodeExcelFile\" />
     <Folder Include="ExcelFile\SendWhatsAppNotification\" />
     <Folder Include="pdffile\" />

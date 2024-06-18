@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Web;
+using Umbraco.Web.PublishedModels;
 
 namespace HPPlc.Models
 {
@@ -151,7 +153,7 @@ namespace HPPlc.Models
 
                         //sb.Append(item.u_name + ',');
                         //sb.Append(item.u_email + ',');
-                       
+
                         //sb.Append(item.u_whatsappno + ',');
                         sb.Append(item.ComWithEmail + ',');
                         sb.Append(item.ComWithWhatsApp + ',');
@@ -196,5 +198,52 @@ namespace HPPlc.Models
 
         }
 
+        public byte[] GenerateBuldMediaExcel(List<string> query, string worksheetName)
+        {
+            Responce responce = new Responce();
+
+            try
+            {
+                using (ExcelPackage pck = new ExcelPackage())
+                {
+                    //Create the worksheet
+                    ExcelWorksheet ws = pck.Workbook.Worksheets.Add(worksheetName);
+
+                    ws.Cells[1, 1].Value = "Media Path";
+
+                    //populate our Data
+                    if (query.Count() > 0)
+                    {
+                        ws.Cells["A2"].LoadFromCollection(query);
+                        ws.Cells.AutoFitColumns();
+                    }
+
+                    //Format the header
+                    using (ExcelRange rng = ws.Cells["A1:BZ1"])
+                    {
+                        rng.Style.Font.Bold = true;
+                        rng.Style.Fill.PatternType = ExcelFillStyle.Solid;                      //Set Pattern for the background to Solid
+                        rng.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(79, 129, 189));  //Set color to dark blue
+                        rng.Style.Font.Color.SetColor(Color.White);
+                    }
+                    //pck.Encryption.Password="TEST";
+                    //Write it back to the client
+                    using (MemoryStream memoryStream = new MemoryStream())
+                    {
+                        pck.SaveAs(memoryStream);
+                        memoryStream.Position = 0;
+                        return memoryStream.ToArray();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                responce.Result = null;
+                responce.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+            }
+
+            return null;
+        }
     }
 }
