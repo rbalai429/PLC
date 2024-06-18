@@ -1,0 +1,295 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	var title = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+								.FirstOrDefault()?.DescendantsOrSelf()?
+								.Where(x => x.ContentType.Alias == "contentMenu")
+								.OfType<ContentMenu>
+	().FirstOrDefault();
+
+	var ageGroups = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault().Children?
+	.Where(x => x.ContentType.Alias == "masterRoot")?.FirstOrDefault().Children?
+	.Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault().Children?.OfType<NameListItem>
+		().Where(x => x.IsActice == true && x.Value<bool>("displayInBonusWorksheet") == true).ToList();
+
+
+
+	var subjects = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+	.Children?.Where(x => x.ContentType.Alias == "structureProgramRoot")?.FirstOrDefault()?.Children?
+	.Where(x => x.ContentType.Alias == "subjectsRoot")?.FirstOrDefault()?.Children?.OfType<Subjects>
+		()?.Where(x => x.IsActive == true)?.OrderBy(x => x.SubjectName).ToList();
+
+	var pageName = UmbracoContext?.PublishedRequest?.PublishedContent.Name;
+	var contentTypeAlias = UmbracoContext?.PublishedRequest?.PublishedContent.ContentType.Alias;
+
+
+	var topics = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+				.Children?.Where(x => x.ContentType.Alias == "structureProgramRoot")?.FirstOrDefault()?.Children?
+				.Where(x => x.ContentType.Alias == "topicsRoot")?.FirstOrDefault()?.Children?.Where(x => x.ContentType.Alias == "topics")?.OfType<Topics>
+				()?.Where(x => x.IsActive == true)?.OrderBy(x => x.TopicName).ToList();
+
+	//if (contentTypeAlias == "topicsName")
+	//{
+	//	var selectedtopics = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+	//				 .Children?.Where(x => x.ContentType.Alias == "structureProgramRoot")?.FirstOrDefault()?.Children?
+	//				.Where(x => x.ContentType.Alias == "worksheetListingAgeWise")?.FirstOrDefault()?.Children?
+	//				.Where(x => x.ContentType.Alias == "worksheetCategory")?.FirstOrDefault()?.Children?.Where(x => x.ContentType.Alias == "topicsName")
+	//				.Where(x => x.Value<bool>("isActive") == true)
+	//				.Select(x => x.Value<Umbraco.Web.Models.Link>("topicMapping").Name).ToList();
+
+	//				topics = topics.Where(x => selectedtopics.Contains(x.Name)).ToList();
+	//}
+
+	var paymentTypes = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+						.Children?.Where(x => x.ContentType.Alias == "masterRoot")?.FirstOrDefault()?.Children?
+						.Where(x => x.ContentType.Alias == "paymentTypeMaster")?.FirstOrDefault()?.Children?.OfType<NameListItem>
+						()?.Where(x => x.IsActice == true)?.ToList();
+
+}
+<input type="hidden" id="pageName" value="@pageName" />
+<input type="hidden" id="contentType" value="@contentTypeAlias" />
+@*@contentTypeAlias*@
+@*@topics.Count*@
+<div class="overlayFltr"></div>
+<div class="leftFltrNew">
+	<span class="clsBtn"></span>
+	<div class="mob-fliter">@title.FilterText</div>
+	<div class="fltrBxNew">
+		<div class="fltrInrNew">
+			<div class="vwAllText">
+				<div class="fltrTitle"><i></i>@title.FiltersText</div>
+				<label for="all">
+					<a class="aFilterReset" onclick="StructuredProgramReset();"><span>@title.ResetButton</span></a>
+				</label>
+			</div>
+
+
+			<div class="fltrBxinNew">
+				@if (paymentTypes != null && paymentTypes.Count > 0)
+				{
+					<div class="acrdNew">
+						<div class="acrdHdBox">@title.SelectPaymentType</div>
+						<div class="chchlistRow radioItems">
+							<div class="chchlistin">
+								@if (paymentTypes != null && paymentTypes.Any())
+								{
+									int row = 0;
+									foreach (var paymentType in paymentTypes)
+									{
+										<div class="chkBxItem chkBxItemWht">
+											<div class="cstm-chckbx">
+												<label for="@("paymenttype_" + row)">
+													<input type="radio"
+														   name="paymenttypes"
+														   value="@paymentType.ItemValue"
+														   id="@("paymenttype_" + row)"
+														   title="@paymentType.ItemName"
+														   class="radInf chkFilterSubCategory paymenttypes" />
+													<strong class="radInf"></strong>
+													<span>@paymentType.ItemName</span>
+												</label>
+											</div>
+										</div>row++;
+									}
+								}
+
+
+
+								@*<div class="doneBtn">
+										<a href="javascript:void(0);" class="btn">@title.DoneTitle</a>
+									</div>*@
+
+
+
+							</div>
+						</div>
+					</div>
+				}
+				@if (ageGroups != null && ageGroups.Any())
+				{
+					<div class="acrdNew">
+						<div class="acrdHdBox">@title.SelectAge</div>
+						<div class="chchlistRow">
+
+							<div class="chchlistin" id="filteragegroupcheckbox">
+								@if (ageGroups != null && ageGroups.Any())
+								{
+									int row = 0;
+									foreach (var age in ageGroups)
+									{
+										@*var className = Umbraco?.Content(age?.Id).Value("itemName");*@
+										<div class="chkBxItem chkBxItemWht">
+											<div class="cstm-chckbx">
+												<label for="@(" chkSubcatId_" + row)">
+													<input type="checkbox"
+														   name="classes"
+														   value="@age.ItemValue"
+														   id="@(" chkSubcatId_" + row)"
+														   title="@age.AlternateItemName"
+														   alternateclassname="@age.AlternateClassName"
+														   class="checbx chkFilterSubCategory classes" />
+													<strong class="chkInf"></strong>
+													<span>@age.AlternateItemName</span>
+												</label>
+											</div>
+										</div>
+										row++;
+									}
+								}
+
+								@*<div class="doneBtn">
+										<a href="javascript:void(0);" class="btn">@title.DoneTitle</a>
+									</div>*@
+							</div>
+
+						</div>
+					</div>
+				}
+				@if (subjects != null && subjects.Count > 0)
+				{
+					<div class="acrdNew">
+						<div class="acrdHdBox">@title.SelectCategory</div>
+						<div class="chchlistRow">
+							<div class="chchlistin" id="filtersubjectscheckbox">
+								@if (subjects != null && subjects.Any())
+								{
+									int row = 0;
+									foreach (var subject in subjects)
+									{
+										<div class="chkBxItem chkBxItemWht">
+											<div class="cstm-chckbx">
+												<label for="@(" subjects_" + row)">
+													<input type="checkbox"
+														   name="subjects"
+														   value="@subject.SubjectValue"
+														   id="@(" subjects_" + row)"
+														   title="@subject.SubjectName"
+														   class="checbx chkFilterSubCategory subjects" />
+													<strong class="chkInf"></strong>
+													<span>@subject.SubjectName</span>
+												</label>
+											</div>
+										</div>
+
+										row++;
+									}
+								}
+
+								@*<div class="doneBtn">
+										<a href="javascript:void(0);" class="btn">@title.DoneTitle</a>
+									</div>*@
+
+							</div>
+						</div>
+					</div>
+				}
+				@if (topics != null && topics.Count > 0)
+				{
+					<div class="acrdNew">
+						<div class="acrdHdBox">@title.SelectTopic</div>
+						<div class="chchlistRow">
+							<div class="chchlistin" id="filtertopiccheckbox">
+								@if (topics != null && topics.Any())
+								{
+									int row = 0;
+									foreach (var topic in topics)
+									{
+										<div class="chkBxItem chkBxItemWht">
+											<div class="cstm-chckbx">
+												<label for="@(" topic_" + row)">
+													<input type="checkbox"
+														   name="topics"
+														   value="@topic.TopicValue"
+														   id="@(" topic_" + row)"
+														   title="@topic.TopicName"
+														   class="checbx chkFilterSubCategory topics" />
+													<strong class="chkInf"></strong>
+													<span>@topic.TopicName</span>
+												</label>
+											</div>
+										</div>
+
+										row++;
+									}
+								}
+
+								@*<div class="doneBtn">
+										<a href="javascript:void(0);" class="btn">@title.DoneTitle</a>
+									</div>*@
+
+							</div>
+						</div>
+					</div>
+				}
+
+
+				@*@if (paymentTypes != null && paymentTypes.Count > 0)
+					{
+					<div class="acrdNew">
+						<div class="acrdHdBox">@title.SelectPaymentType</div>
+						<div class="chchlistRow">
+							<div class="chchlistin">
+								@if (paymentTypes != null && paymentTypes.Any())
+								{
+								int row = 0;
+								foreach (var paymentType in paymentTypes)
+								{
+								<div class="chkBxItem chkBxItemWht">
+									<div class="cstm-chckbx">
+										<label for="@(" paymenttype_" + row)">
+											<input type="checkbox"
+												   name="paymenttypes"
+												   value="@paymentType.ItemValue"
+												   id="@(" paymenttype_" + row)"
+												   title="@paymentType.ItemName"
+												   class="checbx chkFilterSubCategory paymenttypes" />
+											<strong class="chkInf"></strong>
+											<span>@paymentType.ItemName</span>
+										</label>
+									</div>
+								</div>
+
+								row++;
+								}
+								}
+
+								<div class="doneBtn">
+									<a href="javascript:void(0);" class="btn">@title.DoneTitle</a>
+								</div>
+
+							</div>
+						</div>
+					</div>
+					}*@
+
+				@*	<div class="moreChkList">
+
+						<div class="chchlistin">
+
+							<div class="chkBxItem chkBxItemWht" style="display:none;">
+								<div class="cstm-chckbx">
+									<label for="CbseContent">
+										<input type="checkbox"
+											   value="1"
+											   id="CbseContent"
+											   name="CbseContent"
+											   class="checbx chkFilterSubCategory CbseContent" />
+										<strong class="chkInf"></strong>
+										<span>@title.IncludeCbsecontent</span>
+									</label>
+								</div>
+							</div>
+						</div>
+					</div>*@
+			</div>
+
+			@*<div class="filtrActn">
+					<button type="button" id="filterApply" class="btn btnblue applyBtn">@title.ApplyButtonText</button>
+				</div>*@
+			<div>
+				<span class="error" id="validation" style="display:none;">@title.ValidationContent</span>
+			</div>
+		</div>
+
+
+	</div>
+</div>

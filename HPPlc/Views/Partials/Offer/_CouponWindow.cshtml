@@ -1,0 +1,58 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+
+@{
+	var couponOffer = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+					.Where(x => x.ContentType.Alias == "couponOffer")?.OfType<CouponOffer>()?.Where(c => c.IsActive == true)?.FirstOrDefault();
+
+}
+
+
+<div class="close-pb"></div>
+@Html.AntiForgeryToken()
+@if (couponOffer != null && couponOffer?.DesktopImage1 != null)
+{
+	if (couponOffer?.MobileImage1 != null || couponOffer?.MobileNextGenImage1 != null || couponOffer?.DesktopNextGenImage1 != null)
+	{
+		<picture>
+			@if (couponOffer?.MobileImage1 != null)
+			{
+				<source data-srcset="@couponOffer.MobileImage1.Url()" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" />
+			}
+
+			@if (couponOffer?.MobileNextGenImage1 != null)
+			{
+				<source data-srcset="@couponOffer.MobileNextGenImage1.Url()" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" type='image/webp' />
+			}
+
+			@if (couponOffer?.DesktopNextGenImage1 != null)
+			{
+				<source data-srcset="@couponOffer.DesktopNextGenImage1.Url()" srcset="/common/images/banner_loader.jpg" type='image/webp' />
+			}
+			@if (couponOffer?.DesktopImage1 != null)
+			{
+				<img class='b-lazy imgPlacing' data-src="@couponOffer.DesktopImage1.Url()" src='/common/images/banner_loader.jpg' alt="@(couponOffer?.DesktopImage1.Value<string>("altText"))" />
+			}
+		</picture>
+	}
+	else
+	{
+		if (couponOffer?.DesktopImage1 != null)
+		{
+			<img class='b-lazy imgPlacing' data-src="@couponOffer.DesktopImage1.Url()" src='/common/images/banner_loader.jpg' alt="@(couponOffer?.DesktopImage1.Value<string>("altText"))" />
+		}
+	}
+	@*<picture>
+			<source srcset="@couponOffer.DesktopImage1.Url()" media="(max-width: 767px)">
+
+			<img src="@couponOffer.DesktopImage1.Url()" alt="">
+		</picture>*@
+}
+<div class="bannerPopupText">
+	<h2>
+		@Html.Raw(couponOffer.Description)
+	</h2>
+	<a href="/subscription?o=f" onclick="GotoSubscription()" class="btn-pb">@couponOffer.Link1Url</a>
+</div>
+<a href="javascript:void(0)" onclick="DontShowAgain('@couponOffer.CouponCode')" class="dont-again">@couponOffer.Link2Url</a>
+
+

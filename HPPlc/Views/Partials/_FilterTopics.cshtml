@@ -1,0 +1,90 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	var title = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+								.FirstOrDefault()?.DescendantsOrSelf()?
+								.Where(x => x.ContentType.Alias == "contentMenu")
+								.OfType<ContentMenu>().FirstOrDefault();
+
+
+	//var ageGroups = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault().DescendantsOrSelf()?
+	//						.Where(x => x.ContentType.Alias == "worksheetListingAgeWise")?.OfType<WorksheetListingAgeWise>();
+
+	var topics = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault().DescendantsOrSelf()?
+			.Where(x => x.ContentType.Alias == "topics")?.OfType<Topics>();
+
+	var pageName = UmbracoContext.PublishedRequest.PublishedContent.Name;
+}
+
+<input type="hidden" id="pageName" value="@pageName" />
+<div class="leftFltr">
+	<div class="mob-fliter">@title.FilterText</div>
+	<div class="fltrBx">
+		<div class="fltrInr">
+			<div class="vwAll">
+				<div class="fltrTxt">@title.FiltersText</div>
+				@*<label for="all">
+					<a class="aFilterReset" onclick="WorksheetReset();"><span>@title.ResetButton</span></a>
+
+				</label>*@
+			</div>
+
+			<div class="fltrBxin">
+
+				<div class="acrd">
+					<h3 class="acrdHd">@title.SelectTopic</h3>
+					<div class="chchlist">
+
+						<div class="chchlistin">
+							@if (topics != null && topics.Any())
+							{
+								foreach (var topic in topics)
+								{
+									<div class="chkBxItem chkBxItemWht">
+										<div class="cstm-chckbx">
+											<a href="@topic.Url()" onclick="commonLayer('@pageName','@topic.Name')">@topic.Name</a>
+										</div>
+									</div>
+								}
+							}
+
+							<div class="doneBtn">
+								<a href="javascript:void(0);" class="btn" onclick="commonLayer('@pageName','@title.DoneTitle')">@title.DoneTitle</a>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+
+				@*<div class="moreChkList" style="display:none;">
+
+					<div class="chchlistin">
+
+						<div class="chkBxItem chkBxItemWht">
+							<div class="cstm-chckbx">
+								<label for="CbseContent">
+									<input type="checkbox"
+										   value="1"
+										   id="CbseContent"
+										   name="CbseContent"
+										   class="checbx chkFilterSubCategory CbseContent" />
+									<strong class="chkInf"></strong>
+									<span>@title.IncludeCbsecontent</span>
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>*@
+			</div>
+
+			@*<div class="filtrActn">
+				<button type="button" id="filterApply" class="btn btnblue applyBtn">@title.ApplyButtonText</button>
+			</div>
+			<div>
+				<span class="error" id="validation" style="display:none;">@title.ValidationContent</span>
+			</div>*@
+		</div>
+
+
+	</div>
+</div>

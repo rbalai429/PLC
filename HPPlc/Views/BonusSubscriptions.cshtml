@@ -1,0 +1,571 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+
+	var SubcriptionList = Model.DescendantsOrSelf()?.Where(x => x.IsVisible())?.OfType<BonusSubscriptionList>().FirstOrDefault();
+	var SubcriptionListLesson = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "subscriptionTypeRoot")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "subscriptionList")?.OfType<SubscriptionList>().FirstOrDefault();
+
+	var SubcriptionListTeachers = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "teachersSubscriptionRoot")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "teachersSubscriptionList")?.OfType<TeachersSubscriptionList>().FirstOrDefault();
+
+
+
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.SubscriptionTempDtls);
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponTempDtls);
+
+	//string loggedInOrNot = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+	//string qstring = String.Empty;
+	//string selectedAgegroup = String.Empty;
+	//string selectedAgeDecrypted = String.Empty;
+	//string WID = String.Empty;
+	//if (Request.QueryString.Count > 0 && Request.QueryString.AllKeys.Contains("subscptn"))
+	//{
+	//	qstring = Request.QueryString.Get("subscptn").ToString();
+	//	if (Request.QueryString.AllKeys.Contains("age"))
+	//	{
+	//		selectedAgegroup = Request.QueryString.Get("age").ToString();
+	//		selectedAgeDecrypted = HPPlc.Models.clsCommon.Decrypt(selectedAgegroup);
+	//	}
+
+	//try
+	//{
+	//	if (Request.QueryString.AllKeys.Contains("WID"))
+	//	{
+	//		WID = Request.QueryString.Get("WID").ToString();
+	//		WID = HPPlc.Models.clsCommon.Decrypto(WID);
+
+	//		if (!String.IsNullOrEmpty(WID))
+	//		{
+	//			var worksheetDtls = Umbraco?.Content(WID)?.DescendantsOrSelf().OfType<WorksheetRoot>()?.FirstOrDefault();
+	//			var subscriptionRank = Umbraco.Content(worksheetDtls.Subscription.Select(x => x.Udi)).ToList().OfType<Subscriptions>();
+	//			if (subscriptionRank != null)
+	//			{
+	//				if (subscriptionRank.Any(x => x.Ranking == "1"))
+	//				{
+	//					HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.UserClickedOnWorksheet, "1");
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+	//catch { }
+	//}
+
+
+	bool IsLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+	var pageName = UmbracoContext.PublishedRequest.PublishedContent.Name;
+
+	var BuyNow = Umbraco.GetDictionaryValue("BuyNow");
+	var GetStarted = Umbraco.GetDictionaryValue("GetStarted");
+
+	string getstaetedstatus = String.Empty;
+	if (IsLoggedIn == true)
+	{
+		string status = String.Empty;
+		HPPlc.Models.dbAccessClass dbAccessClass = new HPPlc.Models.dbAccessClass();
+		//HPPlc.Models.GetStatus status = new HPPlc.Models.GetStatus();
+		int RefUserId = HPPlc.Models.SessionManagement.GetCurrentSession<int>(HPPlc.Models.SessionType.UserId);
+
+		status = dbAccessClass.CheckGetStaredClicked(RefUserId);
+
+		if (!String.IsNullOrEmpty(status))
+		{
+			getstaetedstatus = status;
+		}
+	}
+}
+
+
+<div class="main-wrp">
+
+	@try
+	{
+		<div class="banner" id="banner">
+			@Html.Partial("/Views/Partials/_BannerSubscptn.cshtml", new ViewDataDictionary(this.ViewData)
+										{
+											{ "PlanType", "bonusSubscriptionRoot" }
+										})
+		</div>
+	}
+	catch (Exception ex) { }
+
+	@Html.Partial("_Breadcrumb")
+
+
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="pckgeWrp">
+					<h1 class="titleforhtag" id="titleOfSubscription">@(SubcriptionList?.Title)</h1>
+					<div class="pckgeTab">
+						<ul>
+							<li><a href="#worksheetsTab" id="wks" class="pckgeTabActive tabClick" data-id="bonusSubscriptionRoot">Worksheets</a></li>
+							<li><a href="#lessonPlanTab" id="lsn" class="tabClick" data-id="subscriptionTypeRoot">Lesson plan</a></li>
+							<li><a href="#teacherPlanTab" id="tchrs" class="tabClick" data-id="teachersSubscriptionRoot">Teachers plan</a></li>
+						</ul>
+					</div>
+
+					<div class="pckgeCont">
+						<div class="pckgeTabCont" id="worksheetsTab" style="display: block;">
+							<div class="pckgeCommon">
+								@try
+								{
+									if (SubcriptionList != null)
+									{
+										if (!string.IsNullOrEmpty(SubcriptionList.SubscriptionPlanTitle))
+										{
+											List<BonusAddSubscriptions> subscpt;
+
+											subscpt = SubcriptionList?.Children()?.OfType<BonusAddSubscriptions>()?.Where(x => x.IsActive).OrderBy(y => y.Ranking).ToList();
+
+											if (subscpt != null && subscpt.Any())
+											{
+												foreach (var child in subscpt)
+												{
+													<div class="pckgeItem">
+														<div class="pckgeItemInr">
+															<div class="pckgeBox">
+																<div class="pckge">
+																	<label class="choosePckge">
+																		@if (child.SubscriptionName != null)
+																		{
+																			var subscription = Umbraco?.Content(child?.SubscriptionName?.Udi)?.DescendantsOrSelf()?.OfType<SubscriptionItemStructureProgram>().FirstOrDefault();
+																			if (subscription != null)
+																			{
+																				var buynowbutton = $"{child.BuyNowButton.Url}?subscriptionid={HPPlc.Models.clsCommon.Encrypt(child.Id.ToString())}";
+
+																				<div class="pckgeHd">
+																					<div class="pcgeTime">
+																						@if (child.Ranking == "4")
+																						{
+																							<input type="radio" name="radiowks" class="subscriptionradio" checked data-amount="@subscription.Amount" value="@buynowbutton" />
+																						}
+																						else
+																						{
+																							<input type="radio" name="radiowks" class="subscriptionradio" data-amount="@subscription.Amount" value="@buynowbutton" />
+																						}
+																						<span class="checkmark"></span>@subscription.SubscriptionName
+																					</div>
+																					<div class="pcgePrice">₹@subscription.Amount</div>
+																				</div>
+																				<div class="pckgeList">
+																					<ul>
+																						@foreach (var item in child.SubscriptionDetails)
+																						{
+																							<li>
+																								@item
+																							</li>
+																						}
+																					</ul>
+																				</div>
+																			}
+
+																		}
+																	</label>
+																	@if (child.IsRecommended == true)
+																	{
+																		<div class="tagBoxPckge">@(child.IsRecommended == true ? child.RecommendedTitle : String.Empty)</div>
+																	}
+																</div>
+															</div>
+														</div>
+													</div>
+												}
+											}
+										}
+									}
+								}
+								catch { }
+							</div>
+
+							<div class="pckgeBtn">
+								<button type="button" class="btn" id="BonusPlanBuy">@BuyNow</button>
+							</div>
+						</div>
+
+
+						<div class="pckgeTabCont" id="lessonPlanTab">
+							<div class="pckgeCommon lessonPlan">
+								@try
+								{
+									if (SubcriptionListLesson != null)
+									{
+										if (!string.IsNullOrEmpty(SubcriptionListLesson.SubscriptionPlanTitle))
+										{
+											List<Subscriptions> subscpt;
+
+											subscpt = SubcriptionListLesson?.Children()?.OfType<Subscriptions>()?.Where(x => x.IsActive).OrderBy(y => y.Ranking).ToList();
+
+											if (subscpt != null && subscpt.Any())
+											{
+												foreach (var child in subscpt)
+												{
+													if (child.Ranking == "1" && (!String.IsNullOrEmpty(getstaetedstatus) && getstaetedstatus == "Y"))
+													{
+														//<div></div>
+													}
+													else
+													{
+														<div class="pckgeItem">
+															<div class="pckgeItemInr">
+																<div class="pckgeBox">
+																	<div class="pckge">
+																		<label class="choosePckge">
+																			@if (child.SubscriptionName != null)
+																			{
+																				var subscription = Umbraco?.Content(child?.SubscriptionName?.Udi)?.DescendantsOrSelf()?.OfType<SubscriptionItem>().FirstOrDefault();
+																				if (subscription != null)
+																				{
+																					var buynowbutton = $"{child.BuyNowButton.Url}?subscriptionid={HPPlc.Models.clsCommon.Encrypt(child.Id.ToString())}";
+
+																					<div class="pckgeHd">
+																						<div class="pcgeTime">
+																							@if (child.Ranking == "4")
+																							{
+																								<input type="radio" name="radiolsn" class="lessonsubscriptionradio" onclick="buttonTextChange('@child.Ranking');" checked data-amount="@subscription.Amount" value="@buynowbutton" />
+																							}
+																							else if (child.Ranking == "1")
+																							{
+																								<input type="radio" name="radiolsn" class="lessonsubscriptionradio" onclick="buttonTextChange('@child.Ranking');" checked data-amount="@subscription.Amount" value="0" />
+																							}
+																							else
+																							{
+																								<input type="radio" name="radiolsn" class="lessonsubscriptionradio" onclick="buttonTextChange('@child.Ranking');" data-amount="@subscription.Amount" value="@buynowbutton" />
+																							}
+																							<span class="checkmark"></span>@subscription.SubscriptionName
+																						</div>
+																						<div class="pcgePrice">₹@subscription.Amount</div>
+																					</div>
+																					<div class="pckgeList">
+																						<ul>
+																							@foreach (var item in child.SubscriptionDetails)
+																							{
+																								<li>
+																									@item
+																								</li>
+																							}
+																						</ul>
+																					</div>
+																				}
+
+																			}
+																		</label>
+																		@if (child.IsRecommended == true)
+																		{
+																			<div class="tagBoxPckge">@(child.IsRecommended == true ? child.RecommendedTitle : String.Empty)</div>
+																		}
+																	</div>
+																	@if (child.Ranking == "1")
+																	{
+																		<div class="tagBoxPckge trialPlan">Trial pack</div>
+																	}
+																</div>
+															</div>
+														</div>
+													}
+												}
+											}
+										}
+									}
+
+								}
+								catch { }
+							</div>
+							<div class="pckgeBtn">
+								<button type="button" class="btn" id="LessonPlanBuy">@BuyNow</button>
+							</div>
+						</div>
+
+
+						<div class="pckgeTabCont" id="teacherPlanTab">
+							<div class="pckgeCommon teacherPlan">
+								@try
+								{
+									if (SubcriptionListTeachers != null)
+									{
+										if (!string.IsNullOrEmpty(SubcriptionListTeachers.SubscriptionPlanTitle))
+										{
+											List<TeachersAddSubscriptions> subscpt;
+											subscpt = SubcriptionListTeachers?.Children()?.OfType<TeachersAddSubscriptions>()?.Where(x => x.IsActive)?.OrderBy(y => y?.Ranking)?.ToList();
+											if (subscpt != null && subscpt.Any())
+											{
+												foreach (var child in subscpt)
+												{
+													<div class="pckgeItem">
+														<div class="pckgeItemInr">
+															<div class="pckgeBox">
+																<div class="pckge">
+																	<label class="choosePckge">
+																		@if (child.SubscriptionName != null)
+																		{
+																			var subscription = Umbraco?.Content(child?.SubscriptionName?.Udi)?.DescendantsOrSelf()?.OfType<TeachersSubscriptionItem>().FirstOrDefault();
+																			if (subscription != null)
+																			{
+																				var buynowbutton = $"{child.BuyNowButton.Url}?subscriptionid={HPPlc.Models.clsCommon.Encrypt(child.Id.ToString())}";
+
+																				<div class="pckgeHd">
+																					<div class="pcgeTime">
+																						<input type="radio" name="radiotchrs" class="teachersubscriptionradio" checked onclick="buttonTextChange('@child.Ranking');" data-amount="@subscription.Amount" value="@buynowbutton" />
+																						<span class="checkmark"></span>@subscription.SubscriptionName
+																					</div>
+																					<div class="pcgePrice">₹@subscription.Amount</div>
+																				</div>
+																				<div class="pckgeList">
+																					<ul>
+																						@foreach (var item in child.SubscriptionDetails)
+																						{
+																							<li>
+																								@item
+																							</li>
+																						}
+																					</ul>
+																				</div>
+																			}
+																		}
+																	</label>
+																	@if (child.IsRecommended == true)
+																	{
+																		<div class="tagBoxPckge">@(child.IsRecommended == true ? child.RecommendedTitle : String.Empty)</div>
+																	}
+																</div>
+
+															</div>
+														</div>
+													</div>
+
+												}
+											}
+										}
+									}
+
+								}
+								catch { }
+							</div>
+							<div class="pckgeBtn">
+								<button type="button" class="btn" id="TeacherPlanBuy">@BuyNow</button>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section CustomJsFiles
+{
+	<script src="~/CustumJs/BonusWorksheet/BuyNow.js"></script>
+	<script>
+		$(document).ready(function () {
+			$(".pckgeTab li a").removeClass("pckgeTabActive");
+			var tab = getParameterByName('mode');
+			
+			if ((tab != null || tab != '' || tab != 'undefined') && tab == 'lsn') {
+				$("#lsn").addClass("pckgeTabActive");
+				$("#lessonPlanTab").show();
+				$("#worksheetsTab").hide();
+				$("#teacherPlanTab").hide();
+			}
+			else if ((tab != null || tab != '' || tab != 'undefined') && tab == 'tchrs') {
+				$("#tchrs").addClass("pckgeTabActive");
+				$("#lessonPlanTab").hide();
+				$("#worksheetsTab").hide();
+				$("#teacherPlanTab").show();
+			} else {
+				$("#wks").addClass("pckgeTabActive");
+				$("#worksheetsTab").show();
+				$("#lessonPlanTab").hide();
+				$("#teacherPlanTab").hide();
+			}
+
+			if (tab == 'lsn') {
+				$("#wks").hide();
+				$("#lsn").show();
+				$("#tchrs").hide();
+
+				$("#titleOfSubscription").html('@(SubcriptionListLesson?.Title)');
+
+				$("#banner").load("/umbraco/Surface/Subscription/SubscriptionPageBannerChange", {
+					tabText: 'subscriptionTypeRoot' }, function (responseTxt, statusTxt, xhr) {
+					if (statusTxt == "success") {
+						//$("#banner").trigger();
+					}
+				});
+			}
+			else if (tab == 'tchrs') {
+				$("#wks").hide();
+				$("#lsn").hide();
+				$("#tchrs").show();
+
+				$("#titleOfSubscription").html('@(SubcriptionListTeachers?.Title)');
+
+				$("#banner").load("/umbraco/Surface/Subscription/SubscriptionPageBannerChange", {
+					tabText: 'teachersSubscriptionRoot' }, function (responseTxt, statusTxt, xhr) {
+					if (statusTxt == "success") {
+						//$("#banner").trigger();
+					}
+				});
+			}
+			else if (tab == 'wks') {
+				$("#wks").show();
+				$("#lsn").hide();
+				$("#tchrs").hide();
+
+				$("#titleOfSubscription").html('@(SubcriptionList?.Title)');
+
+				$("#banner").load("/umbraco/Surface/Subscription/SubscriptionPageBannerChange", {
+					tabText: 'bonusSubscriptionRoot' }, function (responseTxt, statusTxt, xhr) {
+					if (statusTxt == "success") {
+						//$("#banner").trigger();
+					}
+				});
+			}
+			else {
+				$("#wks").show();
+				$("#lsn").show();
+				$("#tchrs").show();
+			}
+		});
+	</script>
+	<script>
+		function buttonTextChange(ranking) {
+			if (ranking == "1") {
+				$("#LessonPlanBuy").html('@GetStarted');
+			}
+			else {
+				$("#LessonPlanBuy").html('@BuyNow');
+			}
+		}
+
+	</script>
+	<script>
+		$(document).on("click", "#BonusPlanBuy", function () {
+			try {
+				commonLayer("Bonus", "Buy Now");
+			}
+			catch (ex) {
+				//console.log('error');
+			}
+
+			
+			@*if ('@IsLoggedIn' == 'True') {*@
+				var selectedpackage = $(".subscriptionradio:checked").map(function () { return this.value }).get().join(", ");
+
+				if (selectedpackage != undefined && selectedpackage != null && selectedpackage != "") {
+					window.location.href = selectedpackage;
+				} else {
+					$("#subscriptionnotseletederrorMessage").show();
+				}
+			//}
+			//else {
+			//	window.location.href = "/my-account/login";
+			//}
+		});
+
+		$(document).on("click", "#LessonPlanBuy", function () {
+			try {
+				commonLayer("Lesson", "Buy Now");
+			}
+			catch (ex) {
+				//console.log('error');
+			}
+
+			@*if ('@IsLoggedIn' == 'True') {*@
+				var selectedpackagelsn = $(".lessonsubscriptionradio:checked").map(function () { return this.value }).get().join(", ");
+				if (selectedpackagelsn != undefined && selectedpackagelsn != null && selectedpackagelsn != "") {
+
+					if (selectedpackagelsn == "0") {
+						GetStarted(selectedpackagelsn);
+					} else {
+						window.location.href = selectedpackagelsn;
+					}
+				} else {
+					$("#subscriptionnotseletederrorMessage").show();
+				}
+			//}
+			//else {
+			//	window.location.href = "/my-account/login";
+			//}
+		});
+
+		$(document).on("click", "#TeacherPlanBuy", function () {
+			try {
+				commonLayer("Teacher", "Buy Now");
+			}
+			catch (ex) {
+				//console.log('error');
+			}
+
+			@*if ('@IsLoggedIn' == 'True') {*@
+				var selectedpackagelsn = $(".teachersubscriptionradio:checked").map(function () { return this.value }).get().join(", ");
+				if (selectedpackagelsn != undefined && selectedpackagelsn != null && selectedpackagelsn != "") {
+
+					if (selectedpackagelsn == "0") {
+						GetStarted(selectedpackagelsn);
+					} else {
+						window.location.href = selectedpackagelsn;
+					}
+				} else {
+					$("#subscriptionnotseletederrorMessage").show();
+				}
+			
+		});
+	</script>
+
+	<script>
+		$('.tabClick').on('click', function () {
+			var tabtext = $(this).attr("data-id");
+
+			if (tabtext == "subscriptionTypeRoot") {
+				$("#titleOfSubscription").html('@SubcriptionListLesson.Title');
+			}
+			else if (tabtext == "teachersSubscriptionRoot") {
+				$("#titleOfSubscription").html('@SubcriptionListTeachers.Title');
+			}
+			else {
+				$("#titleOfSubscription").html('@SubcriptionList.Title');
+			}
+
+			$("#banner").load("/umbraco/Surface/Subscription/SubscriptionPageBannerChange", { tabText: tabtext }, function (responseTxt, statusTxt, xhr) {
+				if (statusTxt == "success") {
+					//$("#banner").trigger();
+				}
+			});
+
+		});
+	</script>
+
+	<script>
+		function GetStarted(amount) {
+
+			if (amount == "0") {
+				var token = $('input[name="__RequestVerificationToken"]').val();
+				$.ajax({
+					//async: false,
+					type: "POST",
+					url: "/umbraco/Surface/WorkSheet/GetStarted",
+					data: { __RequestVerificationToken: token },
+					//contentType: "application/json; charset=utf-8",
+					//dataType: "JSON",
+					success: function (e) {
+						if (e.returnStatus == "Success") {
+							window.location = "/lesson-plan";
+						}
+					},
+					error: function (error) {
+						//alert('error');
+						$("#loader").css('display', 'none');
+					}, complete: function () {
+						//alert('complete');
+						$("#loader").css('display', 'none');
+					}
+				});
+			}
+		}
+	</script>
+}

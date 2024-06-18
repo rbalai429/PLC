@@ -1,0 +1,203 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<HPPlc.Models.WorkSheet.WorkSheetModel>
+@using HPPlc.Models.WorkSheet;
+@using System.Globalization;
+
+@{
+	var model = Model;
+	string pageName = HPPlc.Models.GetPageName.pagename();
+
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+	string RecentlyDownloaded = Umbraco.GetDictionaryValue("RecentlyDownloaded");
+}
+
+@if (model != null && Model.WorkSheets != null && Model.WorkSheets.Any())
+{
+	<input type="hidden" id="titleForClass" value="@Model.Title" />
+	<input type="hidden" id="descForClass" value="@Model.SubTitle" />
+
+	string downloadButton = String.Empty;
+	string colorOfButton = String.Empty;
+	if (UserLoggedInOrNot == true)
+	{
+		downloadButton = Umbraco.GetDictionaryValue("Download Button");
+		colorOfButton = "downllink";
+	}
+	else
+	{
+		downloadButton = Umbraco.GetDictionaryValue("Subscribe to download");
+		colorOfButton = "subs-downllink";
+	}
+
+	foreach (WorkSheetItems worksheets in Model?.WorkSheets)
+	{
+		foreach (NestedItems nested in worksheets.NestedItems)
+		{
+			try
+			{
+				var detailData = string.Empty;
+				if (!string.IsNullOrEmpty(nested.Title))
+				{
+					detailData = nested.Title;
+				}
+				if (!string.IsNullOrEmpty(nested.Volume))
+				{
+					detailData = detailData + "-" + nested.Volume;
+				}
+				if (!string.IsNullOrEmpty(nested.Subject))
+				{
+					detailData = detailData + "-" + nested.Subject;
+				}
+
+
+				<div class='item-col'>
+					<div class='card-box'>
+						@if (nested.RecentlyDownloaded)
+						{
+							<div class="tagBox">@RecentlyDownloaded</div>
+						}
+						<div class='card-img'>
+							<div class="cardImgPlchldr">
+								<picture>
+									@if (!String.IsNullOrWhiteSpace(nested.MobileImagesSrc))
+									{
+										<source class='b-lazy' alt="@nested.MobileAltText" data-src="@nested.MobileImagesSrc" src="/common/images/img-loader.gif" media="(max-width: 680px)" />
+									}
+
+									@if (!String.IsNullOrWhiteSpace(nested.MobileNextGenImage))
+									{
+										<source data-srcset="@nested.MobileNextGenImage" srcset="/common/images/img-loader.gif" type='image/webp' media="(max-width: 680px)" />
+									}
+
+									@if (!String.IsNullOrWhiteSpace(nested.NextGenImage))
+									{
+										<source data-srcset="@nested.NextGenImage" srcset="/common/images/img-loader.gif" type='image/webp' />
+									}
+
+									@if (!String.IsNullOrWhiteSpace(nested.ImagesSrc))
+									{
+										<img class='b-lazy imgPlacing' alt="@nested.AltText" src='/common/images/img-loader.gif' data-src='@nested.ImagesSrc' width="200" height="200" />
+									}
+								</picture>
+							</div>
+
+							@if (nested.IsEnabledForDetailsPage == true)
+							{
+								<a href="@nested.WorksheetDetailsUrl" class="prevOverlyBx" onclick="commonLayer('@pageName','@(detailData + "- Worksheet Details Page")');">
+									<span><img src="/common/images/icon-pdf.png" width="1" height="1" alt=""> Click to see details</span>
+								</a>
+							}
+							else if (nested.IsEnabledForDetailsPage == false && !String.IsNullOrWhiteSpace(nested.PreviewPdf))
+							{
+								<a href="@nested.PreviewPdf" target="_blank" class="prevOverlyBx" onclick="commonLayer('@pageName','@(detailData + "-PreviewPDF")');">
+									<span><img src="/common/images/icon-pdf.png" width="1" height="1" alt=""> Click to see worksheets</span>
+								</a>
+							}
+						</div>
+						<div class='card-cont'>
+							<div class="card-dscptn">
+
+								<p><b>@nested.SubTitle</b></p>
+							</div>
+							@{
+								string pageTitle = model.Title;
+							}
+
+							@if (nested.socialItems != null && (nested.socialItems.FBShare != null || nested.socialItems.EmailShare != null || nested.socialItems.WhatAppShare != null))
+							{
+								<div class='print-col'>
+									@if (UserLoggedInOrNot == true)
+									{
+										<a href="javascript:void(0);" class='clsPrintDoc' onclick="downloadDocmntTeachers('print','@nested.subscriptionStatus.DownloadString','@(nested.IsPaid ? "Paid" : "Free")','@(detailData + " - Print")','worksheet','@nested.WorksheetId','@(nested.IsPaid ? "7" : "8")','@(nested.Age)')"><span style='display:none;'>@downloadButton</span><span style='display:none'>@detailData</span></a>
+									}
+									else
+									{
+										<a href="javascript:void(0)" class='clsPrintDoc' onclick="LoginForTeachers('print','@nested.subscriptionStatus.DownloadUrl','@(nested.IsPaid ? "Paid" : "Free")','@(detailData + " - Print")','worksheet','@nested.WorksheetId','@(nested.IsPaid ? "7" : "8")','@(nested.Age)')"><span style='display:none;'>@downloadButton</span><span style='display:none'>@detailData</span></a>
+									}
+								</div>
+
+								var detailShareData = string.Empty;
+								if (!string.IsNullOrEmpty(nested.Title))
+								{
+									detailShareData = nested.Title;
+								}
+								if (!string.IsNullOrEmpty(nested.Volume))
+								{
+									detailShareData = detailShareData + "-" + nested.Volume;
+								}
+								if (!string.IsNullOrEmpty(nested.Description.ToString()))
+								{
+									System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex("<[^>]*>");
+									string dtls = rx.Replace(nested.Description.ToString(), "").Replace("\n", "");
+
+									detailShareData = detailShareData + "-" + dtls;
+								}
+
+								<div class='card-social-icon'>
+									<div class='share-icon'>
+										<div class='share-box'>
+											<ul>
+												@if (nested.socialItems.FBShare != null)
+												{
+													<li><a href='javascript:void(0)' class='fb-icon aFBShare' onclick="commonShareLayer('Share_facebook','@detailShareData');"><span style='display:none'>@nested.socialItems.FBShare</span></a></li>
+												}
+												@if (nested.socialItems.WhatAppShare != null)
+												{
+													<li>
+														<a href='javascript:void(0)' class='whatsapp-icon aWHTAppSH' onclick="commonShareLayer('Share_whatsapp','@detailShareData');">
+															<span style='display:none'>
+																@nested.socialItems.WhatAppShare
+															</span>
+														</a>
+													</li>
+												}
+												@if (nested.socialItems.EmailShare != null)
+												{
+													<li>
+														<a href='javascript:void(0)' class='mail-icon aMailSh' onclick="commonShareLayer('Share_mail','@detailShareData');">
+															<span style='display:none'>
+																@nested.socialItems.EmailShare
+															</span>
+														</a>
+													</li>
+												}
+											</ul>
+										</div>
+									</div>
+								</div>
+							}
+
+						</div>
+						<div class='card-btn-print'>
+							@{
+								string culture = HPPlc.Models.CultureName.GetCultureName().Replace("/", "");
+								if (String.IsNullOrWhiteSpace(culture))
+								{ culture = "en-US"; }
+
+								System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
+
+
+								<div class="btn-col">
+									@if (UserLoggedInOrNot == true)
+									{
+										<a href="javascript:void(0);" class='btn @colorOfButton' onclick="downloadDocmntTeachers('dwnld','@nested.subscriptionStatus.DownloadUrl','@(nested.IsPaid ? "Paid" : "Free")','@(detailData + " - Download")','worksheet','@nested.WorksheetId','@(nested.IsPaid ? "7" : "8")','@(nested.Age)')">@downloadButton<span class='download-icon'></span></a>
+									}
+									else
+									{
+										<a href="javascript:void(0)" class='btn @colorOfButton' onclick="LoginForTeachers('dwnld','@nested.subscriptionStatus.DownloadUrl','@(nested.IsPaid ? "Paid" : "Free")','@(detailData + " - Download")','worksheet','@nested.WorksheetId','@(nested.IsPaid ? "7" : "8")','@(nested.Age)')">@downloadButton<span class='download-icon'></span></a>
+									}
+
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			}
+			catch { }
+		}
+	}
+}
+@*else
+	{
+		<div class='fit-hd' style="text-align:center"><h5>@Umbraco.GetDictionaryValue("No Result Found", "No Result Found")</h5></div>
+	}*@

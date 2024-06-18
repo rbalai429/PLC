@@ -1,0 +1,31 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+}
+
+<h1>Webhooks</h1>
+
+@section CustomJsFiles
+{
+	
+	<script>
+		$(document).ready(function () {
+			//var hashes = window.location.href;
+			//alert(hashes);
+
+			$.ajax({
+				type: "POST",
+				url: "/umbraco/Surface/WebHooks/WebHook",
+				data: { },
+				success: function (e) {
+					alert('done');
+				},
+				error: function (error) {
+				}, complete: function () {
+				}
+			});
+		});
+			
+	</script>
+
+}

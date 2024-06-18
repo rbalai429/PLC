@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="33.29" height="32.3" viewBox="0 0 33.29 32.3">
+  <g id="Back-arrow" transform="translate(1 4.916)">
+    <path id="Down-arrow" d="M0,0,7.074,6.948,14.021,0" transform="translate(6.948 4.179) rotate(90)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    <path id="Down-arrow-2" data-name="Down-arrow" d="M0,0,20.011,20.011" transform="translate(30.29 11.233) rotate(135)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+  </g>
+</svg>

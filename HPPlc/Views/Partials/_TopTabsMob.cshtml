@@ -1,0 +1,104 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+
+
+	var root = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault();
+	var contentMenu = root?.DescendantsOrSelf()?
+						.Where(x => x.ContentType.Alias == "contentMenu").OfType<ContentMenu>().FirstOrDefault();
+
+	string culture = HPPlc.Models.CultureName.GetCultureName();
+	culture = culture == "/" ? String.Empty : culture;
+
+	var pageName = UmbracoContext?.PublishedRequest?.PublishedContent.Name;
+
+}
+
+@*<p>New Menu</p>
+	<div class="ovrLaySkin"></div>
+	<div class="NavPlc">
+		<div class="NavPlcin">
+			<span class="clsBtn"></span>
+			<ul class="navigations">*@
+<div class="mobileMenuTab">
+	<ul class="navigations">
+
+		@try
+		{
+			if (contentMenu != null && contentMenu.ContentItem.Any())
+			{
+				foreach (var menu in contentMenu?.ContentItem.Where(x => x.IsActive))
+				{
+					if (menu?.MyContentType != null && menu?.MyContentType?.ToLower() == "lession")// && UserLoggedInOrNot == true && (mySubscription != null && mySubscription.Any())
+					{
+						//Lession program
+						try
+						{
+
+							<li>
+								<a class="mobNavtr" href="@(Umbraco.Content(menu?.ContentItem?.Udi)?.DescendantsOrSelf()?.FirstOrDefault()?.Url())" onclick="commonLayer('LessonWorksheet-@pageName','Worksheet-Lession Plan Header')">@(menu?.ContentItem?.Name)</a>
+							</li>
+						}
+						catch { }
+					}
+					else if (menu?.MyContentType != null && menu?.MyContentType?.ToLower() == "bonus")
+					{
+						//Bonus program
+						try
+						{
+
+							<li>
+
+								<a class="mobNavtr" href="@(Umbraco.Content(menu?.ContentItem?.Udi)?.DescendantsOrSelf()?.FirstOrDefault()?.Url())" onclick="commonLayer('BonusWorksheet-@pageName','Worksheet-Bonus Plan Header')">@(menu?.ContentItem?.Name)</a>
+
+							</li>
+						}
+						catch { }
+					}
+					else if (menu?.MyContentType != null && menu?.MyContentType?.ToLower() == "teachers")
+					{
+						//Teachers program
+						try
+						{
+
+							<li>
+
+								<a class="mobNavtr" href="@(Umbraco.Content(menu?.ContentItem?.Udi)?.DescendantsOrSelf()?.FirstOrDefault()?.Url())" onclick="commonLayer('TeachersWorksheet-@pageName','Worksheet-Teachers Plan Header')">@(menu?.ContentItem?.Name)</a>
+
+							</li>
+						}
+						catch { }
+					}
+					else if (menu?.MyContentType != null && menu?.MyContentType?.ToLower() == "festival")
+					{
+						//Teachers program
+						try
+						{
+
+							<li>
+
+								<a class="mobNavtr" href="@(Umbraco.Content(menu?.ContentItem?.Udi)?.DescendantsOrSelf()?.FirstOrDefault()?.Url())" onclick="commonLayer('SpecialOfferWorksheet-@pageName','Worksheet-Special Offer Header')">@(menu?.ContentItem?.Name)</a>
+
+							</li>
+						}
+						catch { }
+					}
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+			error.PageName = "_TopTabs.cshtml";
+			error.MethodName = "OnLoad";
+			error.ErrorMessage = ex.Message;
+
+			HPPlc.Models.dbAccessClass.PostApplicationError(error);
+		}
+	</ul>
+	</div>
+		@*</ul>
+
+
+
+				</div>
+			</div>*@

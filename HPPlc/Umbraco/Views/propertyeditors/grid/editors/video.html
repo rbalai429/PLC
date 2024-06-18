@@ -1,0 +1,19 @@
+﻿
+<umb-control-group label="Label" description="Email addresses to notify">
+	<input type="file" class="umb-textstring umb-property-editor" ng-model="model.settings.Notify.Pending" />
+</umb-control-group>
+
+
+
+<div ng-controller="Umbraco.PropertyEditors.FileUploadController">
+	<umb-property-file-upload culture="{{model.culture}}"
+							  segment="{{model.segment}}"
+							  property-alias="{{model.alias}}"
+							  value="model.value"
+							  required="model.validation.mandatory"
+							  on-files-selected="fileChanged(value)">
+	</umb-property-file-upload>
+</div>
+
+
+

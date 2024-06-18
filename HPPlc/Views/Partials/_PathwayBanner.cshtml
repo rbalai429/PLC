@@ -1,0 +1,103 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using HPPlc.Models;
+@{
+	IEnumerable<BannerElement> lstBanner = null;
+	var banners = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+						.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault()?.Children?
+						.Where(x => x.ContentType.Alias == "pathwayBanner")?.OfType<PathwayBanner>().FirstOrDefault()?.Banner.OfType<BannerElement>().ToList();
+
+	if (banners != null)
+	{
+		List<GetUserCurrentSubscription> GetUserAllSubscription = new List<GetUserCurrentSubscription>();
+		GetUserAllSubscription = SessionManagement.GetCurrentSession<List<GetUserCurrentSubscription>>(SessionType.SubscriptionInDtls);
+
+		if (GetUserAllSubscription == null)
+		{
+			lstBanner = banners.Where(x => Umbraco.Content(x.SubscriptionType?.Select(b => b.Udi)).ToList().OfType<Subscriptions>().Any(o => o.Ranking == "1") || (x.BannerAllowForGuestUser == true) || !x.SubscriptionType.Any()).ToList();
+		}
+		else
+		{
+			//string sd = GetUserAllSubscription?.Where(c => c.Ranking == "2")?.FirstOrDefault()?.Ranking;
+			lstBanner = banners.Where(x => (Umbraco.Content(x.SubscriptionType?.Select(b => b.Udi)).ToList().OfType<Subscriptions>().All(o => o?.Ranking == (GetUserAllSubscription?.Where(c => c?.Ranking == o?.Ranking)?.FirstOrDefault()?.Ranking.ToString()))) || !x.SubscriptionType.Any()).ToList();
+		}
+	}
+	if (lstBanner != null && lstBanner.Any())
+	{
+		<div class="container-fluid">
+			<div class="offer-banner">
+				@foreach (var pathwayBannerItem in lstBanner)
+				{
+					var IsVideo = pathwayBannerItem?.IsVideo;
+					if (IsVideo == "No")
+					{
+						var DesktopImage = pathwayBannerItem?.DesktopImage;
+						var desktopNextGenImage = pathwayBannerItem?.DesktopNextGenImage;
+
+						var MobileImage = pathwayBannerItem?.MobileImage;
+						var mobileNextGenImage = pathwayBannerItem?.MobileNextGenImage;
+
+
+						var BannerLink = pathwayBannerItem?.BannerUrl;
+						string vBannerURL = "javascript:void(0)";
+						string vTarget = "";
+						if (BannerLink != null)
+						{
+							vBannerURL = BannerLink?.Url;
+							vTarget = BannerLink?.Target;
+						}
+
+						if (DesktopImage != null)
+						{
+							<a href="@vBannerURL" target="@vTarget">
+								<picture>
+									@if (MobileImage != null)
+									{
+										<source srcset="@MobileImage.Url()" media="(max-width: 680px)" />
+									}
+									@if (mobileNextGenImage != null)
+									{
+										<source srcset="@mobileNextGenImage.Url()" media="(max-width: 680px)" />
+									}
+									@if (desktopNextGenImage != null)
+									{
+										<source srcset="@desktopNextGenImage.Url()" />
+									}
+									@if (DesktopImage != null)
+									{
+										<source srcset="@DesktopImage.Url()" />
+										<img class="b-lazy" data-src="@DesktopImage.Url()" src="/common/images/low-res-image.jpg" alt="@(DesktopImage.Value<string>("altText"))" />
+									}
+								</picture>
+							</a>
+
+						}
+
+					}
+				}
+			</div>
+		</div>
+	}
+}
+@*@if (Model != null)
+	{
+		var CategoryBannerItems = CategoryBanner?.Value<IEnumerable<IPublishedElement>>("banner");
+		List<BannerElement> lst = new List<BannerElement>();
+
+		if (SubscriptionValidationText != null)
+		{
+			foreach (var BannerItem in CategoryBannerItems?.OfType<BannerElement>())
+			{
+				var lstsubs = BannerItem?.SubscriptionType?.OfType<NameListItem>();
+				if (lstsubs != null && lstsubs.Any(x => x.ItemValue.Contains(SubscriptionValidationText)))
+				{
+					lst.Add(BannerItem);
+				}
+			}
+			CategoryBannerItems = lst;
+		}
+
+		if (CategoryBannerItems != null)
+		{
+
+		}
+	}*@

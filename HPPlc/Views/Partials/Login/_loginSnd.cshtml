@@ -1,0 +1,384 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+
+	var titleData = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+				.FirstOrDefault()?.DescendantsOrSelf()?.OfType<Login>()?.FirstOrDefault();
+
+	var regData = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+						.FirstOrDefault()?.DescendantsOrSelf()?.OfType<Registration>()?.FirstOrDefault();
+
+	var spPlan = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+						.FirstOrDefault()?.DescendantsOrSelf()?.OfType<SpecialPlanRoot>()?.FirstOrDefault();
+
+	//var ageGroup = Model?.Root()?.SiblingsAndSelf()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()
+	//	?.Children()?.Where(x => x.ContentType.Alias == "masterRoot")?.FirstOrDefault()?.Children()
+	//	?.Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault()?.Children()?.OfType<NameListItem>();
+
+	var ageGroup = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+	.Where(x => x.ContentType.Alias == "masterRoot")?.FirstOrDefault().Children?
+	.Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault().Children?.OfType<NameListItem>
+		().Where(x => x.IsActice == true && x.Value<bool>("displayInLessonWorksheet") == true).ToList();
+
+
+
+
+	//string titleChange = String.Empty;
+	//try
+	//{
+	//	if (Request.QueryString.AllKeys.Contains("offer"))
+	//	{
+	//		if (Request.QueryString.Get("offer") != null)
+	//		{
+	//			string offerName = Request.QueryString.Get("offer");
+	//			if (!String.IsNullOrEmpty(offerName) && offerName == "abm")
+	//			{
+	//				titleChange = "Get 7500+ worksheets for just Rs 899, suitable for 3 to 12 years children";
+	//			}
+	//		}
+	//	}
+	//}
+	//catch { }
+
+	//string title = String.Empty;
+	//string description = String.Empty;
+
+	//string messageid = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.LoginMessageDynamic);
+	//if (String.IsNullOrEmpty(messageid))
+	//{ messageid = "0"; }
+
+	//if (!String.IsNullOrEmpty(messageid))
+	//{
+	//	var message = titleData?.MessageText?.Where(x => x?.MessageId.ToString() == messageid).FirstOrDefault();
+	//	if (message != null)
+	//	{
+	//		title = message.MessageTitle;
+	//		description = message.MessageDescription;
+	//	}
+
+	//	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.LoginMessageDynamic);
+	//}
+}
+<div class="loginPopup">
+	<form method="POST" id="preloginForm">
+		@Html.AntiForgeryToken()
+		<input type="hidden" id="enterOTPValidation" value="@titleData.EnterOtpvalidation" />
+		<input type="hidden" id="wrongOTPValidation" value="@titleData.WrongOtpvalidation" />
+		<input type="hidden" id="resendOTPSent" value="@titleData.ResendOtpsent" />
+		@*<input type="hidden" id="resendOTPSent" value="@titleData.ResendOtpsent" />*@
+		<input type="hidden" id="oTPAttemptMaximumLimit" value="@titleData.OTpattemptMaximumLimit" />
+
+		<input type="hidden" id="maskingEmail" value="@titleData.EmailMaskingTitle" />
+		<input type="hidden" id="maskingMobile" value="@titleData.MobileMaskingTitle" />
+		<input type="hidden" id="maskingTitle" value="@titleData.TimerLeft" />
+
+		<input type="hidden" id="resendOtpTimerTitle" value="@titleData.ResendOtptimerTitle" />
+		<input type="hidden" id="ResendBlockingMessage" value="@titleData.ResendBlockingMessage" />
+		<input type="hidden" id="validateAttemptTitle" value="@titleData.ValidateAttemptBlockingMessage" />
+		<input type="hidden" id="oTPAttemptedMaximumTimes" value="@titleData.OTpattemptedMaximumTimes" />
+
+		<input type="hidden" id="emailAlreadyRegistered" value="@regData.EmailAlreadyRegistered" />
+		<input type="hidden" id="mobileAlreadyRegistered" value="@regData.MobileAlreadyRegistered" />
+
+		<input type="hidden" id="otpVerifiedMode" />
+
+
+
+		<div class="loginPopupCont">
+			<div class="loginCol">
+				<div class="loginBannerCont">
+					@if (spPlan?.MediaFile != null)
+					{
+						<div class="loginBnr"> <img src="@spPlan.MediaFile.Url()" alt="" /> </div>
+					}
+					<p>@spPlan?.LeftPanelTitle</p>
+					<h5>@spPlan?.LeftPanelSubTitle</h5>
+				</div>
+			</div>
+
+
+			<div class="loginCol">
+				<div class="loginFrmRow">
+					@*@if (!String.IsNullOrEmpty(source) && source == "popup")
+						{
+						<span class="loginClose"></span>
+						}*@
+					<!--Login form HTML Start-->
+					<div class="sploginFrmBox" id="SP365Login">
+						<h2 id="titleOfLogin">Log in/Sign up to start downloading</h2>
+						<p id="descOfLogin"></p>
+						<div class="lgn-fild-row ">
+							<label>@(spPlan?.MobileNoTitle)<sup class="mandatory">*</sup></label>
+							<div class="lgn-fildbox">
+								<input type="text" class="input-lgn errorclean" id="PreLoginEmail" tabindex="1" maxlength="200" autocomplete="off" onkeyup="this.value=this.value.toLowerCase();" />
+							</div>
+							<span class="error" id="UserNameRequired" style="display:none;">@titleData.EnterUserNameRequired</span>
+						</div>
+						<div class="lgn-fild-row keepSigned">
+							<label class="container-label container-labelCst2">
+								Keep me Signed In
+								<input type="checkbox" class="enterEvent" value="No" name="R_U_Want_to_LoggedIn" id="R_U_Want_to_LoggedIn" />
+								<span class="checkmark-label"></span>
+							</label>
+						</div>
+						<div id="NextBtn" class="lgn-fild-row ">
+							<button type="button" id="PreSignInBtn" tabindex="2" class="btn blckBtn">@(spPlan?.ButtonTitle)</button>
+							@*<a href="javascript:void(0)" id="spLoginNext" class="btn blckBtn">@Model.ButtonTitle</a>*@
+						</div>
+
+						<div class="agreeText"> @Html.Raw(spPlan?.TCprivacy) </div>
+
+						<span id="Msg" class="error dvdr" style="display:none"></span>
+					</div>
+					<!--Login form HTML End-->
+					<!--OTP HTML Start-->
+					<div class="sploginFrmBox ofr-frm" id="SP365Otp" style="display:none">
+						<h2>@titleData.EnterOtp<sup class="mandatory">*</sup></h2>
+						<p id="MaskingMessage" class="otpmaskingmessage"></p>
+
+
+						@*<div class="lgn-otp-row">
+								<input type="number" class="input-lgn otpspecialplanfield ofrfrm-input" maxlength="1" id="digit-1" name="digit-1" data-next="digit-2" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+								<input type="number" class="input-lgn otpspecialplanfield ofrfrm-input" maxlength="1" id="digit-2" name="digit-2" data-next="digit-3" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+								<input type="number" class="input-lgn otpspecialplanfield ofrfrm-input" maxlength="1" id="digit-3" name="digit-3" data-next="digit-4" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+								<input type="number" class="input-lgn otpspecialplanfield ofrfrm-input" maxlength="1" id="digit-4" name="digit-4" data-next="digit-3" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+							</div>*@
+
+						<div id="otp-input">
+							<input type="number" class="ofrfrm-input forFocus" step="1" min="0" max="9" autocomplete="no" pattern="\d*" />
+							<input type="number" class="ofrfrm-input" step="1" min="0" max="9" autocomplete="no" pattern="\d*" />
+							<input type="number" class="ofrfrm-input" step="1" min="0" max="9" autocomplete="no" pattern="\d*" />
+							<input type="number" class="ofrfrm-input" step="1" min="0" max="9" autocomplete="no" pattern="\d*" />
+
+						</div>
+						<input type="hidden" name="otp" id="otp" />
+
+						<div class="cclear">
+							<a id="clear" href="javascript:void(0);" style="display:none" onclick="ClearOtp()" class="resendotp clearhide">Clear OTP</a>
+						</div>
+						<div class="otp-timer-send">
+							<a id="resendotp" href="javascript:void(0);" onclick="RegistrationResendOtp()" class="resendotp disnone">@titleData.ResendOtp</a>
+							<div id="timerdiv" class="tmr-col"> <span id="timer"></span></div>
+						</div>
+
+
+						<div class="lgn-fild-row">
+							<span id="MsgOtp" class="error dvdr" style="display:none;"></span>
+							<span class="error dvdr" id="preloginmessage" style="display:none"></span>
+							<div id="error" class="error dvdr" name="error" style="display:none;"></div>
+						</div>
+
+						<div id="countdown" style="display:none" class="countdownStyle dvdr"> <div class="labeltext"><span id="timerMsg"></span></div></div>
+
+					</div>
+					<!--OTP HTML end-->
+
+					<div id="sp365Consent" style="display:none">
+						<div class="lgn-fild-row ">
+							<label><span id="modeToEnter"></span><sup class="mandatory">*</sup></label>
+							<div class="lgn-fildbox">
+								<input type="text" class="input-lgn errorclean" id="useremailormobile" name="useremailormobile" tabindex="2" maxlength="200" autocomplete="off" onkeyup="this.value=this.value.toLowerCase();" />
+
+								<span class="error" id="emailFormat" style="display:none;">@regData.EmailFormat</span>
+								<span class="error" id="mobilenoFormat" style="display:none;">@regData.MobileNoRequired</span>
+								<span class="error" id="fieldRequired" style="display:none;"></span>
+							</div>
+						</div>
+
+						<div class="lgn-fild-row ">
+							<label>@regData.NameTitle<sup class="mandatory">*</sup></label>
+							<div class="lgn-fildbox">
+								<input type="text" class="input-lgn errorclean" id="name" name="name" tabindex="3" maxlength="200" autocomplete="off" />
+
+								<span class="error" id="nameRequired" style="display:none;">@regData.NameRequired</span>
+							</div>
+						</div>
+
+						<div class="drondownagetitle">
+							<div class="lgn-fild-row">
+								<label>@regData.AgeGroupeTitle <sup class="mandatory">*</sup></label>
+								<select multiple="multiple" class="input-lgn errorclean multiple-select" id="ageGroup" name="ageGroup" tabindex="4">
+									@if (ageGroup != null && ageGroup.Count() > 0)
+									{
+										foreach (var items in ageGroup.Where(x => x.IsActice))
+										{
+											<option value="@items.Name"> @items.AlternateItemName </option>
+										}
+									}
+								</select>
+								<span class="error" id="agegroupRequired" style="display:none;">@regData.AgeGroupRequired</span>
+							</div>
+
+							<div class="lgn-fild-row">
+								<label>@regData.AreYouAparentOrStudent </label>
+								<select id="RuParentOrStudent" name="RuParentOrStudent" class="input-lgn errorclean multiple-select" tabindex="5">
+									<option value="0" id="sourceTypeSelect">Select Type </option>
+									<option value="Parent" id="sourceTypeParent">Parent </option>
+									<option value="Teacher">Teacher </option>
+								</select>
+								<span class="error" id="AreYouParentOrStudent" style="display:none;">@regData.AreYouAparentOrStudentMessage</span>
+							</div>
+						</div>
+
+						<div class="lgn-fild-row ">
+							<label>@regData.ReferralCode</label>
+							<div class="lgn-fildbox">
+								<input type="text" class="input-lgn errorclean" id="ReferralCode" name="ReferralCode" maxlength="15" tabindex="6" autocomplete="off" />
+
+								<span class="error" id="nameRequired" style="display:none;">@regData.InvalidReferralCode</span>
+							</div>
+						</div>
+
+						@*<div class="lgn-fild-row">
+								<label>@regData.AgeGroupeTitle <sup class="mandatory">*</sup></label>
+								<select multiple="multiple" class="input-lgn errorclean multiple-select" id="ageGroup" name="ageGroup" tabindex="2">
+									@if (ageGroup != null && ageGroup.Count() > 0)
+									{
+										foreach (var items in ageGroup.Where(x => x.IsActice))
+										{
+											<option value="@items.Name"> @items.AlternateItemName </option>
+										}
+									}
+								</select>
+								<span class="error" id="agegroupRequired" style="display:none;">@regData.AgeGroupRequired</span>
+							</div>*@
+
+						@*<div class="lgn-fild-row">
+								<label>@regData.AreYouAparentOrStudent <sup class="mandatory">*</sup></label>
+								<select id="RuParentOrStudent" name="RuParentOrStudent" class="enterEvent" tabindex="3">
+									<option value="Parent">Parent </option>
+									<option value="Student">Student </option>
+								</select>
+								<span class="error" id="AreYouParentOrStudent" style="display:none;">@regData.AreYouAparentOrStudentMessage</span>
+							</div>*@
+
+
+						<div class="lgn-fild-row ">
+							<span style="font-size: 14px; padding-bottom: 10px; color:#939393; display: block;">@Html.Raw(spPlan?.ConsentTitle)</span>
+
+							<div class="rdo-wrp">
+								@*<div class="rdo-collft">@regData.CommunicationWhatsAppTitle</div>*@
+								<div class="rdo-colrit">
+									<ul>
+										<li>
+											<label class="container-label">
+												@regData.CommunicationEmailTitle
+												<input type="checkbox" class="enterEvent" value="Yes" name="supportOnEmailFromHP" tabindex="7" />
+												<span class="checkmark-label"></span>
+											</label>
+											
+										</li>
+										<li>
+											<label class="container-label">
+												@regData.CommunicationWhatsAppTitle
+												<input type="checkbox" class="enterEvent" value="Yes" name="supportOnWhatsupFromHP" tabindex="8" />
+												<span class="checkmark-label"></span>
+											</label>
+										</li>
+
+										<li>
+											<label class="container-label">
+												@regData.CommunicationPhoneTitle
+												<input type="checkbox" class="enterEvent" value="Yes" name="supportOnPhoneFromHP" tabindex="9" />
+												<span class="checkmark-label"></span>
+											</label>
+										</li>
+
+										@*<li>
+
+											<label class="rdo-box">
+				@regData.YesTitle
+					<input type="radio" class="enterEvent" value="Yes" checked name="supportOnWhatsupFromHP" tabindex="7" />
+					<span class="checkmark-subs"></span>
+				</label>
+		</li>*@
+										@*<li>
+			<label class="rdo-box">
+				@regData.NoTitle
+				<input type="radio" class="enterEvent" value="No" name="supportOnWhatsupFromHP" tabindex="8" />
+				<span class="checkmark-subs"></span>
+			</label>
+		</li>*@
+									</ul>
+								</div>
+							</div>
+
+
+							@*<div class="rdo-wrp">
+									<div class="rdo-collft">@regData.CommunicationEmailTitle</div>
+									<div class="rdo-colrit">
+										<ul>
+											<li>
+												<label class="rdo-box">
+													@regData.YesTitle
+													<input type="radio" class="enterEvent" value="Yes" checked name="supportOnEmailFromHP" tabindex="11" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+											<li>
+												<label class="rdo-box">
+													@regData.NoTitle
+													<input type="radio" class="enterEvent" value="No" name="supportOnEmailFromHP" tabindex="12" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+										</ul>
+									</div>
+
+								</div>
+
+								<div class="rdo-wrp">
+									<div class="rdo-collft">@regData.CommunicationPhoneTitle </div>
+									<div class="rdo-colrit">
+										<ul>
+											<li>
+												<label class="rdo-box">
+													@regData.YesTitle
+													<input type="radio" class="enterEvent" value="Yes" checked name="supportOnPhoneFromHP" tabindex="9" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+											<li>
+												<label class="rdo-box">
+													@regData.NoTitle
+													<input type="radio" class="enterEvent" value="No" name="supportOnPhoneFromHP" tabindex="10" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+										</ul>
+									</div>
+
+								</div>*@
+
+						</div>
+
+
+						<div class="subs-checkbox">
+							@*<label class="container-label">
+								<input type="checkbox" class="enterEvent" value="Yes" name="termsChecked" tabindex="13" />
+								<span class="checkmark-label"></span>
+							</label>*@
+
+							@Html.Raw(regData.TermsConditionContent)
+
+						</div>
+
+						<div class="lgn-fild-row ">
+							<button type="button" id="register" class="btn blckBtn" tabindex="10">Submit</button>
+
+							<span id="message" class="error" style="display:none"></span>
+						</div>
+
+					</div>
+
+					<div class="closeWindow"><a href="javascript:void(0);" onclick="closeWindow()">Close this window</a></div>
+				</div>
+
+
+
+			</div>
+		</div>
+
+
+	</form>
+</div>
+

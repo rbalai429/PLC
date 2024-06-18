@@ -1,0 +1,83 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+	var CultureInfo = Model.GetCultureFromDomains();
+	var className = Umbraco.Content(Model?.Parent?.DescendantsOrSelf()?.OfType<WorksheetListingAgeWise>()?.FirstOrDefault()?.AgeGroup?.Udi)?
+										.DescendantsOrSelf()?.OfType<NameListItem>()?.FirstOrDefault();
+
+	string qtype = String.Empty;
+	qtype = Model.Id.ToString();
+}
+
+<input type="hidden" id="hdnWorksheet" value="@Model.Id" />
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input id="hdnqtype" type="hidden" value="@qtype" />
+<input id="page" type="hidden" value="Teacher" />
+<input id="closeDesc" type="hidden" value="Close Teachers Program Login" />
+
+
+<div class="main-wrp">
+
+	@Html.Partial("_Breadcrumb")
+
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="dtls-wrp">
+					<h1>@(className?.AlternateItemName)</h1>
+					<div class="dtls-row dtls-pdf-wsheet" id="WorksheetSingle">
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	@*<div class="container-fluid rltdWorkst">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="ListingMnPlcin">
+						<div class="list-items">
+							<div class="fit-hd">
+								<h4>Related Worksheets By Topic</h4>
+							</div>
+							<div class="video-thum-row" id="relatedworksheetbytopic">
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="container-fluid rltdWorkst">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="ListingMnPlcin">
+						<div class="list-items">
+							<div class="fit-hd">
+								<h4>Related Worksheets By Subject</h4>
+							</div>
+							<div class="video-thum-row" id="relatedworksheetbysubject">
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>*@
+
+</div>
+
+@Html.Partial("/Views/Partials/Login/_payLogicTeachers.cshtml")
+
+
+@section CustomJsFiles
+{
+	@*<script type="text/javascript" src="/CustumJs/FilterTeachersProgram.js"></script>*@
+	<script type="text/javascript" src="~/CustumJs/Teachers/WorksheetTeachersDetails.js"></script>
+	<script src="/lib/webviewer.min.js" type="text/javascript"></script>
+}
+
+

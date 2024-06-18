@@ -1,0 +1,34 @@
+﻿
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-animate.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-sanitize.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap.js" integrity="sha512-3z5zbCPEG7DvKKz46yvPmKL+w+UDfwY0f2YWFVIwBb+2Y4E23jTZHZxG+naAiTllvMNQAhapPDKGHBT7V3fQOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap-tpls.js" integrity="sha512-Re9KhAaoh5qo/Cm/wtExVs7ETTKTx/81aXPHko2nWlUvTzELYhTwpp/DwUu+z8ul+DjtbJdPcmxEYwKewzG62w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap-csp.css" integrity="sha512-TSigfdiJq7G9AWJnE/8D3M/HcBs9wfKpbrCbMg4iSs8IRVujA854B5wd/glfPzBRaeqiLLz1jHm6swYsci2txQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<div ng-controller="ImageByNodeController">
+
+    <div class="umb-panel umb-editor-wrapper ng-scope">
+        <div data-element="editor-header" class="umb-editor-header flex items-center">
+            <h1 class="umb-panel-header-name ">Image By Node</h1>
+        </div>
+    </div>
+    <div data-element="editor-container" class="umb-editor-container umb-panel-body umb-scrollable row-fluid ">
+        <div class="umb-pane">
+            <div>
+         
+
+                <div class="umb-table" id="export">
+                    <table>
+                        <tr><td>Image Node</td><td>:</td><td><input type="text" id="inptImageByNode" /></td></tr>
+                    </table>
+                    <button id="aExportImageIntoExcel" class="btn umb-button__button btn-success umb-button-- umb-outline float-right">
+                        Export
+                    </button>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>

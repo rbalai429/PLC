@@ -1,0 +1,55 @@
+﻿@using HPPlc.Models.Constant;
+@using HPPlc.Models.Mailer;
+@model RegistrationMailerModel
+@{
+
+    Layout = null;
+    var node = Model;
+
+}
+@if (node != null)
+{
+
+    <html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    </head>
+
+    <body bgcolor="#FFFFFF" text="#000000">
+        <table width="650" border="0" cellspacing="0" cellpadding="0" align="center">
+            <tr>
+                <td style="border:1px solid #000000;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td valign="top">
+                               <a href="@Model.SubscriptionUrl" target="_blank">
+                                    @if (node.HeaderBanner != null)
+									{
+										<img src="@node.HeaderBanner" width="650" height="542" border="0" />
+									}
+									else
+									{
+										 <img src="https://d1o0e2ejzaj3cn.cloudfront.net/media/31pcx0bp/head.jpg" width="650" height="542" border="0" />
+									}
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                @Html.Raw(Model.BodyContent)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                @Html.Raw(Model.FooterText)
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>
+
+}

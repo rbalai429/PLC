@@ -1,0 +1,127 @@
+﻿@inherits UmbracoViewPage
+@using Umbraco.Web.Models
+
+@{
+	var currentCulture = Model.GetCultureFromDomains();
+	if (!String.IsNullOrWhiteSpace(currentCulture))
+	{
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SelectedLanguageCulture, currentCulture);
+	}
+	string culture = HPPlc.Models.CultureName.GetCultureName();
+
+	var header = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "commonRoot").FirstOrDefault()?
+							   .Children?.Where(x => x.ContentType.Alias == "headerBonusWorksheet").OfType<HeaderBonusWorksheet>().FirstOrDefault();
+
+	//var languageDisplayOn = header?.LanguageNotDisplayOn?.Where(x => x.Name.Equals(Model.Name)).Any();
+
+	//var SubscriptionMessageDisplayOnHeader = header?.DisplaySubscriptionMessageOnHeader?.Where(x => x.Name.Equals(Model.Name)).Any();
+
+	var CurrentselectedLang = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.SelectedLanguage);
+
+	//Check User LoggedIn Or Not
+	bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	var LoggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+
+	string UserSelectedAgeGroup = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserAgeGroupSelected);
+
+	HPPlc.Models.LoggedIn loggedIn = new HPPlc.Models.LoggedIn();
+	loggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<HPPlc.Models.LoggedIn>(HPPlc.Models.SessionType.LoggedInDtls);
+	//Get value for open subscription popup
+	//string subscribePopup = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.subscriptionPopup);
+	//int NoOfSubscribed = HPPlc.Models.SessionManagement.GetCurrentSession<int>(HPPlc.Models.SessionType.NoOfSubscribed);
+
+	//var pageName = !string.IsNullOrEmpty(Convert.ToString(Model.Name)) ? Convert.ToString(Model.Name) : "";
+	var pageName = UmbracoContext.PublishedRequest.PublishedContent.Name;
+	string userLoggedInMode = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserRegistrationMode);
+}
+
+@if (header != null)
+{
+	<header id="headerTag" class="plc365header">
+		<div class="header">
+			
+			<div class="header-main-section">
+				<div>
+					<div class="headerMMM"><a href="#mobile-menu"></a></div>
+					<div class="plc-logo">
+						<a href="@(IsUserLoggedIn == true ? "/structure-program" : "/structure-program")" onclick="commonLayer('@pageName','PLC Icon');">
+							@if (header != null && header.Logo.Url() != null)
+							{
+								<img src="@header.Logo.Url()" alt="PLC" width="82" height="42" />
+							}
+						</a>
+					</div>
+				</div>
+				<div class="headerrgt">
+					<div class="premium-signin sinin">
+
+						@try
+						{
+							if (pageName != null)
+							{
+								if (header != null && header.SignIn != null && LoggedIn == null)
+								{
+									<a href="@header.SignIn.Url" onclick="commonLayer('@pageName','@header.SignIn.Name');">
+
+									</a>
+								}
+							}
+						}
+						catch { }
+
+						@try
+						{
+							if (header != null && header?.SignOut != null && LoggedIn == "Y")
+							{
+								var headerMenu = header?.AfterLoggedInMenu;
+								<a href="javascript:void(0);" class="signin-arrow">
+									<span class="prflIcnHdr"></span>
+
+								</a>
+								<div class="signin-drop">
+									<div class="signin-dropInr">
+										<ul class="SininTopLink">
+											@if (headerMenu != null)
+											{
+												foreach (var items in headerMenu)
+												{
+													try
+													{
+														if (!(items != null && items?.SelectSubscriptions?.Name?.ToLower().Replace(" ", "") == "changepassword" && (!String.IsNullOrWhiteSpace(userLoggedInMode) && userLoggedInMode.ToLower() == "otp")))
+														{
+															<li><a href="@(items?.SelectSubscriptions?.Url + "?type=bns")" target="@(items?.SelectSubscriptions?.Target)" onclick="commonLayer('@pageName','User Profile Icon(@(items?.SelectSubscriptions?.Name))');"><b><img src="@(items?.BrowseDocument?.Url())" alt="" width="1" height="1"></b> @(items?.SelectSubscriptions?.Name)</a></li>
+														}
+													}
+													catch { }
+												}
+											}
+
+											<li><a href="javascript:void(0);" onclick="SignOutBonusPlan();"><b><img src="/common/images/icon-my-acount.png" alt="" width="1" height="1"></b>@header.SignOut.Name</a></li>
+
+										</ul>
+
+
+
+									</div>
+
+								</div>
+							}
+						}
+						catch { }
+					</div>
+
+					<div class="hp-logo" onclick="commonLayer('@pageName','HP Icon');">
+						<a href='@(IsUserLoggedIn == true ? "/structure-program" : "/structure-program")'>
+							@if (header != null && header?.HPlogo != null && header?.HPlogo?.Url() != null)
+							{
+								<img src="@header.HPlogo.Url()" alt="PLC" width="31" height="31" />
+							}
+						</a>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+	</header>
+}

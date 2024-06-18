@@ -1,0 +1,103 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.MySubscription>
+@using ContentModels = Umbraco.Web.PublishedModels;
+
+@{
+	Layout = "masterpagespecialoffer.cshtml";
+
+	//CheckUserSpecialPlanRedeemed
+	bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	if (IsUserLoggedIn == false)
+	{
+		Response.Redirect("/learn-365");
+	}
+
+	//string cultureISO = HPPlc.Models.CultureName.GetCultureName();
+	////get data from database
+	HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+	HPPlc.Models.GetSpecialPlanSubscriptionRportData subscriptionReport = new HPPlc.Models.GetSpecialPlanSubscriptionRportData();
+	subscriptionReport = db.GetSubscriptionDataSpecialPlan();
+}
+
+<div class="main-wrp">
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	@Html.Partial("_BreadcrumbSpecialPlan")
+
+	<div class="container-fluid ref-column1 plc365learn">
+		<div class="profile-wrp">
+			<div class="prf-lft-tb">
+				@Html.Partial("/Views/Partials/_MyAccount365Tab.cshtml")
+			</div>
+			<div class="prf-rgt-tb">
+				<div class="prf-rgt-pd">
+					<div class="prf-rgt-tit">
+						<h1 class="titleforhtag">@Model.Title</h1>
+					</div>
+					<div class="sub-main-cont">
+						<div class="subs-tab">
+							<ul>
+								<li><a href="javascript:void(0);">3-6 Years</a></li>
+							</ul>
+						</div>
+
+						<div class="tab-cont">
+							
+									<table width="100%" border="0" cellspacing="5" cellpadding="5">
+										<tbody>
+											<tr>
+												<th align="left" valign="middle">Subscription Plan</th>
+												<th align="left" valign="middle">Learning sets downloaded</th>
+												<th align="left" valign="middle">Subscription Start Date</th>
+												<th align="left" valign="middle">Subscription End Date</th>
+											</tr>
+											@if (subscriptionReport != null && !String.IsNullOrWhiteSpace(subscriptionReport.SubscriptionName))
+											{
+												<tr>
+													<td>@subscriptionReport.SubscriptionName</td>
+													<td>@(subscriptionReport.LearningSetDownloads + " of 365" ) <a href="/learn-365/my-downloads">My Downloads</a></td>
+													<td>@subscriptionReport.SubscriptionStartDate</td>
+													<td>@subscriptionReport.SubscriptionEndDate</td>
+												</tr>
+											}
+											else
+											{
+												<tr>
+													<td colspan="4" class="error"><b>No Subscription Found!!!</b></td>
+												</tr>
+											}
+										</tbody>
+									</table>
+								
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section CustomJsFiles
+{
+	<script>
+		$(document).ready(function () {
+
+
+			$(".subs-tab li:first").addClass("active");
+			$(".tab-cont").hide(); //Hide all content
+			$(".tab-cont:first").show(); //Show first tab content
+			$(".subs-tab li a").click(function () {
+				$(".subs-tab li").removeClass('active');
+				$(this).parent('li').addClass('active');
+				$(".tab-cont").hide();
+				var activeTab = $(this).attr('href');
+				$(activeTab).fadeIn();
+				return false;
+			});
+		});
+	</script>
+}

@@ -1,0 +1,36 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+    Layout = null;
+
+}
+
+@* the fun starts here *@
+
+    <table>
+        <tr>
+            <td>Language</td>
+            <td>:</td>
+            <td>
+                <select id="ddlLanguage">
+                    <option value="0">Select Language</option>
+                    <option value="bn">Bangla</option>
+                    <option value="en-US">English</option>
+                    <option value="gu">Gujarati</option>
+                    <option value="hi">Hindi</option>
+                    <option value="mr">Marathi</option>
+                </select>
+            </td>
+        </tr>
+        <tr><td>Category</td><td>:</td><td><select id="ddlCategory"></select></td></tr>
+        <tr><td>Age</td><td>:</td><td><select id="ddlAgeGroupe"></select></td></tr>
+        <tr><td>Subscription</td><td>:</td><td><select id="ddlSubscription"></select></td></tr>
+        <tr><td>Thumbnail Image</td><td>:</td><td><input type="file" id="fluWebinarImage" /></td></tr>
+        <tr><td>Datetime</td><td>:</td><td><input id="inptDatetime" type='datetime-local'> </td><td>eg:2021-01-01T13:42</td></tr>
+        <tr><td>Meeting Duration</td><td>:</td><td><input id="inptMeetingDuration" type='text'> </td></tr>
+        <tr><td>Meeting Agenda</td><td>:</td><td><input id="inptMeetingAgenda" type='text'> </td></tr>
+        <tr><td>Meeting Title</td><td>:</td><td><input id="inptMeetingTitle" type='text'> </td></tr>
+        <tr><td>Meeting Details</td><td>:</td><td><input type='text' id="inptMeetingDetails" readonly><a id="aGenerateMeeting">Generate Meeting</a></td></tr>
+        <tr><td></td><td>:</td><td><a id="aSubmitMeetingDetails">Submit Meeting Details</a> </td></tr>
+    </table>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script type="text/javascript" src="/CustumJs/Webinar.js"></script>

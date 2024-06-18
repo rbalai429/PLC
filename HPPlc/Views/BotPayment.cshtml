@@ -1,0 +1,29 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+
+	string param1 = String.Empty;
+	string param2 = String.Empty;
+
+	if (Request.QueryString.AllKeys.Length > 0)
+	{
+		if (Request.QueryString.AllKeys.Contains("u"))
+		{
+			param1 = Request.QueryString.Get("u").ToString().Replace(" ", "+");
+		}
+		if (Request.QueryString.AllKeys.Contains("pay"))
+		{
+			param2 = Request.QueryString.Get("pay").ToString().Replace(" ", "+");
+		}
+	}
+}
+
+<div class="main-wrp">
+	<input type="hidden" id="email" value="@param1" />
+	<input type="hidden" id="pay" value="@param2" />
+</div> 
+
+@section CustomJsFiles
+{   
+	<script src="/CustumJs/BotRequestPay.js"></script>
+}

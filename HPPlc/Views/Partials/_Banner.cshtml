@@ -1,0 +1,263 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using HPPlc.Models;
+@using System.Configuration;
+
+@{
+	List<BannerElement> lstBanner = new List<BannerElement>();
+
+	var banners = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+						.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault()?.Children?
+						.Where(x => x.ContentType.Alias == "banner")?.OfType<Banner>().FirstOrDefault()?.BannerItems.OfType<BannerElement>().Where(x => x.Activated == true).ToList();
+
+	string pageName = null;
+	var pageId = 0;
+	var parentId = 0;
+
+	try
+	{
+		//var pageName = !string.IsNullOrEmpty(Convert.ToString(Model.Name)) ? Convert.ToString(Model.Name) : "";
+		pageName = UmbracoContext.PublishedRequest.PublishedContent.Name;
+		pageId = UmbracoContext.PublishedRequest.PublishedContent.Id;
+
+		if (UmbracoContext.PublishedRequest.PublishedContent?.Parent != null && (UmbracoContext.PublishedRequest.PublishedContent.Parent.ContentType.Alias.Equals("worksheetNode") || UmbracoContext.PublishedRequest.PublishedContent.Parent.ContentType.Alias.Equals("videos") || UmbracoContext.PublishedRequest.PublishedContent.Parent.ContentType.Alias.Equals("blogRoute")))
+		{ parentId = UmbracoContext.PublishedRequest.PublishedContent?.Parent == null ? 0 : UmbracoContext.PublishedRequest.PublishedContent.Parent.Id; }
+
+	}
+	catch { }
+
+	if (banners != null)
+	{
+		List<GetUserCurrentSubscription> GetUserAllSubscription = new List<GetUserCurrentSubscription>();
+		GetUserAllSubscription = SessionManagement.GetCurrentSession<List<GetUserCurrentSubscription>>(SessionType.SubscriptionInDtls);
+
+		string ViaOfferPage = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.JoinNowUrl);
+		string SpecificBannerAllowed = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.BannerSpecificTag);
+
+		if (!String.IsNullOrWhiteSpace(ViaOfferPage) && !String.IsNullOrWhiteSpace(SpecificBannerAllowed))
+		{
+			lstBanner = banners?.Where(x => x?.IsSubscriptionWiseBanner == true && Umbraco.Content(x.SubscriptionMapping?.Select(m => m?.Udi)).ToList().OfType<Subscriptions>().Any(o => o?.Ranking == SpecificBannerAllowed)).ToList();
+		}
+		else
+		{
+			if (GetUserAllSubscription == null)
+			{
+				lstBanner = banners?.Where(x => Umbraco.Content(x.SubscriptionType.Select(b => b.Udi)).ToList().OfType<Subscriptions>
+					().Any(o => o.Ranking == "1") || (x.BannerAllowForGuestUser == true) || !x.SubscriptionType.Any() && x.IsSubscriptionWiseBanner == false).ToList();
+			}
+			else
+			{
+				//string sd = GetUserAllSubscription?.Where(c => c.Ranking == "2")?.FirstOrDefault()?.Ranking;
+				lstBanner = banners?.Where(x => (Umbraco.Content(x.SubscriptionType.Select(b => b.Udi)).ToList().OfType<Subscriptions>
+					().All(o => o?.Ranking == (GetUserAllSubscription?.Where(c => c?.Ranking == o?.Ranking)?.FirstOrDefault()?.Ranking.ToString()))) || !x.SubscriptionType.Any() && x.IsSubscriptionWiseBanner == false).ToList();
+			}
+		}
+	}
+
+	
+
+	if (lstBanner != null && lstBanner.Any())
+	{
+		string IsBundleUser = "";
+		string vBannerURL = "javascript:void(0)";
+		string vTarget = "";
+		string bannerUrl = "";
+		int i = 1;
+
+		<div class="banner">
+			<div class="slider-banner">
+				@foreach (var BannerItem in lstBanner)
+				{
+					try
+					{
+						if (BannerItem.PageToDisplayBanner.Count() == 0 || (BannerItem.PageToDisplayBanner.Count() > 0 && BannerItem.PageToDisplayBanner.Any(x => (Umbraco.Content(x.Udi).Id == pageId || Umbraco.Content(x.Udi).Id == parentId))))
+						{
+							bannerUrl = ConfigurationManager.AppSettings["bundlingRedirectUrl"].ToString();
+							//Bundling Coupon Check
+							if (BannerItem.IsCouponBundleBanner)
+							{
+								HttpCookie reqCookies = Request.Cookies["IsBundleUser"];
+								if (reqCookies != null)
+								{
+									IsBundleUser = reqCookies.Value;
+									vBannerURL = bannerUrl;
+								}
+							}
+
+							//Offer User Check
+							HttpCookie offerCookies = Request.Cookies["IsOfferUser"];
+							if (offerCookies != null)
+							{
+								vBannerURL = bannerUrl;
+							}
+
+							if ((BannerItem.IsCouponBundleBanner == true && (!String.IsNullOrEmpty(IsBundleUser) && IsBundleUser == "YES")) || BannerItem.IsCouponBundleBanner == false)
+							{
+								var IsVideo = BannerItem.IsVideo;
+								if (IsVideo == "No")
+								{
+									Boolean IsBannerShow = false;
+									Boolean IsUserLogin = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+									var isEnableTracker = BannerItem.IsEnableTracker ? "Yes" : "No";
+
+									var DesktopImage = BannerItem.DesktopImage;
+									var desktopNextGenImage = BannerItem.DesktopNextGenImage;
+
+									var MobileImage = BannerItem.MobileImage;
+									var mobileNextGenImage = BannerItem.MobileNextGenImage;
+
+									var IsWonkBanner = BannerItem.IsWonkBanner.ToString();
+									var WonkMessage = BannerItem.WonkBannerMessage;
+									var WonkURL = BannerItem.WonkUrl;
+
+									var BannerLink = BannerItem.Value<Umbraco.Web.Models.Link>("bannerURL");
+									var BannerLinkAfterLogin = BannerItem.Value<Umbraco.Web.Models.Link>("bannerURLAfterLogin");
+									var bannerUrlAppend = BannerItem.Heading;
+
+
+									if (BannerLink != null)
+									{
+										bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+										if (IsUserLoggedIn == true)
+										{
+											vBannerURL = BannerLinkAfterLogin?.Url;
+										}
+										else
+										{
+											vBannerURL = BannerLink.Url;
+
+											vTarget = BannerLink.Target;
+										}
+
+										if (!String.IsNullOrWhiteSpace(bannerUrlAppend))
+										{ vBannerURL += bannerUrlAppend; }
+									}
+
+									//check banner display or not
+									if (!BannerItem.BannerAllowForGuestUser && !BannerItem.BannerAllowForLoginUser)
+									{
+										IsBannerShow = true;
+									}
+									else if (BannerItem.BannerAllowForGuestUser && BannerItem.BannerAllowForLoginUser)
+									{
+										IsBannerShow = true;
+									}
+									else if (BannerItem.BannerAllowForGuestUser && !IsUserLogin)
+									{
+										IsBannerShow = true;
+									}
+									else if (BannerItem.BannerAllowForLoginUser && IsUserLogin)
+									{
+										IsBannerShow = true;
+									}
+									if (DesktopImage != null && IsBannerShow)
+									{
+
+										<div class="items">
+											<a href="javascript:void(0);" class="loginMsg" data-id="5" onclick="WonkBanner('@IsWonkBanner','@WonkMessage','@WonkURL','@vBannerURL','@vTarget','@isEnableTracker','@pageName','@BannerItem.Title','@BannerItem.SubTitle')">
+												<div class="bannerWrap">
+													@if (MobileImage != null || mobileNextGenImage != null || desktopNextGenImage != null)
+													{
+														<picture>
+															@if (MobileImage != null)
+															{
+																<source data-srcset="@MobileImage.Url()" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" />
+															}
+
+															@if (mobileNextGenImage != null)
+															{
+																<source data-srcset="@mobileNextGenImage.Url()" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" type='image/webp' />
+															}
+
+															@if (desktopNextGenImage != null)
+															{
+																<source data-srcset="@desktopNextGenImage.Url()" srcset="/common/images/banner_loader.jpg" type='image/webp' />
+															}
+
+															@if (DesktopImage != null)
+															{
+																<img class='b-lazy imgPlacing' data-src="@DesktopImage.Url()" src='/common/images/banner_loader.jpg' alt="@(DesktopImage.Value<string>("altText"))" width="200" height="50" />
+															}
+														</picture>
+													}
+													else
+													{
+														if (DesktopImage != null)
+														{
+															<img class='b-lazy imgPlacing' data-src="@DesktopImage.Url()" src='/common/images/banner_loader.jpg' alt="@(DesktopImage.Value<string>("altText"))" width="200" height="50" />
+														}
+													}
+												</div>
+											</a>
+										</div>
+									}
+								}
+								else if (IsVideo == "Yes")
+								{
+									var VideoDesktopImage = BannerItem.VideoDesktopImage;
+									var VideodesktopNextGenImage = BannerItem.VideoDesktopNextGenImage;
+
+									var VideoMobileImage = BannerItem.VideoMobileImage;
+									var VideomobileNextGenImage = BannerItem.VideoMobileNextGenImage;
+
+									var PlayVideoIcon = BannerItem.VideoIconIfAny;
+
+									<div class="items" onclick="VideoBanner('@BannerItem.YoutubeId','@(i.ToString())')">
+										@if (VideoMobileImage != null || VideomobileNextGenImage != null || VideodesktopNextGenImage != null)
+										{
+											<picture>
+												@if (VideoMobileImage != null)
+												{
+													<source data-srcset="@VideoMobileImage.Url()" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" />
+												}
+
+												@if (VideomobileNextGenImage != null)
+												{
+													<source data-srcset="@VideomobileNextGenImage.Url()" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" type='image/webp' />
+												}
+
+												@if (VideodesktopNextGenImage != null)
+												{
+													<source data-srcset="@VideodesktopNextGenImage.Url()" srcset="/common/images/banner_loader.jpg" type='image/webp' />
+												}
+
+												@if (VideoDesktopImage != null)
+												{
+													<img class='b-lazy' data-src="@VideoDesktopImage.Url()" src='/common/images/banner_loader.jpg' alt="@(VideoDesktopImage.Value<string>("altText"))" width="200" height="50" />
+												}
+											</picture>
+										}
+										else
+										{
+											if (VideoDesktopImage != null)
+											{
+												<img class='b-lazy imgPlacing' data-src="@VideoDesktopImage.Url()" src='/common/images/banner_loader.jpg' alt="@(VideoDesktopImage.Value<string>("altText"))" width="200" height="50" />
+											}
+										}
+
+										<div class="@("playvideobanner" + i.ToString())">
+											@if (PlayVideoIcon != null)
+											{
+												<div class="play-btn-video">
+													<img src="@PlayVideoIcon.Url()" />
+												</div>
+											}
+										</div>
+										<div id="@("HpPlcvidBanner" + i.ToString())" class="VideoBanner" data-video="@BannerItem.YoutubeId" style="display:none">
+
+										</div>
+
+									</div>
+								}
+							}
+						}
+					}
+					catch { }
+
+					i++;
+				}
+			</div>
+		</div>
+	}
+}
+

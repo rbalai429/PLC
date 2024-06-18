@@ -1,0 +1,198 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+}
+
+<div class="main-wrp">
+
+	<div class="container-grey">
+		<div class="container-box">
+
+			<div class="container-inr">
+				@Html.AntiForgeryToken()
+				<div class="subscription-block-set" style="display:none">
+
+					@*<div class="lds-roller" id="worksheetLoading"></div>*@
+					<input type="submit" id="FreeUserNotification" style="width:200px;" class="btn submitbtn brdrrdsnone" value="Free User Notification" />
+
+					<br />
+					<br />
+					<br />
+					<br />
+					<br />
+					<hr />
+					<br />
+					<br />
+					<br />
+					<br />
+					<br />
+
+					<input type="submit" id="PaidUserNotification" style="width:200px" class="btn submitbtn brdrrdsnone" value="Paid User Notification" />
+
+					<br />
+					<br />
+					<br />
+					<br />
+					<br />
+					<hr />
+					<br />
+					<br />
+					<br />
+					<br />
+					<br />
+					<input type="submit" id="Plan365UserNotification" style="width:200px" class="btn submitbtn brdrrdsnone" value="Plan 365 Days Notification" />
+
+
+					<br />
+					<br />
+					<br />
+					<br />
+					<br />
+					<hr />
+					<br />
+					<br />
+					<br />
+					<br />
+					<br />
+
+				</div>
+
+				<input type="submit" id="WorksheetPlanData" style="width:200px" class="btn submitbtn brdrrdsnone" value="Bulk Notification Engine" />
+
+				<div id="dialog" style="display: none"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section CustomJsFiles
+{
+	<script>
+		$("#FreeUserNotification").on('click', function () {
+			var token = $('input[name="__RequestVerificationToken"]').val();
+			$('#loader').show();
+
+				$.ajax({
+					type: "POST",
+					url: "/umbraco/Surface/Notification/GetWhatsAppEventTimingFreeSubscriber",
+					data: { __RequestVerificationToken: token },
+					success: function (e) {
+						if (e.status == "Success") {
+							$("#loader").hide();
+							alert("Notification Sent");
+						}
+						if (e.status == "Fail") {
+							alert("Notification Not Sent");
+						}
+					},
+					error: function (error) {
+						$("#loader").hide();
+						alert("Error!!");
+					}, complete: function () {
+						$("#loader").hide();
+					}
+				});
+		});
+
+
+		$("#PaidUserNotification").on('click', function () {
+			var token = $('input[name="__RequestVerificationToken"]').val();
+			$('#loader').show();
+
+			$.ajax({
+				type: "POST",
+				url: "/umbraco/Surface/Notification/GetWhatsAppEventTimingPaidSubscriber",
+				data: { __RequestVerificationToken: token },
+				success: function (e) {
+					if (e.status == "Success") {
+						$("#loader").hide();
+						alert("Notification Sent");
+					}
+					if (e.status == "Fail") {
+						alert("Notification Not Sent");
+					}
+				},
+				error: function (error) {
+					$("#loader").hide();
+					alert("Error!!");
+				}, complete: function () {
+					$("#loader").hide();
+				}
+			});
+		});
+
+
+		$("#Plan365UserNotification").on('click', function () {
+			var token = $('input[name="__RequestVerificationToken"]').val();
+			$('#loader').show();
+
+			$.ajax({
+				type: "POST",
+				url: "/umbraco/Surface/Notification/GetWhatsAppForPlan365Days",
+				data: { __RequestVerificationToken: token },
+				success: function (e) {
+					if (e.status == "Success") {
+						$("#loader").hide();
+						alert("Notification Sent");
+					}
+					if (e.status == "Fail") {
+						alert("Notification Not Sent");
+					}
+				},
+				error: function (error) {
+					$("#loader").hide();
+					alert("Error!!");
+				}, complete: function () {
+					$("#loader").hide();
+				}
+			});
+		});
+
+		$("#WorksheetPlanData").on('click', function () {
+			//var token = $('input[name="__RequestVerificationToken"]').val();
+			$('#loader').show();
+
+			$.ajax({
+				type: "POST",
+				url: "/umbraco/Surface/Notification/BulkMessageNotification",
+				data: { "planName": "copy_of_30_days_plan" },
+				success: function (e) {
+					$("#loader").hide();
+					alert("Notification Sent");
+					
+				},
+				error: OnError,
+				complete: function () {
+					$("#loader").hide();
+					
+				}
+			});
+		});
+
+		function OnError(xhr, errorType, exception) {
+			$("#loader").hide();
+			var responseText;
+			$("#dialog").html("");
+			try {
+				responseText = jQuery.parseJSON(xhr.responseText);
+				$("#dialog").append("<div><b>" + errorType + " " + exception + "</b></div>");
+				$("#dialog").append("<div><u>Exception</u>:<br /><br />" + responseText.ExceptionType + "</div>");
+				$("#dialog").append("<div><u>StackTrace</u>:<br /><br />" + responseText.StackTrace + "</div>");
+				$("#dialog").append("<div><u>Message</u>:<br /><br />" + responseText.Message + "</div>");
+			} catch (e) {
+				responseText = xhr.responseText;
+				$("#dialog").html(responseText);
+			}
+			$("#dialog").dialog({
+				title: "jQuery Exception Details",
+				width: 700,
+				buttons: {
+					Close: function () {
+						$(this).dialog('close');
+					}
+				}
+			});
+		}
+	</script>
+}

@@ -1,0 +1,427 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.StructureProgramItems>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterstructuredprogram.cshtml";
+	var CultureInfo = Model.GetCultureFromDomains();
+	@*var classValue = Umbraco?.Content(Model?.AgeTitle?.Udi)?.DescendantsOrSelf()?
+		.OfType<NameListItem>
+			()?.Where(x => x.IsActice)?.FirstOrDefault()?.ItemValue;
+			var className = Umbraco?.Content(Model?.AgeTitle?.Udi)?.DescendantsOrSelf()?
+			.OfType<NameListItem>
+				()?.Where(x => x.IsActice)?.FirstOrDefault()?.AlternateItemName;
+
+				var subjectId = Umbraco?.Content(Model?.SelectSubject?.Udi)?
+				.DescendantsOrSelf()?.OfType<Subjects>
+					()?.FirstOrDefault()?.SubjectValue;*@
+}
+
+@* the fun starts here *@
+
+
+@*<input type="hidden" id="hdnAgeGroup" value="@classValue" />
+	<input type="hidden" id="hdnSubject" value="@subjectId" />*@
+<input type="hidden" id="hdnWorksheet" value="@Model.Id" />
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<div class="main-wrp">
+
+	@Html.Partial("_Breadcrumb")
+
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="dtls-wrp">
+					@*<h1>@className</h1>*@
+					<div class="dtls-row" id="WorksheetSingle">
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!--<div class="video-tutorials">
+
+		<div class="container-fluid">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="ListingMnPlcin">
+						@*<div id="WorksheetList">
+							<div class="lds-roller" id="worksheetDetailsLoading"></div>
+						</div>*@
+
+						<div id="faqbox">
+							@Html.CachedPartial("_footerSEOContent", Model, 3600)
+							@Html.Partial("_footerContentData")
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+	</div>-->
+	@*<div class="container-fluid rltdWorkst">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="ListingMnPlcin">
+
+						<div class="list-items">
+
+
+
+
+							<div class="fit-hd">
+								<h4>Related Worksheets By Topic</h4>
+							</div>
+							<div class="video-thum-row">
+								<div class="crslItm4">
+									<items>
+										<div class="item-col">
+											<div class="card-box">
+
+												<div class="card-img">
+													<picture>
+														<source srcset="/common/images/plc_age-3-4-2.webp" type="image/webp">
+														<img class="b-lazy b-loaded" alt="Worksheet for 3-4 Years - Science Week 2" src="/common/images/plc_age-3-4-2.jpg" width="200" height="200">
+													</picture>
+												</div>
+												<div class="card-cont">
+													<div class="card-dscptn">
+														<p>Practice Math with shapes and objects</p>
+													</div>
+													<div class="prntDonld">
+														<div class="print-col"><a class="clsPrintDoc"></a></div>
+														<div class="downld-col"><a href="#"></a></div>
+													</div>
+												</div>
+												<div class="sheetTag">
+													<ul>
+														<li>UKG </li>
+														<li>Nursery </li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</items>
+									<items>
+										<div class="item-col">
+											<div class="card-box">
+
+												<div class="card-img">
+													<picture>
+														<source srcset="/common/images/plc_age-3-4-2.webp" type="image/webp">
+														<img class="b-lazy b-loaded" alt="Worksheet for 3-4 Years - Science Week 2" src="/common/images/plc_age-3-4-2.jpg" width="200" height="200">
+													</picture>
+												</div>
+												<div class="card-cont">
+													<div class="card-dscptn">
+														<p>Practice Math with shapes and objects</p>
+													</div>
+													<div class="prntDonld">
+														<div class="print-col"><a class="clsPrintDoc"></a></div>
+														<div class="downld-col"><a href="#"></a></div>
+													</div>
+												</div>
+												<div class="sheetTag">
+													<ul>
+														<li>UKG </li>
+														<li>Nursery </li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</items>
+									<items>
+										<div class="item-col">
+											<div class="card-box">
+
+												<div class="card-img">
+													<picture>
+														<source srcset="/common/images/plc_age-3-4-2.webp" type="image/webp">
+														<img class="b-lazy b-loaded" alt="Worksheet for 3-4 Years - Science Week 2" src="/common/images/plc_age-3-4-2.jpg" width="200" height="200">
+													</picture>
+												</div>
+												<div class="card-cont">
+													<div class="card-dscptn">
+														<p>Practice Math with shapes and objects</p>
+													</div>
+													<div class="prntDonld">
+														<div class="print-col"><a class="clsPrintDoc"></a></div>
+														<div class="downld-col"><a href="#"></a></div>
+													</div>
+												</div>
+												<div class="sheetTag">
+													<ul>
+														<li>UKG </li>
+														<li>Nursery </li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</items>
+									<items>
+										<div class="item-col">
+											<div class="card-box">
+
+												<div class="card-img">
+													<picture>
+														<source srcset="/common/images/plc_age-3-4-2.webp" type="image/webp">
+														<img class="b-lazy b-loaded" alt="Worksheet for 3-4 Years - Science Week 2" src="/common/images/plc_age-3-4-2.jpg" width="200" height="200">
+													</picture>
+												</div>
+												<div class="card-cont">
+													<div class="card-dscptn">
+														<p>Practice Math with shapes and objects</p>
+													</div>
+													<div class="prntDonld">
+														<div class="print-col"><a class="clsPrintDoc"></a></div>
+														<div class="downld-col"><a href="#"></a></div>
+													</div>
+												</div>
+												<div class="sheetTag">
+													<ul>
+														<li>UKG </li>
+														<li>Nursery </li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</items>
+									<items>
+										<div class="item-col">
+											<div class="card-box">
+
+												<div class="card-img">
+													<picture>
+														<source srcset="/common/images/plc_age-3-4-2.webp" type="image/webp">
+														<img class="b-lazy b-loaded" alt="Worksheet for 3-4 Years - Science Week 2" src="/common/images/plc_age-3-4-2.jpg" width="200" height="200">
+													</picture>
+												</div>
+												<div class="card-cont">
+													<div class="card-dscptn">
+														<p>Practice Math with shapes and objects</p>
+													</div>
+													<div class="prntDonld">
+														<div class="print-col"><a class="clsPrintDoc"></a></div>
+														<div class="downld-col"><a href="#"></a></div>
+													</div>
+												</div>
+												<div class="sheetTag">
+													<ul>
+														<li>UKG </li>
+														<li>Nursery </li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</items>
+
+
+								</div>
+							</div>
+
+						</div>
+
+
+
+
+
+
+
+
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<div class="container-fluid rltdWorkst">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="ListingMnPlcin">
+
+						<div class="list-items">
+
+
+
+
+							<div class="fit-hd">
+								<h4>Related Worksheets By Class</h4>
+							</div>
+							<div class="video-thum-row">
+								<div class="crslItm4">
+									<items>
+										<div class="item-col">
+											<div class="card-box">
+
+												<div class="card-img">
+													<picture>
+														<source srcset="/common/images/plc_age-3-4-2.webp" type="image/webp">
+														<img class="b-lazy b-loaded" alt="Worksheet for 3-4 Years - Science Week 2" src="/common/images/plc_age-3-4-2.jpg" width="200" height="200">
+													</picture>
+												</div>
+												<div class="card-cont">
+													<div class="card-dscptn">
+														<p>Practice Math with shapes and objects</p>
+													</div>
+													<div class="prntDonld">
+														<div class="print-col"><a class="clsPrintDoc"></a></div>
+														<div class="downld-col"><a href="#"></a></div>
+													</div>
+												</div>
+												<div class="sheetTag">
+													<ul>
+														<li>UKG </li>
+														<li>Nursery </li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</items>
+									<items>
+										<div class="item-col">
+											<div class="card-box">
+
+												<div class="card-img">
+													<picture>
+														<source srcset="/common/images/plc_age-3-4-2.webp" type="image/webp">
+														<img class="b-lazy b-loaded" alt="Worksheet for 3-4 Years - Science Week 2" src="/common/images/plc_age-3-4-2.jpg" width="200" height="200">
+													</picture>
+												</div>
+												<div class="card-cont">
+													<div class="card-dscptn">
+														<p>Practice Math with shapes and objects</p>
+													</div>
+													<div class="prntDonld">
+														<div class="print-col"><a class="clsPrintDoc"></a></div>
+														<div class="downld-col"><a href="#"></a></div>
+													</div>
+												</div>
+												<div class="sheetTag">
+													<ul>
+														<li>UKG </li>
+														<li>Nursery </li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</items>
+									<items>
+										<div class="item-col">
+											<div class="card-box">
+
+												<div class="card-img">
+													<picture>
+														<source srcset="/common/images/plc_age-3-4-2.webp" type="image/webp">
+														<img class="b-lazy b-loaded" alt="Worksheet for 3-4 Years - Science Week 2" src="/common/images/plc_age-3-4-2.jpg" width="200" height="200">
+													</picture>
+												</div>
+												<div class="card-cont">
+													<div class="card-dscptn">
+														<p>Practice Math with shapes and objects</p>
+													</div>
+													<div class="prntDonld">
+														<div class="print-col"><a class="clsPrintDoc"></a></div>
+														<div class="downld-col"><a href="#"></a></div>
+													</div>
+												</div>
+												<div class="sheetTag">
+													<ul>
+														<li>UKG </li>
+														<li>Nursery </li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</items>
+									<items>
+										<div class="item-col">
+											<div class="card-box">
+
+												<div class="card-img">
+													<picture>
+														<source srcset="/common/images/plc_age-3-4-2.webp" type="image/webp">
+														<img class="b-lazy b-loaded" alt="Worksheet for 3-4 Years - Science Week 2" src="/common/images/plc_age-3-4-2.jpg" width="200" height="200">
+													</picture>
+												</div>
+												<div class="card-cont">
+													<div class="card-dscptn">
+														<p>Practice Math with shapes and objects</p>
+													</div>
+													<div class="prntDonld">
+														<div class="print-col"><a class="clsPrintDoc"></a></div>
+														<div class="downld-col"><a href="#"></a></div>
+													</div>
+												</div>
+												<div class="sheetTag">
+													<ul>
+														<li>UKG </li>
+														<li>Nursery </li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</items>
+									<items>
+										<div class="item-col">
+											<div class="card-box">
+
+												<div class="card-img">
+													<picture>
+														<source srcset="/common/images/plc_age-3-4-2.webp" type="image/webp">
+														<img class="b-lazy b-loaded" alt="Worksheet for 3-4 Years - Science Week 2" src="/common/images/plc_age-3-4-2.jpg" width="200" height="200">
+													</picture>
+												</div>
+												<div class="card-cont">
+													<div class="card-dscptn">
+														<p>Practice Math with shapes and objects</p>
+													</div>
+													<div class="prntDonld">
+														<div class="print-col"><a class="clsPrintDoc"></a></div>
+														<div class="downld-col"><a href="#"></a></div>
+													</div>
+												</div>
+												<div class="sheetTag">
+													<ul>
+														<li>UKG </li>
+														<li>Nursery </li>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</items>
+
+
+								</div>
+							</div>
+
+						</div>
+
+
+
+
+
+
+
+
+
+					</div>
+
+				</div>
+			</div>
+		</div>*@
+
+</div>
+
+<div class="overlayLogin" style="display:none">
+	@Html.Partial("/Views/Partials/Login/_loginSnd.cshtml")
+</div>
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/NewLogin/Login.js"></script>
+	<script type="text/javascript" src="~/CustumJs/BonusWorksheet/RelatedStructuredProgram.js"></script>
+}

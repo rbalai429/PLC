@@ -1,0 +1,118 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	//string pageName = HPPlc.Models.GetPageName.pagename();
+	var pageName = UmbracoContext.PublishedRequest.PublishedContent.Name;
+
+	var titleData = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+						.FirstOrDefault()?.DescendantsOrSelf()?.OfType<Login>()?.FirstOrDefault();
+
+	//string bundlingRedirectUrl = System.Configuration.ConfigurationManager.AppSettings["bundlingRedirectUrl"].ToString();
+
+
+
+	string loginUserVerify = String.Empty;
+	string loginUserSubmit = String.Empty;
+
+	if (!String.IsNullOrWhiteSpace(pageName) && pageName == "login")
+	{
+		loginUserVerify = titleData?.LoginUserVerifyTitle;
+		loginUserSubmit = titleData?.LoginSubmitTitle;
+	}
+	else
+	{
+		loginUserVerify = titleData?.LoginUserVerifyTitleOffer;
+		loginUserSubmit = titleData?.LoginSubmitOfferTitle;
+	}
+}
+
+
+<input type="hidden" id="hdHpNotification" value="@titleData.NotificationTitle" />
+
+
+<form method="POST" id="preloginForm">
+	@Html.AntiForgeryToken()
+	<div class="inputbrdr">
+		<input type="text" id="PreLoginEmail" tabindex="1" maxlength="200" autocomplete="off" placeholder="@titleData.EnterUserNameTitle" onkeyup="this.value=this.value.toLowerCase();" />
+	</div>
+	<span class="error" id="UserNameRequired" style="display:none;">@titleData.EnterUserNameRequired</span>
+
+	<div class="inputbrdr plcpwd pass-box" style="display:none">
+
+		<input type="password" id="PreLoginPassword" tabindex="3" value="" style="top:8px!important" maxlength="200" autocomplete="new-password" placeholder="@titleData.EnterPasswordTitle" />
+		<i class="fa-eye" onClick="showPass('PreLoginPassword')"></i>
+
+	</div>
+	<span class="error" id="PreLoginPasswordRequired" style="display:none;">@titleData.EnterPasswordRequired</span>
+
+	<div class="plcpwd" style="display:none">
+		<a href="/my-account/forgot-password" class="resendotp disnone" onclick="commonLayer('Login', 'Forgot Password')">Forgot Password?</a>
+	</div>
+
+	@*@if (titleData?.TermsCondition != null)
+		{
+			<div class="trmsagree">
+				<p>
+					@Html.Raw(titleData?.TermsAndConditionContent?.ToString()?.Replace("<p>", "").Replace("</p>", "")) <br />
+					<a href="@(titleData?.TermsCondition?.Url)" target="@(titleData?.TermsCondition?.Target)" onclick="commonLayer('@pageName','Terms of Use');">@(titleData?.TermsCondition?.Name)</a> @titleData.AndOr <a href="@(titleData?.PrivacyPolicy?.Url)" target="@(titleData?.PrivacyPolicy?.Target)" onclick="commonLayer('@pageName','Privacy Policy');">@(titleData?.PrivacyPolicy?.Name)</a>
+				</p>
+			</div>
+		}*@
+	<div class="Submit-btn prepwdlogin">
+		<button id="PreSignInBtn" tabindex="2" class="btn submitbtn brdrrdsnone" type="button" value="Submit">@(loginUserVerify == null ? "Submit" : loginUserVerify)</button>
+	</div>
+	<div class="Submit-btn postpwdlogin" style="display:none; margin-top:5px;">
+		<button id="PreSignInBtnLogin" tabindex="4" class="btn submitbtn brdrrdsnone" type="button" value="Submit">@(loginUserSubmit == null ? "Submit" : loginUserSubmit)</button>
+	</div>
+
+	@*OTP Verification*@
+	<div class="ofr-frm" style="display:none">
+		<div id="OtpSection">
+			<div id="OtpBase">
+
+				<h2><span id="MaskingMessage" class="otpmaskingmessage"></span></h2>
+				<div class="ofrfrm-fild">
+
+					<div class="ofrfrm-otp">
+						<input type="number" class="otpfield ofrfrm-input otpspecialplanfield" maxlength="1" id="digit-1" name="digit-1" data-next="digit-2" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+						<input type="number" class="otpfield ofrfrm-input otpspecialplanfield" maxlength="1" id="digit-2" name="digit-2" data-next="digit-3" data-previous="digit-1" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+						<input type="number" class="otpfield ofrfrm-input otpspecialplanfield" maxlength="1" id="digit-3" name="digit-3" data-next="digit-4" data-previous="digit-2" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+						<input type="number" class="otpfield ofrfrm-input otpspecialplanfield" maxlength="1" id="digit-4" name="digit-4" data-previous="digit-3" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+					</div>
+				</div>
+				<div class="cclear">
+					<a id="clear" href="javascript:void(0);" style="display:none" onclick="ClearOtp()" class="resendotp clearhide">Clear OTP</a>
+				</div>
+				<div class="tmr-rsnd-row">
+					<div id="timerdiv" class="tmr-col"> <span id="timer"></span></div>
+					<a id="resendotp" href="javascript:void(0);" onclick="RegistrationResendOtp()" class="resendotp disnone">@titleData.ResendOtp</a>
+				</div>
+				@*<div class="ofrfrm-fild">
+						<label class="accept-tc"><input type="checkbox"> By clicking, I accept Terms and Conditions & Privacy policy</label>
+					</div>*@
+				<div class="subsub-cmn">
+					<button id="VerifyOtp" type="button" style="cursor:pointer;" disabled class="btn btndisable styledisable" tabindex="15">@titleData.OtpSubmitTitle</button>
+				</div>
+
+				<div>
+					<span id="MsgOtp" class="error" style="display:none;"></span>
+				</div>
+
+			</div>
+
+		</div>
+
+		<div id="countdown" style="display:none" class="countdownStyle"> <div class="labeltext"><span id="timerMsg"></span></div></div>
+
+
+	</div>
+	<div>
+		<span class="error" id="preloginmessage" style="display:none"></span>
+	</div>
+	<div>
+		<div id="error" class="error" name="error" style="display:none;"></div>
+	</div>
+
+	<div class="ofrfrm-fild">
+		@Html.Raw(titleData.TermsAndConditionContent)
+	</div>
+</form>

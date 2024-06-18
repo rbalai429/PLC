@@ -1,0 +1,97 @@
+﻿
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-animate.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-sanitize.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap.js" integrity="sha512-3z5zbCPEG7DvKKz46yvPmKL+w+UDfwY0f2YWFVIwBb+2Y4E23jTZHZxG+naAiTllvMNQAhapPDKGHBT7V3fQOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap-tpls.js" integrity="sha512-Re9KhAaoh5qo/Cm/wtExVs7ETTKTx/81aXPHko2nWlUvTzELYhTwpp/DwUu+z8ul+DjtbJdPcmxEYwKewzG62w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap-csp.css" integrity="sha512-TSigfdiJq7G9AWJnE/8D3M/HcBs9wfKpbrCbMg4iSs8IRVujA854B5wd/glfPzBRaeqiLLz1jHm6swYsci2txQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+<div ng-controller="NotificationDataReportController" ng-init="init()">
+
+    <div class="umb-panel umb-editor-wrapper ng-scope">
+        <div data-element="editor-header" class="umb-editor-header flex items-center"> 
+            <h1 class="umb-panel-header-name ">{{Title}}</h1>
+        </div>
+    </div>
+    <div data-element="editor-container" class="umb-editor-container umb-panel-body umb-scrollable row-fluid ">
+        <div class="umb-pane">
+            <div ng-if="!RegistrationLoad">
+                <div class="row">
+                    <!--<div class="pb-5">
+                        <input type="text" id="query" style="margin-top:9px;" ng-model="inputValue" />
+                        <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="FilterData(inputValue)">
+                            Search
+                        </button>
+                        <button ng-if="inputValue.length>0" class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="ResetData()">
+                            Reset
+                        </button>
+                    </div>-->
+                    <div class="pb-5">
+
+                        <div class="inner-addon left-addon">
+                            <label>Start Date</label>
+                            <input class="form-control search-input" type="date" placeholder="Start Date" ng-model="StartDate">
+                        </div>
+                        <div class="inner-addon left-addon">
+                            <label>End Date</label>
+                            <input class="form-control search-input" type="date" placeholder="End Date" ng-model="EndDate">
+                        </div>
+
+                        <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="FilterData(StartDate,EndDate)">
+                            Show
+                        </button>
+                        <!--ng-if="filteredItemsList.length>0"-->
+                        <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="ExportToExcel(StartDate,EndDate)">
+                            <span ng-if="!RegistrationReportDownload"> Export To Excel</span>
+                            <span ng-if="RegistrationReportDownload"> Exporting..</span>
+                        </button>
+                    </div>
+                    <!--<div class="text-right pb-5">
+                       
+                    </div>-->
+                </div>
+                <div class="umb-table" id="export">
+					<table class="table table-bordered">
+						<thead>
+							<tr>
+                                <th>DateOfAction</th>
+                                <th>WhatsAppTotalDownloaded</th>
+                                <th>WhatsAppUniqueDownloaded</th>
+                                <th>SFMCDownloaded</th>
+                                <th>LessionPlanDownloadWorksheet</th>
+                                <th>LessionPlanPrint</th>
+                                <th>BonusPlanDownloadWorksheet</th>
+                                <th>BonusPlanDownloadPrint</th>
+                                <th>BonusPlanDownloadVideo</th>
+							</tr>
+						</thead>
+						<tbody ng-if="filteredItemsList.length>0">
+							<tr ng-repeat="item in filteredItemsList.slice(((currentPage-1)*itemsPerPage), ((currentPage)*itemsPerPage))">
+                                <td>{{item.DateOfAction}}</td>
+                                <td>{{item.WhatsAppTotalDownloaded}}</td>
+                                <td>{{item.WhatsAppUniqueDownloaded}}</td>
+                                <td>{{item.SFMCDownloaded}}</td>
+                                <td>{{item.LessionPlanDownloadWorksheet}}</td>
+                                <td>{{item.LessionPlanPrint}}</td>
+                                <td>{{item.BonusPlanDownloadWorksheet}}</td>
+                                <td>{{item.BonusPlanDownloadPrint}}</td>
+                                <td>{{item.BonusPlanDownloadVideo}}</td>
+							</tr>
+						</tbody>
+						<tbody ng-if="filteredItemsList.length==0">
+							<tr>
+								<td colspan="6"> <localize key="content_listViewNoItems"></localize></td>
+							</tr>
+						</tbody>
+					</table>
+                </div>
+            </div>
+            <ul uib-pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()"></ul>
+            <ul uib-pagination total-items="bigTotalItems" ng-model="bigCurrentPage" max-size="maxSize" class="pagination-sm" boundary-link-numbers="true" rotate="false"></ul>
+            <ul class="umb-load-indicator animated -half-second" ng-if="RegistrationLoad">
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+            </ul>
+        </div>
+    </div>
+</div>

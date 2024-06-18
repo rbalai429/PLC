@@ -1,0 +1,160 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models
+@{
+	Layout = "masterpage.cshtml";
+	var CultureInfo = Model.GetCultureFromDomains();
+	//var vrNoreId = Model.Id;
+	//var CurrentPageDetails = Umbraco?.Content(vrNoreId);
+
+	//int HomeContainerId = 0;
+	//var Container = Umbraco?.Content(vrNoreId)?.Children?.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault();
+	//if (Container != null)
+	//{
+	//	HomeContainerId = Container.Id;
+	//}
+
+	var Banner = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home").FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "banner");
+
+	//var CategoryBanner = Umbraco?.ContentAtRoot()?.FirstOrDefault()?.Children?
+	//	.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault()?.Children?
+	//	.Where(x => x.ContentType.Alias == "categoryBanner");
+
+	var SignUpSection = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home").FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "homePageSignUpSection");
+
+
+	//var vrAgrGroupe = Umbraco?.Content(1197).DescendantsOrSelf().FirstOrDefault();
+	//var vrCategory = Umbraco?.Content(1055).DescendantsOrSelf().FirstOrDefault();
+	//var vrPathways = Umbraco?.Content(1523).DescendantsOrSelf().FirstOrDefault();
+
+	//var WorkSheetNode = Umbraco?.Content(vrNoreId).Children.Where(x => x.ContentType.Alias == "worksheet").FirstOrDefault();
+	//var Worksheet = Umbraco?.Content(WorkSheetNode.Id);
+
+	//var Videos = Umbraco?.Content(vrNoreId)?.Where(x => x.ContentType.Alias == "videoListing")?.FirstOrDefault();
+	//.Children?.Where(x => x.ContentType.Alias == "videoListing")?.FirstOrDefault()?.Children.OfType<Video>()?.Where(x => x.IsActive);
+
+	//var Videos = Umbraco?.Content(VideoNode.id);
+
+	//var ExpertNode = Umbraco?.Content(vrNoreId).Children.Where(x => x.ContentType.Alias == "zoomMeeting").FirstOrDefault();
+	//var Experts = Umbraco?.Content(ExpertNode.Id);
+	//var RemainingMinutesInMeeting = Experts.Value<string>("joinNowAppearsTimeInMunites");
+
+	//Session["USERID"] = "1";
+	//string vUserId = Session["USERID"].ToString();
+	//string vSubscriptionName = "FREE";
+
+
+	//Check User LoggedIn Or Not
+	var UserLoggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+	//get download text
+	var downloadText = Umbraco.GetDictionaryValue("Video Download");
+	var SubscribefordownloadText = Umbraco.GetDictionaryValue("Subscribe to download");
+	var seeMore = Umbraco.GetDictionaryValue("See More");
+	var buyNow = Umbraco.GetDictionaryValue("Upgrade to Premium");
+	var BuyNewSubscription = Umbraco.GetDictionaryValue("BuyNewSubscription");
+}
+
+@section metatags
+{
+	@Html.Partial("/Views/Partials/_MetaDataBind.cshtml")
+}
+
+@* the fun starts here *@
+<input id="hdnCurrentNode" type="hidden" value="@Model.Id" />
+<input id="hdnSeeMore" type="hidden" value="@seeMore" />
+<input id="hdnBuyNow" type="hidden" value="@buyNow" />
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input id="hdnAgeFilterReset" type="hidden" />
+@*<input id="hdnSubscription" type="hidden" value="@vSubscriptionName" />*@
+<input id="hdnDownloadText" type="hidden" value="@downloadText" />
+<input id="hdnSubscribeforDownload" type="hidden" value="@SubscribefordownloadText" />
+@*<input id="hdExpertJoinNow" type="hidden" value="@Experts.Value("joinNow")" />*@
+<input id="hdnTabId" type="hidden" value="1" />
+<input id="hdnBuyNewSubscription" type="hidden" value="@BuyNewSubscription" />
+
+<div class="main-wrp">
+
+	@if (SignUpSection != null && UserLoggedInOrNot == false)
+	{
+		@Html.Partial("/Views/Partials/_TopSection.cshtml", SignUpSection)
+	}
+
+	@if (Banner != null)
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml", Banner.FirstOrDefault())
+	}
+
+	@Html.Partial("_Breadcrumb")
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="title-fltr">
+
+					<div id="dvTitleVideo">
+						<h3>@Model.Value("headerLabelName")</h3>
+					</div>
+
+				</div>
+
+				<form id="form1" method="POST">
+					@Html.AntiForgeryToken()
+
+					<div id="dvVideoTuturial">
+						<div class="container-fluid">
+							<div class="container-box">
+								<div class="container-inr">
+									<div class="list-items dvVideoSectionContainer">
+									</div>
+
+									@*<div class="list-items dvVideoSectionContainerDetails">
+										</div>*@
+
+									@*<div class="list-items-coming">
+											Coming Soon ...
+										</div>*@
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</form>
+
+			</div>
+		</div>
+	</div>
+
+
+
+</div>
+<div class="scrollto_top">
+	<div class="scrolltt_inr">
+		<span></span>
+	</div>
+</div>
+
+
+<div class="fltr-overlay"></div>
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/Video.js"></script>
+	<script src="/CustumJs/Common.js"></script>
+	<script>
+		function VideoFilter(filtertype) {
+			VideoTutorial(filtertype);
+		}
+
+				//function VideoFilterDetails(VideoId,nodeId, filterType) {
+				//	VideoTutorialDetails(VideoId,nodeId, filterType);
+				//}
+	</script>
+	
+}
+
+
+

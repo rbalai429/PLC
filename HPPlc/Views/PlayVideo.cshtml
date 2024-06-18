@@ -1,0 +1,193 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models
+
+@{
+	Layout = "masterpage.cshtml";
+	var CultureInfo = Model.GetCultureFromDomains();
+
+	var downloadText = Umbraco.GetDictionaryValue("Video Download");
+	var SubscribefordownloadText = Umbraco.GetDictionaryValue("Subscribe to download");
+	var buyNow = Umbraco.GetDictionaryValue("Upgrade to Premium");
+	var BuyNewSubscription = Umbraco.GetDictionaryValue("BuyNewSubscription");
+
+	//Check User LoggedIn Or Not
+	//var UserLoggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+	HPPlc.Models.Videos.VideosBonus videosBonus = new HPPlc.Models.Videos.VideosBonus();
+
+	string queryTypeUrl = String.Empty;
+
+	string queryTypeUrlBonus = String.Empty;
+	int durationTillViewVideos = 15;
+	bool UserEligibleToWatchVideo = false;
+	bool IsWatchedVideos = false;
+	//string qnodeid = String.Empty;
+	//string qvideoid = String.Empty;
+
+
+	if (UserLoggedInOrNot == false)
+	{
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SplRedirection, Request.RawUrl);
+	}
+	else
+	{
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SplRedirection, String.Empty);
+	}
+
+	if (Model.Id > 0)
+	{
+		var videos = Umbraco.Content(Model.Id).DescendantsOrSelf().OfType<Video>().FirstOrDefault();
+		if (videos != null)
+		{
+			queryTypeUrl = HttpUtility.UrlPathEncode("type=age" + "&videoid=" + videos?.VideoYouTubeId + "&video=" + videos.Id + "&filterid=" + "&age=" + videos?.AgeTitle?.Name + " Years" + "&name=" + videos?.Title);
+		}
+		else
+		{
+			string culture = String.Empty;
+			culture = CultureInfo;
+			if (CultureInfo != null && CultureInfo.Equals("en-US"))
+			{ culture = ""; }
+
+			Response.Redirect(culture + "/videos", false);
+		}
+	}
+
+	if (Request.QueryString != null && Request.QueryString.Count >= 1 && String.IsNullOrWhiteSpace(queryTypeUrl))
+	{
+		queryTypeUrl = Request.QueryString.ToString();
+		//qvideoid = Request.QueryString.Get("video");
+		//qnodeid = Request.QueryString.Get("node");
+	}
+	else if(Request.QueryString != null && Request.QueryString.Count >= 1 && !String.IsNullOrWhiteSpace(queryTypeUrl))
+	{
+		queryTypeUrlBonus = Request.QueryString.Get("s").ToString();
+		if (queryTypeUrlBonus != null && queryTypeUrlBonus == "bns")
+		{
+			if (UserLoggedInOrNot == true)
+			{
+				HPPlc.Models.dbAccessClass dbAccessClass = new HPPlc.Models.dbAccessClass();
+
+				videosBonus = dbAccessClass.BonusVideosViewEligibility();
+
+				if (videosBonus.UserHaveSubscription == 0)
+				{
+					//UserLoggedIn but not any valid subscription so only watch only one video
+					if (videosBonus.HowManyVideosWatchedMoreThan15Sec == 0)
+					{ UserEligibleToWatchVideo = true; }
+					else if (videosBonus.HowManyVideosWatchedMoreThan15Sec > 0 && (String.IsNullOrWhiteSpace(videosBonus.WhichVideosWatchedMoreThan15Sec) || videosBonus.WhichVideosWatchedMoreThan15Sec == Model.Id.ToString()))
+					{ UserEligibleToWatchVideo = true; }
+				}
+				else if (videosBonus.UserHaveSubscription > 0 && videosBonus.UserEligibleToWatchNewVideo == 0)
+				{
+					//User have subscription and valid but no of elible videos already watched
+					if (videosBonus.WhichVideosWatchedMoreThan15Sec != null && !String.IsNullOrWhiteSpace(videosBonus.WhichVideosWatchedMoreThan15Sec))
+					{
+						string videoId = videosBonus?.WhichVideosWatchedMoreThan15Sec;
+
+						if (!String.IsNullOrWhiteSpace(videoId) && videoId.Contains(","))
+						{
+							List<HPPlc.Models.Videos.VideosList> videosList = new List<HPPlc.Models.Videos.VideosList>();
+							string[] videos = videoId.Split(',');
+							for (int i = 0; i <= videos.Length; i++)
+							{
+								videosList.Add(new HPPlc.Models.Videos.VideosList { VideoId = videos[i] });
+							}
+
+							if (videosList != null && videosList.Any())
+							{
+								IsWatchedVideos = videosList.Any(x => x.VideoId == Model.Id.ToString());
+							}
+						}
+
+						if (IsWatchedVideos == true)
+						{ UserEligibleToWatchVideo = true; }
+					}
+				}
+				else if (videosBonus.UserHaveSubscription > 0 && videosBonus.UserEligibleToWatchNewVideo == 1)
+				{
+					//User have subscription and valid to watch new videos
+					UserEligibleToWatchVideo = true;
+				}
+			}
+		}
+	}
+}
+
+@*@section styles
+	{
+		<link href="/common/css/video-js.css" rel="stylesheet" />
+	}*@
+
+@section metatags
+{
+	@Html.Partial("/Views/Partials/_MetaDataBind.cshtml")
+}
+
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input id="hdnqtype" type="hidden" value="@queryTypeUrl" />
+<input id="hdnBuyNow" type="hidden" value="@buyNow" />
+<input id="hdnDownloadText" type="hidden" value="@downloadText" />
+<input id="hdnSubscribeforDownload" type="hidden" value="@SubscribefordownloadText" />
+<input id="hdnVideos" type="hidden" value="" />
+<input id="hdnBuyNewSubscription" type="hidden" value="@BuyNewSubscription" />
+
+<input id="hdnQueryTypeBonus" type="hidden" value="@queryTypeUrlBonus" />
+<input id="hdndurationTillViewVideos" type="hidden" value="@durationTillViewVideos" />
+<input id="hdnUserLoggedIn" type="hidden" value="@UserLoggedInOrNot" />
+
+<input id="hdnUserEligibleToWatchVideo" type="hidden" value="@UserEligibleToWatchVideo" />
+
+
+<div class="main-wrp">
+	@Html.Partial("_Breadcrumb")
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				@*<div class="title-fltr">
+						<div id="dvTitleWorksheet">
+							<h3>Play Video </h3>
+						</div>
+					</div>*@
+				<form id="form1" method="post">
+					@Html.AntiForgeryToken()
+
+					<div id="dvVideoTuturial">
+						<div class="container-fluid">
+							<div class="container-box">
+								<div class="container-inr">
+									<div id="PlayVideoDiv"></div>
+									<div class="lds-roller" id="videoLoading"></div>
+									@*<div class="list-items dvVideoPlay">
+											<div class="lds-roller" id="videoLoading"></div>
+										</div>*@
+
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</form>
+
+			</div>
+		</div>
+	</div>
+</div>
+<div class="scrollto_top">
+	<div class="scrolltt_inr">
+		<span></span>
+	</div>
+</div>
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/videojs/video.core.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/videojs-contrib-eme.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/videojs-contrib-quality-levels.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/videojs-http-source-selector.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/videojs-http-streaming.min.js"></script>
+	<script type="text/javascript" src="/CustumJs/PlayVideo.js"></script>
+}
+
+
+

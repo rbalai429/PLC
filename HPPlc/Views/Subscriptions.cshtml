@@ -1,0 +1,209 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models;
+
+@{
+	Layout = "masterpage.cshtml";
+
+	Response.Redirect("/subscription");
+	//manage session before redirection on login page
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	if (UserLoggedInOrNot == false)
+	{
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SplRedirection, "/subscription");
+
+		Response.Redirect("/my-account/login");
+	}
+
+	var SubcriptionList = Model.DescendantsOrSelf()?.Where(x => x.IsVisible())?.OfType<SubscriptionList>().SingleOrDefault();
+	//var SubscriptionBenefits = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+	//											.Where(x => x.ContentType.Alias == "masterRoot")?.FirstOrDefault()?.Children?
+	//											.Where(x => x.ContentType.Alias == "subscriptionBenefitsMaster")?.FirstOrDefault()?.Children.OfType<NameListItem>();
+
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.SubscriptionTempDtls);
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponTempDtls);
+
+	//string loggedInOrNot = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+	string qstring = String.Empty;
+	string selectedAgegroup = String.Empty;
+	string selectedAgeDecrypted = String.Empty;
+	string WID = String.Empty;
+	if (Request.QueryString.Count > 0 && Request.QueryString.AllKeys.Contains("subscptn"))
+	{
+		qstring = Request.QueryString.Get("subscptn").ToString();
+		if (Request.QueryString.AllKeys.Contains("age"))
+		{
+			selectedAgegroup = Request.QueryString.Get("age").ToString();
+			selectedAgeDecrypted = HPPlc.Models.clsCommon.Decrypt(selectedAgegroup);
+		}
+
+		try
+		{
+			if (Request.QueryString.AllKeys.Contains("WID"))
+			{
+				WID = Request.QueryString.Get("WID").ToString();
+				WID = HPPlc.Models.clsCommon.Decrypto(WID);
+
+				if (!String.IsNullOrEmpty(WID))
+				{
+					var worksheetDtls = Umbraco?.Content(WID)?.DescendantsOrSelf().OfType<WorksheetRoot>()?.FirstOrDefault();
+					var subscriptionRank = Umbraco.Content(worksheetDtls.Subscription.Select(x => x.Udi)).ToList().OfType<Subscriptions>();
+					if (subscriptionRank != null)
+					{
+						if (subscriptionRank.Any(x => x.Ranking == "1"))
+						{
+							HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.UserClickedOnWorksheet, "1");
+						}
+					}
+				}
+			}
+		}
+		catch { }
+
+		//if (!String.IsNullOrEmpty(selectedAgeDecrypted))
+		//{
+		//	//Get loggedInUser all Subscriptions
+		//	List<HPPlc.Models.GetUserCurrentSubscription> CurrentSubscriptions = new List<HPPlc.Models.GetUserCurrentSubscription>();
+		//	CurrentSubscriptions = HPPlc.Models.SessionManagement.GetCurrentSession<List<HPPlc.Models.GetUserCurrentSubscription>>(HPPlc.Models.SessionType.SubscriptionInDtls);
+
+		//	if (CurrentSubscriptions != null && CurrentSubscriptions.Any())
+		//	{
+		//		selectedAgeSubscription = CurrentSubscriptions?.Where(x => x.AgeGroup == selectedAgeDecrypted).FirstOrDefault();
+		//	}
+		//}
+	}
+
+	//Coupon popup offer here
+	if (Request.QueryString.Count > 0 && Request.QueryString.AllKeys.Contains("o"))
+	{
+		if (Request.QueryString.Get("o") != "f")
+		{
+			HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponCode);
+		}
+	}
+	else
+	{
+		HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponCode);
+	}
+
+	string UserExistingAndElibigleForDiscount = String.Empty;
+
+	string UserType = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.RegistrationMode);
+	string UserAgeGroupEnrolledOrNot = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.AgeGroupExistsOrNot);
+	string UserSubscribedOrNot = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.SubscribedOrNot);
+
+	if (!String.IsNullOrEmpty(UserType) && UserType.ToLower() == "existing" && !String.IsNullOrEmpty(UserSubscribedOrNot) && UserSubscribedOrNot.ToLower() == "no")
+	{
+		UserExistingAndElibigleForDiscount = "yes";
+	}
+}
+
+
+<div class="main-wrp">
+	@Html.Partial("_Breadcrumb")
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="signupMn">
+					@if (UserExistingAndElibigleForDiscount == "yes")
+					{
+						<div class="spcofr-bnr">
+							<picture>
+								@if (SubcriptionList?.ExistingUserBannerMobile != null)
+								{
+									<source data-srcset="@(SubcriptionList?.ExistingUserBannerMobile?.Url())" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" />
+								}
+
+								@if (SubcriptionList?.ExistingUserBannerWebP != null)
+								{
+									<source data-srcset="@(SubcriptionList?.ExistingUserBannerWebP?.Url())" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" type='image/webp' />
+								}
+
+								@if (SubcriptionList?.ExistingUserBannerDesktopWebp != null)
+								{
+									<source data-srcset="@(SubcriptionList?.ExistingUserBannerDesktopWebp?.Url())" srcset="/common/images/banner_loader.jpg" type='image/webp' />
+								}
+
+								@if (SubcriptionList?.ExistingUserBannerDesktop != null)
+								{
+									<img class='b-lazy' data-src="@(SubcriptionList?.ExistingUserBannerDesktop?.Url())" src='/common/images/banner_loader.jpg' alt="@(SubcriptionList?.ExistingUserBannerDesktop?.Value<string>("altText"))" width="200" height="50" />
+								}
+							</picture>
+						</div>
+					}
+					else
+					{
+						try
+						{
+							<div class="sgnup-hd">
+								@if (SubcriptionList != null)
+								{
+									if (!String.IsNullOrEmpty(SubcriptionList.Title))
+									{
+										<h1 class="titleforhtag">@SubcriptionList.Title</h1>
+									}
+									if (!String.IsNullOrEmpty(SubcriptionList.SubTitle))
+									{
+										<h2 class="sgnup-hdin">@SubcriptionList.SubTitle</h2>
+									}
+								}
+							</div>
+							<div class="reasons-point">
+								@if (SubcriptionList != null && SubcriptionList.SubscriptionPointers.Any())
+								{
+									int row = 1;
+									<div class="point-col">
+										<ul>
+											@foreach (var items in SubcriptionList?.SubscriptionPointers)
+											{
+												<li><i></i><span>@Html.Raw(items)</span></li>
+												row++;
+											}
+										</ul>
+									</div>
+								}
+							</div>
+						}
+						catch { }
+					}
+
+					@Html.Partial("/Views/Partials/_Subscriptionlist.cshtml",
+					  new ViewDataDictionary(this.ViewData)
+						{
+						  { "qstring",qstring },
+						  { "selectedAgegroup", selectedAgegroup},
+						  { "selectedAgeDecrypted", selectedAgeDecrypted},
+						  { "UserExistingAndElibigleForDiscount",UserExistingAndElibigleForDiscount},
+						  { "UserAgeGroupEnrolledOrNot",UserAgeGroupEnrolledOrNot}
+						})
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+@*@section CustomJsFiles{
+	<script>
+		$("#getstarted").click(function () {
+
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            $.ajax({
+                //async: false,
+                type: "POST",
+                url: "/umbraco/Surface/WorkSheet/GetStarted",
+                data: { __RequestVerificationToken: token },
+                //contentType: "application/json; charset=utf-8",
+                //dataType: "JSON",
+                success: function (e) {
+                    if (e.returnStatus == "Success") {
+                        window.location = "/lesson-plan";
+                    }
+                },
+                error: function (error) {
+                    //alert('error');
+                    $("#loader").css('display', 'none');
+                }, complete: function () {
+                    //alert('complete');
+                    $("#loader").css('display', 'none');
+                }
+            });
+        });</script>
+}*@

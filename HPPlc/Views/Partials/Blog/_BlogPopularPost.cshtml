@@ -1,0 +1,60 @@
+﻿@model List<BlogContent>
+@{
+	int TotalCountOfPopularBlogs = (int)ViewData["TotalCountOfPopularBlogs"];
+	int NoOfPopularBlogDisplayOnBlogListingPage = (int)ViewData["NoOfPopularBlogDisplayOnBlogListingPage"];
+}
+
+<div class="post-slidr">
+	@if (Model != null && Model.Count > 0)
+	{
+		foreach (var blog in Model)
+		{
+			if (blog != null)
+			{
+				try
+				{
+				<div class="pp-postclm">
+					<div class="pp-postclm-inr">
+						@if (blog.BlogMediaFile != null)
+						{
+							<div class="pp-postclmlft">
+								<a href="@blog.Url()" onclick="commonLayer('Blogs','Popular Post - @blog.BlogTitle');">
+									<div class="thumbsPlcHldr">
+										<img class="imgPlacing" src="@Url.GetCropUrl(imageCropperValue: blog.BlogMediaFile, width: 126,height: 79)" alt="Blog Image" />
+									</div>
+								</a>
+							</div>
+						}
+							<div class="pp-postclmrgt">
+								<em class="dt">@blog.BlogDate.ToString("MMMM d, yyyy")</em>
+								<p>
+									<a class="ra-fn" href="@blog.Url()" onclick="commonLayer('Blogs','Popular Post - @blog.BlogTitle');">
+										@blog.BlogTitle
+									</a>
+								</p>
+
+								<em class="autnm">@blog.AuthorName</em>
+							</div>
+						</div>
+				</div>
+				}
+				catch (Exception ex)
+				{
+					HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+					error.PageName = "Blog Popular Post Bind";
+					error.MethodName = "Html";
+					error.ErrorMessage = ex.Message;
+
+					HPPlc.Models.dbAccessClass.PostApplicationError(error);
+				}
+			}
+		}
+
+	}
+</div>
+
+@if (TotalCountOfPopularBlogs > NoOfPopularBlogDisplayOnBlogListingPage)
+{
+	<div class="ppview-mor"><a href="/blogs/popular-post" onclick="commonLayer('Blogs','Popular Post - View more');">View more</a></div>
+}
+

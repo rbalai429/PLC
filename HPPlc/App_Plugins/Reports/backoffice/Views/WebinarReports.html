@@ -1,0 +1,54 @@
+﻿<div  ng-controller="ReportsController" ng-init="init()">
+    <div class="umb-panel umb-editor-wrapper ng-scope">
+        <div data-element="editor-header" class="umb-editor-header flex items-center">
+            <h1 class="umb-panel-header-name ">{{Title}}</h1>
+        </div>
+    </div>
+    <div data-element="editor-container" class="umb-editor-container umb-panel-body umb-scrollable row-fluid ">
+        <div class="umb-pane">
+            <div ng-if="!ReportLoad">
+                <div class="text-right pb-5" ng-if="ExportTalkList.length>0">
+                    <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="ExportToExcel()">
+                        <span ng-if="!ReportDownload"> Export To Excel</span>
+                        <span ng-if="ReportDownload"> Exporting..</span>
+                    </button>
+                </div>
+                <div class="umb-table" id="export">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Contact</th>
+                                <th>Metting Name</th>
+                                <th>Metting Date</th>
+                                <th>joined Date</th>
+                            </tr>
+                        </thead>
+                        <tbody ng-if="ExportTalkList.length>0">
+                            <tr ng-repeat="item in ExportTalkList">
+                                <td>{{item.Name}}</td>
+                                <td>{{item.Email}}</td>
+                                <td>{{item.ContactPrefix}}{{item.Contact}}</td>
+                                <td>{{item.MettingName}}</td>
+                                <td>{{item.MettingDate|date:'medium'}}</td>
+                                <td>{{item.JoinDate|date:'medium'}}</td>
+                            </tr>
+
+                        </tbody>
+                        <tbody ng-if="ExportTalkList.length==0">
+                            <tr>
+                                <td colspan="6"> <localize key="content_listViewNoItems"></localize></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <ul class="umb-load-indicator animated -half-second" ng-if="ReportLoad">
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+            </ul>
+        </div>
+    </div>
+</div>

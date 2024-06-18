@@ -1,0 +1,147 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models
+@{
+	Layout = "masterpage.cshtml";
+	var CultureInfo = Model.GetCultureFromDomains();
+
+	var downloadText = Umbraco.GetDictionaryValue("Download Button");
+	var SubscribefordownloadText = Umbraco.GetDictionaryValue("Subscribe to download");
+	var buyNow = Umbraco.GetDictionaryValue("Upgrade to Premium");
+	var BuyNewSubscription = Umbraco.GetDictionaryValue("BuyNewSubscription");
+
+	//Check User LoggedIn Or Not
+	var UserLoggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+
+	//string agegroup = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserSelectAgeOnWorksSheet);
+
+	string agegroup = String.Empty;
+	string qtype = String.Empty;
+	string PathQString = Request.Url.ToString().Split('/').Where(x => !string.IsNullOrWhiteSpace(x)).LastOrDefault();
+	if (!String.IsNullOrWhiteSpace(PathQString))
+	{
+		qtype = PathQString;
+	}
+
+	var root = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+							.FirstOrDefault();
+
+	var WorkSheetFilter = root?.DescendantsOrSelf()?
+							.Where(x => x.ContentType.Alias == "worksheetNode").OfType<WorksheetNode>().FirstOrDefault()?.WorksheetFilterOptions.Where(x => x.Activation).ToList();
+
+	//var UserSelectVolumeOnWorksSheet = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserSelectVolumeOnWorksSheet);
+	//var UserSelectCategoryOnWorksSheet = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserSelectCategoryOnWorksSheet);
+}
+
+@section metatags
+{
+	@Html.Partial("~/Views/Partials/_MetaDataBind.cshtml")
+}
+
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input id="hdnqtype" type="hidden" value="@qtype" />
+@*<input id="hdnqtypeid" type="hidden" value="@qtypeid" />*@
+<input id="hdnDownloadText" type="hidden" value="@downloadText" />
+<input id="hdnSubscribeforDownload" type="hidden" value="@SubscribefordownloadText" />
+<input id="hdnBuyNow" type="hidden" value="@buyNow" />
+<input id="hdnBuyNewSubscription" type="hidden" value="@BuyNewSubscription" />
+
+<div class="main-wrp">
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	@Html.Partial("_Breadcrumb")
+
+	
+	<div class="container-fluid ContnPlc">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="ContnPlcin">
+					@if (Model.HasProperty("title"))
+					{
+						<div class="descTitlePlc">
+							<h1 class="titleforhtag">@Html.Raw(Model.GetProperty("title").Value<string>().ToString())</h1>
+						</div>
+					}
+
+					@if (Model.HasProperty("description"))
+					{
+						<div class="descContPlc">
+							@Html.Raw(Model.Value("description"))
+						</div>
+					}
+
+					<div class="dvdr"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="video-tutorials ListingMnPlc">
+
+		<div class="container-fluid">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="ListingMnPlcin">
+						<div class="fltrMnPlc">
+
+							@Html.Partial("_Filter")
+
+							<div class="ritListingPlc">
+								<div class="ritListingPlcTop">
+									<div id="WorksheetList">
+
+									</div>
+									<div class="lds-roller" id="worksheetLoading"></div>
+
+								</div>
+
+								<div id="faqbox">
+									@Html.CachedPartial("_footerSEOContent", Model, 3600)
+									@Html.Partial("_footerContentData")
+								</div>
+
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+
+</div>
+<div class="scrollto_top">
+	<div class="scrolltt_inr">
+		<span></span>
+	</div>
+</div>
+<div class="mob-fliter">Filter</div>
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/Filter.js"></script>
+	<script type="text/javascript" src="/CustumJs/Worksheet.js"></script>
+
+
+	<script>
+		function loadMore(displayCount) {
+			loadMoreData(displayCount);
+		}
+					//$(document).ready(function () {
+					//	$(".gotobtm").click(function () {
+					//		alert('plc');
+					//		$('html, body').animate({ scrollTop: $(".faqbox-row").offset().top - 300 }, 2000);
+					//	});
+					//});
+
+	</script>
+
+}
+
+
+

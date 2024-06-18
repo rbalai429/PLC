@@ -1,0 +1,158 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models
+@{
+	Layout = "masterpage.cshtml";
+	var CultureInfo = Model.GetCultureFromDomains();
+
+	var downloadText = Umbraco.GetDictionaryValue("Download Button");
+	var SubscribefordownloadText = Umbraco.GetDictionaryValue("Subscribe to download");
+	var buyNow = Umbraco.GetDictionaryValue("Upgrade to Premium");
+	var BuyNewSubscription = Umbraco.GetDictionaryValue("BuyNewSubscription");
+
+	//Check User LoggedIn Or Not
+	var UserLoggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+
+	string agegroup = String.Empty;
+	//string qtype = String.Empty;
+
+
+	//qtype = Model?.UrlSegment;
+	//var WorkSheetFilter = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+	//						.FirstOrDefault()?.DescendantsOrSelf()?
+	//						.Where(x => x.ContentType.Alias == "worksheetNode").OfType<WorksheetNode>().FirstOrDefault()?.WorksheetFilterOptions.Where(x => x.Activation).ToList();
+
+
+	agegroup = Model?.DescendantsOrSelf()?.OfType<WorksheetListingAgeWise>()?
+				.FirstOrDefault()?.AgeGroup.Name;
+
+	var firstTimeDisplay = Model.Value("firstTimeDisplayWorksheet");
+
+}
+
+@section metatags
+{
+	@Html.Partial("~/Views/Partials/_MetaDataBind.cshtml")
+}
+
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input id="hdnqtype" type="hidden" value="@agegroup" />
+<input id="hdnDownloadText" type="hidden" value="@downloadText" />
+<input id="hdnSubscribeforDownload" type="hidden" value="@SubscribefordownloadText" />
+<input id="hdnBuyNow" type="hidden" value="@buyNow" />
+<input id="hdnBuyNewSubscription" type="hidden" value="@BuyNewSubscription" />
+
+<input id="hdTobeDisplayWorksheet" type="hidden" value="0" />
+<input id="hdTotalNoOfDisplayWorksheet" type="hidden" value="1000" />
+<input id="hdAlreadyDisplayedWorksheet" type="hidden" value="@firstTimeDisplay" />
+<input id="page" type="hidden" value="Teacher" />
+<input id="filterType" type="hidden" value="class" />
+
+<div class="main-wrp">
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+	@Html.Partial("_Breadcrumb")
+
+
+	<div class="container-fluid ContnPlc">
+		<div class="container-box">
+			<div class="container-inr">
+				@Html.Partial("/Views/Partials/_FilterTeachersClassWise.cshtml")
+				<div class="ContnPlcin">
+
+					<div class="descTitlePlc">
+						<h1 class="titleforhtag"><span id="titleOfClassName"></span></h1>
+					</div>
+
+					<div class="descContPlc">
+						<p><span id="descriptionOfClassName"></span></p>
+					</div>
+					@*@if (Model.HasProperty("title"))
+						{
+							<div class="descTitlePlc">
+								<h1 class="titleforhtag">@Html.Raw(Model.GetProperty("title").Value<string>().ToString())</h1>
+							</div>
+						}*@
+
+
+					@*@if (Model.HasProperty("description"))
+						{
+							IHtmlString description = Model.Value<IHtmlString>("description");
+
+							string descp = System.Text.RegularExpressions.Regex.Replace(description.ToString(), "<.*?>", String.Empty).Replace("\n", "");
+							if (!String.IsNullOrWhiteSpace(descp))
+							{
+								<div class="descContPlc">
+									@Html.Raw("<p>" + description.ToHtmlString().Replace("<p>", "").Replace("</p>", "") + "  <a href='javascript: void(0);' onclick='gotobottomfaq();'>" + Model?.Parent?.Value<string>("readMore") + "</a>" + "</p>")
+								</div>
+							}
+						}*@
+
+
+
+					<div class="dvdr"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="video-tutorials ListingMnPlc topSpace">
+
+		<div class="container-fluid">
+			<div class="container-box">
+				<div class="container-inr">
+					@*<div class="ListingMnPlcin">
+						<div class="fltrMnPlc">*@
+					@*@Html.Partial("_FilterTeachersProgramSubTopic")*@
+					@*<div class="ritListingPlc">*@
+					<div class="ritListingPlcTop">
+						
+						<div class="video-tutorials teachersSliderThum">
+
+							<div class="recommended-list">
+
+								<div class="list-items fourItemBinding" id="WorksheetDetails">
+
+								</div>
+								<div id="pagediv" style="height:10px;"></div>
+								<div class="lds-roller" id="worksheetDetailsLoading"></div>
+							</div>
+						</div>
+
+					</div>
+
+					<div id="faqbox">
+						@Html.CachedPartial("_footerSEOContent", Model, 3600)
+						@Html.Partial("_footerContentData")
+					</div>
+
+					@*</div>
+
+							</div>
+						</div>*@
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+</div>
+<div class="scrollto_top">
+	<div class="scrolltt_inr">
+		<span></span>
+	</div>
+</div>
+<div class="mob-fliter">Filter</div>
+
+@Html.Partial("/Views/Partials/Login/_payLogicTeachers.cshtml")
+
+@section CustomJsFiles
+{
+
+	<script type="text/javascript" src="/CustumJs/Teachers/WorksheetTeachersAgeWise.js?v4"></script>
+}
+
+
+

@@ -1,0 +1,327 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	string AboutUsTitle = String.Empty;
+	string AboutUsUrl = String.Empty;
+	string PricingTabTitle = String.Empty;
+	string PricingTabUrl = String.Empty;
+	string ContactUsTitle = String.Empty;
+	string ContactUsUrl = String.Empty;
+
+	try
+	{
+		AboutUsTitle = ViewData["AboutUsTitle"]?.ToString() ?? "";
+		AboutUsUrl = ViewData["AboutUsUrl"]?.ToString() ?? "";
+		PricingTabTitle = ViewData["PricingTabTitle"]?.ToString() ?? "";
+		PricingTabUrl = ViewData["PricingTabUrl"]?.ToString() ?? "";
+		ContactUsTitle = ViewData["ContactUsTitle"]?.ToString() ?? "";
+		ContactUsUrl = ViewData["ContactUsUrl"]?.ToString() ?? "";
+	}
+	catch { }
+
+	var root = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault();
+	var contentMenu = root?.DescendantsOrSelf()?
+						.Where(x => x.ContentType.Alias == "contentMenu").OfType<ContentMenu>().FirstOrDefault();
+
+	string culture = HPPlc.Models.CultureName.GetCultureName();
+	culture = culture == "/" ? String.Empty : culture;
+
+	var pageName = UmbracoContext?.PublishedRequest?.PublishedContent.Name;
+}
+
+@if (contentMenu != null)
+{
+	<input type="hidden" id="selectAge" value="@contentMenu.SelectAge" />
+	<input type="hidden" id="selectWeek" value="@contentMenu.SelectWeek" />
+	<input type="hidden" id="selectCategory" value="@contentMenu.SelectCategory" />
+	<input type="hidden" id="reset" value="@contentMenu.ResetButton" />
+}
+
+
+<div class="ovrLaySkin"></div>
+<div class="NavPlc">
+	<div class="NavPlcin">
+		<span class="clsBtn"></span>
+		<ul class="navigation">
+			@try
+			{
+				if (contentMenu != null && contentMenu.ContentItem.Any())
+				{
+					foreach (var menu in contentMenu?.ContentItem.Where(x => x.IsActive))
+					{
+						if (menu?.MyContentType != null && menu?.MyContentType?.ToLower() == "worksheet")
+						{
+							try
+							{
+								var classes = root?.DescendantsOrSelf()?.Where(x => x.ContentType.Alias == "worksheetNode")?.FirstOrDefault()?.DescendantsOrSelf()?
+										.Where(x => x.ContentType.Alias == "worksheetListingAgeWise")?.OfType<WorksheetListingAgeWise>();
+
+								<li class="@menu.TitleClassName">
+									@*<a href="@(menu?.ContentItem?.Url + "?" + menu?.ContentFestive + "#tab")">@menu.ContentItem.Name</a>*@
+									<a href="javascript:void(0);">@(menu?.ContentItem?.Name)</a>
+									<ul>
+										@if (menu?.SubMenu != null && menu.SubMenu.Any())
+										{
+											var submenus = menu?.SubMenu?.OfType<SubMenuItems>();
+											if (submenus != null && submenus.Any())
+											{
+												foreach (var subMenu in submenus)
+												{
+													if (subMenu.Title.ToLower().Equals("class"))
+													{
+														if (subMenu?.SubMenuItem != null)
+														{
+															try
+															{
+																<li>
+																	@*<a href="@(culture + "/worksheets")" onclick="commonLayer('Worksheet-@pageName','Worksheet-By Class for @subMenu.SubMenuItem.Name')">@subMenu.SubMenuItem.Name</a>*@
+																	<a href="javascript:void(0)">@(subMenu?.SubMenuItem?.Name)</a>
+																	@if (classes != null && classes.Any())
+																	{
+																		<ul>
+																			@foreach (var className in classes)
+																			{
+																				try
+																				{
+																					var subjects = className?.DescendantsOrSelf()?
+																					.Where(x => x.ContentType.Alias == "worksheetCategory")?
+																					.OfType<WorksheetCategory>();
+
+																					<li>
+																						<a href="@(className?.Url())" onclick="commonLayer('Worksheet-@pageName','Worksheet-By Class-@(className?.Name)')">@className.Title</a>
+																						@if (subjects != null && subjects.Any())
+																						{
+																							<ul>
+																								@foreach (var subject in subjects)
+																								{
+																									if (subject?.CategoryName != null)
+																									{
+																										var topics = subject?.DescendantsOrSelf()?
+																												.Where(x => x.ContentType.Alias == "topicsName")?
+																													.OfType<TopicsName>();
+
+																										var subjectName = Umbraco?.Content(subject?.CategoryName?.Udi)?.Value("subjectAlternateName");
+																										<li>
+																											<a href="@(subject?.Url())" onclick="commonLayer('Worksheet-@pageName','Worksheet-By Class-@className.Name-@subjectName')">@subjectName</a>
+																											@if (topics != null && topics.Any())
+																											{
+																												<ul>
+																													@foreach (var topic in topics)
+																													{
+																														if (topic != null)
+																														{
+																															var topicName = Umbraco?.Content(topic?.TopicMapping?.Udi)?.Value("topicAlternateName");
+
+																															<li><a href="@(topic?.Url())" onclick="commonLayer('Worksheet-@pageName','Worksheet-By Class-@className.Name-@subjectName-@topicName')">@topicName</a></li>
+																														}
+																													}
+																												</ul>
+																											}
+
+																										</li>
+																									}
+																								}
+																							</ul>
+																						}
+																					</li>
+																				}
+																				catch (Exception ex)
+																				{
+																					HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+																					error.PageName = "_TopTabs.cshtml";
+																					error.MethodName = "Class";
+																					error.ErrorMessage = ex.Message;
+
+																					HPPlc.Models.dbAccessClass.PostApplicationError(error);
+																				}
+																			}
+																			<li class="ms-no-results"><a href="@(culture + "/worksheets/")" onclick="commonLayer('Worksheet-@pageName','Worksheet-By Class-All Classes Worksheet')"><b>All Classes Worksheet</b></a></li>
+																		</ul>
+																	}
+																</li>
+															}
+															catch { }
+														}
+													}
+													if (subMenu.Title.ToLower().Equals("subject"))
+													{
+														if (subMenu?.SubMenuItem != null)
+														{
+															try
+															{
+																var subjects = root?.DescendantsOrSelf()?
+																					   .Where(x => x.ContentType.Alias == "subjectsRoot")?.FirstOrDefault()?
+																					   .Children.OfType<Subjects>();
+
+																<li>
+																	@*<a href="@(culture + "/worksheets/by-subjects")" onclick="commonLayer('Worksheet-@pageName','Worksheet-By Subject-@subMenu.SubMenuItem.Name')">@subMenu.SubMenuItem.Name</a>*@
+																	<a href="javascript:void(0)">@subMenu.SubMenuItem.Name</a>
+																	@if (subjects != null && subjects.Any())
+																	{
+																		<ul>
+																			@foreach (var subject in subjects)
+																			{
+																				<li><a href="@(subject?.Url())" onclick="commonLayer('Worksheet-@pageName','Worksheet-By Subject-@subject.Name')">@subject.SubjectAlternateName</a></li>
+																			}
+																			<li><a href="@(culture + "/worksheets/by-subjects/")" onclick="commonLayer('Worksheet-@pageName','Worksheet-By Subject-All Subject')"><b>All Subject</b></a></li>
+																		</ul>
+																	}
+
+
+																</li>
+															}
+															catch (Exception ex)
+															{
+																HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+																error.PageName = "_TopTabs.cshtml";
+																error.MethodName = "Subject";
+																error.ErrorMessage = ex.Message;
+
+																HPPlc.Models.dbAccessClass.PostApplicationError(error);
+															}
+														}
+													}
+													if (subMenu.Title.ToLower().Equals("topic"))
+													{
+														if (subMenu?.SubMenuItem != null)
+														{
+															try
+															{
+																var topics = root?.DescendantsOrSelf()?
+																					   .Where(x => x.ContentType.Alias == "topicsRoot")?.FirstOrDefault()?
+																					   .Children?.OfType<Topics>().Take(10);
+
+																<li>
+
+																	<a href="javascript:void(0)">@subMenu.SubMenuItem.Name</a>
+																	@if (topics != null && topics.Any())
+																	{
+																		<ul>
+																			@foreach (var topic in topics)
+																			{
+																				<li><a href="@topic.Url()" onclick="commonLayer('Worksheet-@pageName','Worksheet-By Topic-@topic.Name')">@topic.TopicAlternateName</a></li>
+																			}
+																			<li><a href="@(culture + "/worksheets/by-topics/")" onclick="commonLayer('Worksheet-@pageName','Worksheet-By Topic-All Topics')"><b>All Topics</b></a></li>
+																		</ul>
+																	}
+
+
+																</li>
+															}
+															catch (Exception ex)
+															{
+																HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+																error.PageName = "_TopTabs.cshtml";
+																error.MethodName = "Topic";
+																error.ErrorMessage = ex.Message;
+
+																HPPlc.Models.dbAccessClass.PostApplicationError(error);
+															}
+														}
+													}
+												}
+											}
+										}
+
+									</ul>
+								</li>
+							}
+							catch { }
+						}
+						else if (menu.MyContentType != null && menu.MyContentType.ToLower() == "video")
+						{
+							try
+							{
+								var classes = root?.DescendantsOrSelf()?
+										.Where(x => x.ContentType.Alias == "videoListingAgeWise").OfType<VideoListingAgeWise>();
+
+								<li class="@menu.TitleClassName">
+									@*<a href="@(menu?.ContentItem?.Url + "?" + menu?.ContentFestive + "#tab")">@menu.ContentItem.Name</a>*@
+									<a href="javascript:void(0);">@menu.ContentItem.Name</a>
+									<ul>
+										@if (classes != null && classes.Any())
+										{
+											foreach (var className in classes)
+											{
+												<li>
+													<a href="@className.Url()" onclick="commonLayer('Video-@pageName','Video-@className.Name')">@className.Title</a>
+												</li>
+											}
+											<li class="ms-no-results"><a href="@(culture + "/videos/")" onclick="commonLayer('Video-@pageName','All Classes Videos')"><b>All Classes Videos</b></a></li>
+										}
+									</ul>
+								</li>
+							}
+							catch { }
+						}
+						else if (menu.MyContentType != null && menu.MyContentType.ToLower() == "freedownload")
+						{
+							try
+							{
+								var freedownloads = root?.DescendantsOrSelf()?
+										.Where(x => x.ContentType.Alias == "freeDownloadsTitle")?
+										.OfType<FreeDownloadsTitle>()?.Where(x => x.IsActive == true && x?.Parent?.ContentType.Alias == "freeDownloads");
+
+								<li class="@menu.TitleClassName">
+									<a href="javascript:void(0);">@menu.ContentItem.Name</a>
+									<ul>
+										@if (freedownloads != null && freedownloads.Any())
+										{
+											foreach (var freedownload in freedownloads)
+											{
+												<li>
+													<a href="@freedownload.Url()" onclick="commonLayer('Free Downloads-@pageName','Free Downloads for @freedownload.Name')">@freedownload.Name</a>
+												</li>
+											}
+										}
+									</ul>
+								</li>
+							}
+							catch { }
+						}
+						else if (menu.MyContentType != null && menu?.SubMenu != null && String.IsNullOrWhiteSpace(menu?.MyContentType))
+						{
+							var submenus = menu?.SubMenu?.OfType<SubMenuItems>();
+							<li>
+								<a href="javascript:void(0)">@(menu?.ContentItem.Name)</a>
+								<ul>
+									@foreach (var subMenu in submenus)
+									{
+										<li><a href="@(subMenu?.SubMenuItem?.Url)" onclick="commonLayer('@pageName','@(subMenu?.SubMenuItem?.Name)')">@(subMenu?.SubMenuItem?.Name)</a></li>
+									}
+								</ul>
+							</li>
+						}
+						else if (menu.MyContentType != null && menu.MyContentType.ToLower() == "festival")
+						{
+							<li><a class="@menu.TitleClassName" href="@(menu?.ContentItem?.Url)" onclick="commonLayer('Festival-@pageName','Festival-@(menu?.ContentItem?.Name)')">@(menu?.ContentItem?.Name)</a></li>
+						}
+						else
+						{
+							<li class="@menu.TitleClassName"><a href="@(menu?.ContentItem?.Url + "#tab")" class="dvWorkSheet" onclick="commonLayer('@pageName','@(menu.ContentItem?.Name)')">@(menu.ContentItem?.Name)</a></li>
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+				error.PageName = "_TopTabs.cshtml";
+				error.MethodName = "OnLoad";
+				error.ErrorMessage = ex.Message;
+
+				HPPlc.Models.dbAccessClass.PostApplicationError(error);
+			}
+		</ul>
+
+
+		<div class="mobilelInks">
+			<div class="mobilelInksin">
+				<ul class="">
+					<li class="noDD"><a href="@(culture + "/subscription")" onclick="commonLayer('@pageName','Packages')">Packages</a></li>
+					<li class="noDD"><a href="@(culture + "/about-us")" onclick="commonLayer('@pageName','About Us')">About Us</a></li>
+					<li class="noDD"><a href="@(culture + "/faqs")" onclick="commonLayer('@pageName','Help Center')">Help Center</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>

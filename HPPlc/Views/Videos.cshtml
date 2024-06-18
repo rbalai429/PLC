@@ -1,0 +1,201 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models
+@{
+	Layout = "masterpage.cshtml";
+	var CultureInfo = Model.GetCultureFromDomains();
+	//var vrNoreId = Model.Id;
+	//var CurrentPageDetails = Umbraco?.Content(vrNoreId);
+
+	//int HomeContainerId = 0;
+	//var Container = Umbraco?.Content(vrNoreId)?.Children?.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault();
+	//if (Container != null)
+	//{
+	//	HomeContainerId = Container.Id;
+	//}
+
+	var Banner = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home").FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "banner");
+
+	//var CategoryBanner = Umbraco?.ContentAtRoot()?.FirstOrDefault()?.Children?
+	//	.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault()?.Children?
+	//	.Where(x => x.ContentType.Alias == "categoryBanner");
+
+	var SignUpSection = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home").FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "homePageSignUpSection");
+
+
+	//var vrAgrGroupe = Umbraco?.Content(1197).DescendantsOrSelf().FirstOrDefault();
+	//var vrCategory = Umbraco?.Content(1055).DescendantsOrSelf().FirstOrDefault();
+	//var vrPathways = Umbraco?.Content(1523).DescendantsOrSelf().FirstOrDefault();
+
+	//var WorkSheetNode = Umbraco?.Content(vrNoreId).Children.Where(x => x.ContentType.Alias == "worksheet").FirstOrDefault();
+	//var Worksheet = Umbraco?.Content(WorkSheetNode.Id);
+
+	//var Videos = Umbraco?.Content(vrNoreId)?.Where(x => x.ContentType.Alias == "videoListing")?.FirstOrDefault();
+	//.Children?.Where(x => x.ContentType.Alias == "videoListing")?.FirstOrDefault()?.Children.OfType<Video>()?.Where(x => x.IsActive);
+
+	//var Videos = Umbraco?.Content(VideoNode.id);
+
+	//var ExpertNode = Umbraco?.Content(vrNoreId).Children.Where(x => x.ContentType.Alias == "zoomMeeting").FirstOrDefault();
+	//var Experts = Umbraco?.Content(ExpertNode.Id);
+	//var RemainingMinutesInMeeting = Experts.Value<string>("joinNowAppearsTimeInMunites");
+
+	//Session["USERID"] = "1";
+	//string vUserId = Session["USERID"].ToString();
+	//string vSubscriptionName = "FREE";
+
+
+	//Check User LoggedIn Or Not
+	var UserLoggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+
+
+	//get download text
+	var downloadText = Umbraco.GetDictionaryValue("Video Download");
+	var SubscribefordownloadText = Umbraco.GetDictionaryValue("Subscribe to Watch");
+	var seeMore = Umbraco.GetDictionaryValue("See More");
+	var buyNow = Umbraco.GetDictionaryValue("Upgrade to Premium");
+	var BuyNewSubscription = Umbraco.GetDictionaryValue("BuyNewSubscription");
+	var vrAgrGroupe = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+					.Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault()?.Children?.OfType<NameListItem>().ToList().Where(c => c.IsActice);
+
+	var vrWeekName = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+					   .Where(x => x.ContentType.Alias == "volumeMaster")?.FirstOrDefault()?.Children?.OfType<NameListItem>().ToList().Where(c => c.IsActice);
+	var vrCategories = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+					 .Where(x => x.ContentType.Alias == "categoryMaster")?.FirstOrDefault()?.Children?.OfType<NameListItem>().ToList().Where(c => c.IsActice);
+	var VideosNode = Umbraco?.Content(Model.Id) as Videos;
+	var VideosFilter = VideosNode.FilterOptions.Where(x => x.Activation).ToList();
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.UserSelectVolumeOnVidoe);
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.UserSelectCategoryOnWorksVidoe);
+}
+
+@section styles
+{
+	<link href="/common/css/video-js.css" rel="stylesheet" />
+}
+
+@section metatags
+{
+	@Html.Partial("/Views/Partials/_MetaDataBind.cshtml")
+}
+
+@* the fun starts here *@
+<input id="hdnCurrentNode" type="hidden" value="@Model.Id" />
+<input id="hdnSeeMore" type="hidden" value="@seeMore" />
+<input id="hdnBuyNow" type="hidden" value="@buyNow" />
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input id="hdnAgeFilterReset" type="hidden" />
+@*<input id="hdnSubscription" type="hidden" value="@vSubscriptionName" />*@
+<input id="hdnDownloadText" type="hidden" value="@downloadText" />
+<input id="hdnSubscribeforDownload" type="hidden" value="@SubscribefordownloadText" />
+@*<input id="hdExpertJoinNow" type="hidden" value="@Experts.Value("joinNow")" />*@
+<input id="hdnTabId" type="hidden" value="1" />
+<input id="hdnBuyNewSubscription" type="hidden" value="@BuyNewSubscription" />
+
+<div class="main-wrp">
+
+
+
+	@if (Banner != null)
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml", Banner.FirstOrDefault())
+	}
+	@Html.Partial("_Breadcrumb")
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				@if (Model.HasProperty("title"))
+				{
+					<div class="descTitle">
+						<h1 class="titleforhtag">@Html.Raw(Model.GetProperty("title").Value<string>().ToString())</h1>
+					</div>
+				}
+
+				@*@if (Model.HasProperty("description"))
+					{
+						<div class="descTitle">
+							@Html.Raw(Model.Value("description"))
+						</div>
+					}*@
+
+				@if (String.IsNullOrWhiteSpace(UserLoggedIn))
+				{
+					<div class="vdeoTitle">@Html.Raw(Model.GetProperty("videoAvailableFor").Value<string>().ToString())</div>
+				}
+				<div class="title-fltr">
+					<div class="fltr-col">
+						<div class="fltr-close"><img src="/common/images/close-btn-fltr.png" alt="Worksheet Video Tutorials For Age Group 3 to 6 Years"></div>
+						@if (VideosFilter.Where(x => x.FilterTag.ToLower().Contains("age")).FirstOrDefault() != null)
+						{
+							<div class="fltr-box wdt-age">
+								<select name="vrAgrGroupeVideo" id="vrAgrGroupeVideo" multiple class="select-age">
+								</select>
+							</div>
+						}
+
+						@if (VideosFilter.Where(x => x.FilterTag.ToLower().Contains("volume")).FirstOrDefault() != null)
+						{
+							<div class="fltr-box wdt-age">
+								<select name="vrVolumeGroupeVideo" id="vrVolumeGroupeVideo" multiple class="select-volume">
+								</select>
+							</div>
+						}
+
+						@if (VideosFilter.Where(x => x.FilterTag.ToLower().Contains("category")).FirstOrDefault() != null)
+						{
+							<div class="fltr-box wdt-age">
+								<select name="vrCategoriesVideo" id="vrCategoriesVideo" multiple class="select-category">
+								</select>
+							</div>
+						}
+					</div>
+
+					<button id="searchReset" class="aResetAll reset-btn" onclick="VideosReset();" type="button">@Umbraco.GetDictionaryValue("Reset", "Reset")</button>
+				</div>
+			</div>
+			<form id="form1" method="POST">
+				@Html.AntiForgeryToken()
+				<div class="container-inr">
+					<div id="dvVideoTuturial">
+						<div class="lds-roller" id="videoLoading"></div>
+						<div class="list-items" id="VideosList">
+						</div>
+
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="scrollto_top">
+	<div class="scrolltt_inr">
+		<span></span>
+	</div>
+</div>
+
+<div class="mob-fliter-video">Filter</div>
+<div class="fltr-overlay"></div>
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/Video.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/video.core.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/videojs-contrib-eme.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/videojs-contrib-quality-levels.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/videojs-http-source-selector.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/videojs-http-streaming.min.js"></script>
+
+
+	<script>
+		function VideoFilter(filtertype) {
+			VideoTutorial(filtertype);
+		}
+
+	</script>
+
+}
+
+
+

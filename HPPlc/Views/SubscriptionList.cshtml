@@ -1,0 +1,101 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models;
+
+@{
+	Layout = "masterpage.cshtml";
+	var SubcriptionList = Model.DescendantsOrSelf()?.Where(x => x.IsVisible())?.OfType<SubscriptionList>().SingleOrDefault();
+}
+
+
+
+<div class="main-wrp">
+	@Html.Partial("_Breadcrumb")
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="signupMn">
+					@if (SubcriptionList != null)
+					{
+						if (!String.IsNullOrEmpty(SubcriptionList.Title))
+						{
+							<div class="sgnup-hd">
+								@SubcriptionList.Title
+							</div>
+						}
+						if (!String.IsNullOrEmpty(SubcriptionList.SubTitle))
+						{
+							<div class="sgnup-hd">
+								@SubcriptionList.SubTitle
+							</div>
+						}
+						if (!String.IsNullOrEmpty(SubcriptionList.Description.ToString()))
+						{
+							<div class="sgnup-hd">
+								@Html.Raw(SubcriptionList.Description)
+							</div>
+						}
+					}
+					<div class="signupCrds">
+						@if (SubcriptionList != null)
+						{
+							foreach (var child in SubcriptionList.Children()?.OfType<Subscriptions>()?.Where(x => x.IsActive))
+							{
+								<div class="cardsBx">
+									<div class="cardsBxin">
+										@if (child.IsRecommended)
+										{
+											<div class="label">@child.RecommendedTitle</div>
+										}
+										<div class="cardsBxinr">
+
+											@if (child.SubscriptionName != null)
+											{
+												var subscription = Umbraco.Content(child.SubscriptionName.Udi);
+												<div class="crdTptxt">@child.SubscriptionName.Name</div>
+
+												if (subscription != null)
+												{
+													var amount = subscription?.Value("amount") == null ? 0 : (int)subscription?.Value("amount");
+													if (amount > 0)
+													{
+														<div class="prcCrd">₹@amount</div>
+													}
+													else
+													{
+														<div class="prcCrd">&nbsp;</div>
+													}
+												}
+											}
+
+											@if (child.BuyNowButton != null)
+											{
+												//var subscribeDetails = Umbraco.Content(child.SubscriptionName.Udi);
+												<a href="@child.BuyNowButton.Url?@child.Id" class="btn">@child.BuyNowButton.Name</a>
+											}
+											<div class="crdlist">
+												<p><span>@child.SubscriptionDetailsTitle</span></p>
+												<ul>
+													@if (child.SubscriptionDetails != null && child.SubscriptionDetails.Any())
+													{
+														foreach (var item in child.SubscriptionDetails)
+														{
+															<li>@item</li>
+														}
+													}
+												</ul>
+											</div>
+										</div>
+
+									</div>
+								</div>
+
+							}
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+

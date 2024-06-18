@@ -1,0 +1,23 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	var menu = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+								.FirstOrDefault()?.DescendantsOrSelf()?
+								.Where(x => x.ContentType.Alias == "freeDownloads")
+								.OfType<FreeDownloads>().FirstOrDefault();
+
+	var pageName = UmbracoContext?.PublishedRequest?.PublishedContent.Name;
+}
+
+
+@if (menu != null)
+{
+	var freeDownldChildren = menu?.Children?.OfType<FreeDownloadsTitle>()?.Where(x => x.IsActive == true);
+	if (freeDownldChildren != null && freeDownldChildren.Any())
+	{
+		<div class="ctItm"><a href="/free-downloads/" class="navigationall">All</a></div>
+		foreach (var chldrn in freeDownldChildren)
+		{
+			<div class="ctItm"><a href="@chldrn.Url()" class="navigationfreedwn" onclick="commonLayer('@pageName','@chldrn.Name')">@chldrn.Name</a></div>
+		}
+	}
+}

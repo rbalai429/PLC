@@ -1,0 +1,114 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+
+	var blogTitle = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "blogRoute").OfType<BlogRoute>().FirstOrDefault();
+
+	var blogs = blogTitle?.Children?.Where(x => x.ContentType.Alias == "blogListing")?.FirstOrDefault()?.Children?
+												.OfType<BlogContent>().ToList()?.Where(x => x.IsActive == true && x.BlogTag.Any(c => c.Name == Model.Name));
+
+}
+
+
+<div class="main-wrp">
+	<div class="banner banner2 nopdbtm">
+		@try
+		{
+			@Html.Partial("/Views/Partials/_Banner.cshtml");
+		}
+		catch { }
+	</div>
+
+	@Html.Partial("_Breadcrumb")
+
+
+	<div class="container-fluid educatn-pnl">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="faq-wrp">
+					@Html.Partial("/Views/Partials/Blog/_BlogMenu.cshtml")
+
+					<div style="padding-top:30px;">
+						<div class="container-fluid grayshrbg popl-tgs">
+							<p><strong class="tag-header">@Model.Name</strong></p>
+						</div>
+					</div>
+
+					<div class="articl-wrap">
+						<div class="blog-clm-left">
+							@if (blogs != null && blogs.Any())
+							{
+								foreach (var blog in blogs)
+								{
+									<div class="pp-postclm">
+										<div class="pp-postclm-inr">
+											<div class="pp-postclmlft">
+												@if (blog.BlogMediaFile != null)
+												{
+													<a href="@blog.Url()" onclick="commonLayer('@blog.Name','Blog Tag - @blog.BlogTitle');">
+														@*<img src="@Url.GetCropUrl(imageCropperValue: blog.BlogMediaFile, cropAlias: "BlogIcon", htmlEncode: false)" alt="Blog Image" />*@
+														<img src="@Url.GetCropUrl(blog.BlogMediaFile, height: 343, width: 257)" alt="Blog Image" />
+													</a>
+												}
+											</div>
+											<div class="pp-postclmrgt">
+												<em class="dt">@blog.BlogDate.ToString("MMMM d, yyyy")</em>
+												<p>
+													<a href="@blog.Url()" onclick="commonLayer('@blog.Name','Blog Tag - @blog.BlogTitle');">
+														@blog.BlogTitle
+													</a>
+												</p>
+												@Html.Raw(blog.BlogDescription)
+												@*@if(blog.BlogDescription.ToHtmlString().Length > 350)
+													{
+														string blogurl = blog.Url();
+														string link = "<a class='vm-mor' href='" + blogurl + "' onclick='commonLayer('" + @blog.Name + "', 'Blog Tag - '" + @blog.BlogTitle + "');'> ... </a>";
+														@Html.Raw(blog.BlogDescription.ToHtmlString().Substring(0, 350) + link);
+													}
+													else
+													{
+														@Html.Raw(blog.BlogDescription)
+													}*@
+												<div>
+													<em class="autnm">@blog.AuthorName</em>
+												</div>
+											</div>
+										</div>
+									</div>
+								}
+							}
+							else
+							{
+								<div class="rltd-artclm">
+									<p>Blog not found for selected tag</p>
+								</div>
+							}
+
+						</div>
+
+						<div class="articl-clmrigth">
+
+
+							<div class="popl-tgs">
+
+								<strong>@blogTitle.PopularTagsTitle</strong>
+
+								<div class="pptg-clm">
+
+									@Html.Partial("/Views/Partials/Blog/_BlogPopularTag.cshtml")
+
+								</div>
+							</div>
+
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+

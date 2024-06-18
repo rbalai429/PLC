@@ -1,0 +1,65 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models
+@{
+	List<NameListItem> ageGroups;
+	ageGroups = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+						.Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault()?.Children?
+						.OfType<NameListItem>().Where(x => x.IsActice && x.Value<bool>("displayInLessonWorksheet") == true).ToList();
+
+	List<HPPlc.Models.TempSubscriptionCreatedByUser> UsertempSubscription = new List<HPPlc.Models.TempSubscriptionCreatedByUser>();
+	UsertempSubscription = HPPlc.Models.SessionManagement.GetCurrentSession<List<HPPlc.Models.TempSubscriptionCreatedByUser>>(HPPlc.Models.SessionType.SubscriptionTempDtls);
+
+	var titles = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "subscriptionTypeRoot")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "subscriptionForm")?.OfType<SubscriptionForm>().FirstOrDefault();
+
+}
+
+<div class="addmore-row">
+	<div class="addmore">
+		<div class="hd-age">@titles.AddMoreAgeGroupTitle</div>
+		<div class="age-option">
+			<ul>
+				@if (ageGroups != null && ageGroups.Any())
+				{
+					foreach (var items in ageGroups)
+					{
+						if (UsertempSubscription != null && UsertempSubscription.Any() && UsertempSubscription.Where(x => x.AgeGroup == items.ItemValue).Any())
+						{
+							<li>
+								<label class="container-label">
+									<input type="checkbox" name="ageSelected" id="ageSelected" class="chk" checked disabled value="@items.ItemValue" />
+									<span class="checkmark-label"></span>@items.ItemName
+								</label>
+							</li>
+						}
+						else
+						{
+							<li>
+								<label class="container-label">
+									<input type="checkbox" name="ageSelected" id="ageSelected" class="chk" value="@items.ItemValue" />
+									<span class="checkmark-label"></span>@items.ItemName
+								</label>
+							</li>
+						}
+					}
+				}
+			</ul>
+			<div class="addage">
+				<button id="btnAddAgeGroup" type="button" class="btn" onclick="AddAgeGroup();">@titles.AgeAddButtonTitle</button>
+			</div>
+			<div id="msgbox" class="error"></div>
+		</div>
+
+	</div>
+
+	@*<div class="addmore">
+		<div class="hd-age">Available Coupons</div>
+		<div class="age-option">
+
+			<b>Renew20 - </b> Get 20% discount on all plans.
+
+		</div>
+
+	</div>*@
+</div>

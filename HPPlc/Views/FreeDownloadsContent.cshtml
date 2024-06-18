@@ -1,0 +1,103 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.FreeDownloadsContent>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpage.cshtml";
+
+	var CultureInfo = Model.GetCultureFromDomains();
+	var vrNoreId = Model.Parent.Id;
+	var vrNoreIdChild = Model.Id;
+
+	string trackTitle = String.Empty;
+	var rootNode = Model?.Parent?.ContentType.Alias;
+
+	//var CurrentPageDetails = Umbraco?.Content(vrNoreId);
+}
+
+@section metatags
+{
+	@Html.Partial("/Views/Partials/_MetaDataBind.cshtml")
+}
+
+
+<div class="main-wrp">
+	<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+	<input id="hdnNodeIdParent" type="hidden" value="@vrNoreId" />
+	<input id="hdnNodeIdChild" type="hidden" value="@vrNoreIdChild" />
+	<input id="hdnNodeChild" type="hidden" value="yes" />
+	<input id="PageId" type="hidden" value="Free" />
+
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	@Html.Partial("_Breadcrumb")
+
+	
+	<div class="container-fluid ContnPlc">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="ContnPlcin">
+					@if (Model.HasProperty("title"))
+					{
+						<div class="descTitlePlc">
+							<h1 class="titleforhtag">@Html.Raw(Model.Value("title"))</h1>
+						</div>
+					}
+
+					@if (Model.HasProperty("description"))
+					{
+						IHtmlString description = Model.Value<IHtmlString>("description");
+
+						string descp = System.Text.RegularExpressions.Regex.Replace(description.ToString(), "<.*?>", String.Empty).Replace("\n", "");
+						if (!String.IsNullOrWhiteSpace(descp))
+						{
+							<div class="descContPlc">
+								@Html.Raw(Model.Value("description"))
+							</div>
+						}
+					}
+
+					<div class="dvdr"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="video-tutorials fullWidePage ListingMnPlc topSpace0">
+
+		<div class="container-fluid">
+			<div class="container-box">
+				<div class="container-inr">
+
+					<div class="ListingMnPlcin">
+						<div class="fltrMnPlc">
+							<div class="ritListingPlc fullrownospace">
+								@*<div class="ritListingPlcTop">*@
+
+								<div id="festival-offers-WorksheetList">
+									<div class="lds-roller" id="festival-offers-worksheetLoading"></div>
+								</div>
+								@*</div>*@
+
+								<div id="faqbox">
+									@Html.CachedPartial("_footerSEOContent", Model, 3600)
+									@Html.Partial("_footerContentData")
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+</div>
+
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/FreeDownloads.js"></script>
+}

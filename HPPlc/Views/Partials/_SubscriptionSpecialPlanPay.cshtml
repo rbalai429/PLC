@@ -1,0 +1,54 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@*@using Umbraco.Web.Models*@
+@*@using HPPlc.Controllers*@
+
+@{
+	var CultureInfo = Model?.GetCultureFromDomains();
+
+	var buyNowPage = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+						.DescendantsOrSelf()?.Where(x => x.ContentType.Alias == "specialPlanRoot")?
+						.FirstOrDefault()?.Children.Where(c => c.ContentType.Alias == "buyNow")?.OfType<BuyNow>()?
+						.FirstOrDefault();
+}
+
+
+<div class="cmn-rightsubs">
+	@try
+	{
+		<div class="subscdetails">
+			<h3>@buyNowPage.PayNowPageTitle</h3>
+			@if (buyNowPage != null)
+			{
+				var buyNowPlan = buyNowPage.SpecialPlanPrice;
+				if (buyNowPlan != null)
+				{
+					foreach (var items in buyNowPlan)
+					{
+						<ul class="cmn-rightsubs">
+							<li> <span>@buyNowPage.AgeTitle</span> <em>@items.AgeGroup.Name @buyNowPage.YearsTitle</em> </li>
+							<li> <span>@buyNowPage.ValidFromTitle</span> <em>@DateTime.Now.ToString("ddd, MMM d, yyyy")</em> </li>
+							<li>
+								<span>@buyNowPage.ValidToTitle</span>
+
+								<em>@DateTime.Now.AddMonths(items.ValidInMonths).ToString("ddd, MMM d, yyyy")</em>
+							</li>
+							<li style="margin-top:20px;">
+								<span>@items.PlanName</span>
+								<em>₹ @items.Price</em>
+							</li>
+						</ul>
+					}
+				}
+			}
+		</div>
+
+		<div>
+			<span class="error" id="msg_pay" style="display:none;"></span>
+		</div>
+		<div class="signin-btn">
+			<a href="javascript:void(0);" class="btn" onclick="paynowSpecialPlan()">@buyNowPage.PayNowTitle</a>
+		</div>
+	}
+	catch { }
+</div>
+

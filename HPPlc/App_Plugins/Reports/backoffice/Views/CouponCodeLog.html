@@ -1,0 +1,98 @@
+﻿<div ng-controller="CouponCodeLogController" ng-init="init()">
+
+    <div class="umb-panel umb-editor-wrapper ng-scope">
+        <div data-element="editor-header" class="umb-editor-header flex items-center">
+            <h1 class="umb-panel-header-name ">{{Title}}</h1>
+        </div>
+    </div>
+    <div data-element="editor-container" class="umb-editor-container umb-panel-body umb-scrollable row-fluid ">
+        <div class="umb-pane">
+            <div class="umb-editor-sub-header__content-right">
+                <div class="form-search -no-margin-bottom custom-form-search">
+                    <div class="inner-addon left-addon">
+                        <i class="icon icon-search"></i>
+                        <input class="form-control search-input" type="text" placeholder="Search for Coupon code" ng-model="search" ng-change="GetCouponCodeLogList(currentPage,itemsPerPage,search)">
+                    </div>
+                    <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="ResetSearch()">
+                        <span> Reset</span>
+                    </button>
+                    <button ng-if="CouponCodeLogList.length>0" class="btn umb-button__button btn-success umb-button-- umb-outline float-right ml-5" type="button" ng-click="ExportToExcel()">
+                        <span ng-if="!RequestDownload"> Export To Excel</span>
+                        <span ng-if="RequestDownload"> Exporting..</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="umb-pane">
+            <div ng-if="!CouponCodeLogLoad">
+                <div class="umb-table" id="import" ng-if="!CouponCodeLogLoad">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Coupon Code</th>
+                                <th>Source</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody ng-if="CouponCodeLogList.length>0">
+                            <tr ng-repeat="item in CouponCodeLogList">
+                                <td>{{item.CouponCodeName}}</td>
+                                <td>{{item.CouponSource}}</td>
+                                <td>{{item.ValidityStartDate|date}}</td>
+                                <td>{{item.ValidityEndDate|date}}</td>
+                                <td>{{item.UploadStatus}}</td>
+                                <td>
+                                    <div ng-repeat="reason in item.Reason.split(',')">
+                                        <p>{{reason}}</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot ng-show="totalPages > 1">
+                            <tr>
+                                <th colspan="6">
+                                    <div class="pagination pagination-right" page-number="currentPage" total-pages="totalPages">
+                                        <ul>
+
+                                            <li ng-class="{disabled: currentPage == 1}" ng-click="currentPage == 1 || GetCouponCodeLogList(currentPage -1,itemsPerPage,status)">
+                                                <a href="javascript:void(0)">Prev Page</a>
+                                            </li>
+                                            <li ng-repeat="i in rangeCreator(currentStart,totalPages)" ng-class="{disabled: currentPage == i}" ng-click="currentPage == i || GetCouponCodeLogList(i,itemsPerPage,status)"><a href="javascript:void(0)">{{i}}</a></li>
+
+                                            <li ng-class="{disabled: currentPage == totalPages}" ng-click="currentPage == totalPages || GetCouponCodeLogList(currentPage + 1,itemsPerPage,status)">
+                                                <a href="javascript:void(0)">Next Page</a>
+                                            </li>
+                                            <li><a href="javascript:void(0)">Page Per Items</a></li>
+                                            <li>
+                                                <select ng-change="GetCouponCodeLogList(currentPage,itemsPerPage,status)" ng-model="itemsPerPage" class="form-control">
+                                                    <option value="5">5</option>
+                                                    <option value="10">10</option>
+                                                    <option value="25">25</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                </select>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </th>
+                            </tr>
+                        </tfoot>
+                        <tbody ng-if="CouponCodeLogList.length==0">
+                            <tr>
+                                <td colspan="4"> <localize key="content_listViewNoItems"></localize></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <ul class="umb-load-indicator animated -half-second" ng-if="CouponCodeLogLoad">
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,39 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.PrintLearnCenter>
+@using ContentModels = Umbraco.Web.PublishedModels;
+
+
+<div class="container-fluid learnCenter">
+    <div class="container-box">
+        <div class="container-inr">
+            <div class="top-texts">
+                <h4 class="title-plc">@Model.Title</h4>
+                @Model.Description
+
+            </div>
+            <div class="cardBxMn">
+                <div class="cardBxMnin">
+                    @foreach (PrintLearnCenterItmes item in Model?.PrintLearnCenterItems.Where(x => x.IsActive))
+                    {
+                        <div class="cardBx">
+                            <div class="cardBxin">
+                                <div class="overlayDv">
+                                    <div class="overlayDvin">
+                                        <h5>@item.Title</h5>
+                                        <p>@item.Description</p>
+                                    </div>
+                                </div>
+                                <div class="cardImg"><img src="@(item.Image?.Url())" alt=""></div>
+                                <div class="crdTxt">
+                                    <strong>@item.Title</strong>
+                                    <p>@item.Description</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            @*<div><a href="@(Model.SubscribeNow?.Url)" class="sbcptn-btn">@(Model.SubscribeNow?.Name)</a></div>*@
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,183 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<HPPlc.Models.ExpertTalkWebinar.ExpertTalkWebinarModel>
+@using HPPlc.Models.ExpertTalkWebinar;
+@{
+	var model = Model;
+	var titleData = Umbraco?.ContentAtRoot()?.FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "expertTalks").OfType<ExpertTalks>().FirstOrDefault();
+
+}
+@if (model != null && Model.ExpertWebinars != null && Model.ExpertWebinars.Any() && Model.ExpertWebinars.Count > 0)
+{
+	<div class="webin-hd upcoming">
+		<div class='fit-hd'>
+			<h2 class="hdtitl">@titleData.WebinarHeaderLabel</h2>
+		</div>
+	</div>
+	<div class="list-items dvExpertWiseContainer">
+		@foreach (WebinarItems item in Model.ExpertWebinars)
+		{
+			<div class="item-col">
+				<div class="card-box">
+					<div class="card-img">
+						<div class="vidPlchldr2">
+							<picture>
+								@if (item.MobileImage != null)
+								{
+									<source data-srcset="@item.MobileImage" srcset="/common/images/loader.jpg" media="(max-width: 680px)" />
+								}
+
+								@if (item.MobileImageWebP != null)
+								{
+									<source data-srcset="@item.MobileImageWebP" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" type='image/webp' />
+								}
+
+								@if (item.DesktopImageWebP != null)
+								{
+									<source data-srcset="@item.DesktopImageWebP" srcset="/common/images/loader.jpg" media="(max-width: 680px)" type='image/webp' />
+								}
+
+								@if (item.DesktopImage != null)
+								{
+									<img class='b-lazy imgPlacing' data-src="@item.DesktopImage" src='/common/images/loader.jpg' alt="@(item.AltText)" width="1" height="1" />
+								}
+							</picture>
+						</div>
+					</div>
+					<div class="card-cont">
+						<div class="card-dscptn">
+							@if (!String.IsNullOrWhiteSpace(item.Topic))
+							{
+								<div class="card-title">
+									<strong>@titleData.TopicTitle :</strong> @Html.Raw(item.Topic)
+								</div>
+							}
+
+							@if (item.Speakers != null)
+							{
+								<div class="card-title">
+									<strong>@titleData.SpeakerTitle:</strong>
+									@if (item.Speakers != null)
+									{
+										foreach (var spkr in item.Speakers)
+										{
+											<b>@Html.Raw(spkr.SpeakerName)</b> @Html.Raw(spkr.SpeakerSubDetails)
+										}
+									}
+								</div>
+							}
+							@if (!String.IsNullOrWhiteSpace(item.Topic))
+							{
+								<div class="card-title">
+									<strong>
+										@titleData.DateTitle:
+									</strong>
+
+									@Convert.ToDateTime(item.WebinarDate).ToString("dd MMM yyy"), @Convert.ToDateTime(item.WebinarStartTime).ToString("hh:mm").TrimStart(new Char[] { '0' }) - @Convert.ToDateTime(item.WebinarEndTime).ToString("hh:mm").TrimStart(new Char[] { '0' }) @Convert.ToDateTime(item.WebinarEndTime).ToString("tt")
+								</div>
+							}
+
+							@{
+								DateTime dt = DateTime.Parse(DateTime.Now.ToString());
+								var currentTime = dt.ToString("HH:mm");
+								var WebinarDate = Convert.ToDateTime(item.WebinarDate);
+
+								var webinarStartTime = Convert.ToDateTime(item.WebinarStartTime).ToString("HH:mm");
+								var webinarEndTime = Convert.ToDateTime(item.WebinarEndTime).ToString("HH:mm");
+
+								//var webinarAppearTime = TimeSpan.Parse(webinarStartTime).TotalMinutes - Convert.ToDouble(item.JoinNowDisplayInMinutes);
+								//var webinarRegisterTime = TimeSpan.Parse(webinarStartTime).TotalMinutes - Convert.ToDouble(item.AppearRegisterNowInMinutes);
+
+								DateTime WebinarStartDateTime = Convert.ToDateTime(WebinarDate).Add(TimeSpan.Parse(webinarStartTime.ToString()));
+								//DateTime WebinarEndDateTime = Convert.ToDateTime(webinarEndTime).AddMinutes(-item.DisAppearJoinNowInMinutes);
+								DateTime WebinarEndDateTime = Convert.ToDateTime(WebinarDate.Add(TimeSpan.Parse(webinarEndTime.ToString())));
+								DateTime JoinNowButtonDisplayDateTime = WebinarStartDateTime.AddMinutes(-item.JoinNowDisplayInMinutes);
+								DateTime RegisterButtonDisplayDateTime = WebinarStartDateTime.AddMinutes(-item.AppearRegisterNowInMinutes);
+
+
+								//TimeSpan registerTime = TimeSpan.FromMinutes(webinarRegisterTime);
+								//string registerTimeValue = registerTime.ToString(@"hh\:mm");
+
+
+								//TimeSpan appearTime = TimeSpan.FromMinutes(webinarAppearTime);
+								//string appearTimeValue = appearTime.ToString(@"hh\:mm");
+
+								//var webinarDisAppearTime = TimeSpan.Parse(webinarStartTime).TotalMinutes - Convert.ToDouble(item.DisAppearJoinNowInMinutes);
+								//TimeSpan disAppearTime = TimeSpan.FromMinutes(webinarDisAppearTime);
+								//string disAppearTimeValue = disAppearTime.ToString(@"hh\:mm");
+								@*<p>@dt</p>
+									<p>@JoinNowButtonDisplayDateTime</p>
+									<p>@WebinarEndDateTime</p>*@
+								if (WebinarEndDateTime > dt)
+								{
+									//Registration Button Display
+									if ((item.AppearRegisterNowInMinutes == 0 || dt >= RegisterButtonDisplayDateTime) && (dt < JoinNowButtonDisplayDateTime))
+									{
+										<div class='btn-col'>
+											<a href='@item.WebinarLink' target='_blank' class='btn'>@titleData.RegisterNow</a>
+										</div>
+									}
+									//Join Now Button Display
+									else if (dt >= JoinNowButtonDisplayDateTime && dt < WebinarEndDateTime)
+									{
+										<div class='btn-col'>
+											<a href='@item.WebinarLink' target='_blank' class='btn'>@titleData.JoinNow</a>
+										</div>
+									}
+
+									else if (dt > WebinarEndDateTime)
+									{
+										<div class='btn-col'>
+											<a href='javascript:void(0);' class='btn'>@titleData.WebinarExpired</a>
+										</div>
+									}
+								}
+								else
+								{
+									<div class='btn-col'>
+										<a href='javascript:void(0);' class='btn'>@titleData.WebinarExpired</a>
+									</div>
+								}
+							}
+						</div>
+
+						@if (item.IsDisplayShare == true)
+						{
+							<div class='card-social-icon'>
+								<div class='share-icon'>
+									<div class='share-box'>
+										<ul>
+											@if (!String.IsNullOrWhiteSpace(item.facebookContent))
+											{
+												<li><a href='javascript:void(0)' class='fb-icon aFBShare' onclick="commonShareLayer('Share_facebook','Upcoming Webinar - @item.Topic');"><span style='display:none'>@item.facebookContent</span></a></li>
+											}
+											@if (!String.IsNullOrWhiteSpace(item.whatsAppContent))
+											{
+												<li>
+													<a href='javascript:void(0)' class='whatsapp-icon aWHTAppSH' onclick="commonShareLayer('Share_whatsapp','Upcoming Webinar - @item.Topic');">
+														<span style='display:none'>
+															@item.whatsAppContent
+														</span>
+													</a>
+												</li>
+											}
+											@if (!String.IsNullOrWhiteSpace(item.mailContent))
+											{
+												<li>
+													<a href='javascript:void(0)' class='mail-icon aMailSh' onclick="commonShareLayer('Share_mail','Upcoming Webinar - @item.Topic');">
+														<span style='display:none'>
+															@item.mailContent
+														</span>
+													</a>
+												</li>
+											}
+										</ul>
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+}

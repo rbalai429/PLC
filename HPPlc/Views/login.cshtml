@@ -1,0 +1,239 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using System.Configuration
+@{
+	Layout = "masterpage.cshtml";
+
+	string UserName = String.Empty;
+	string Password = String.Empty;
+	string IsRemembered = String.Empty;
+	string referralCode = String.Empty;
+	string dwnlPdf = String.Empty;
+
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	if (UserLoggedInOrNot == true)
+	{
+		Response.Redirect("/");
+	}
+
+	var titleData = Model?.DescendantsOrSelf()?.OfType<Login>()?.FirstOrDefault();
+	string culture = HPPlc.Models.CultureName.GetCultureName();
+
+	//download pdf with loggedIn
+	if (Request.QueryString.Count > 0 && Request.QueryString.AllKeys.Contains("d"))
+	{
+		dwnlPdf = Request.Url.OriginalString;
+
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.WorksheetDownloadUrl, dwnlPdf);
+
+		bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+		if (IsUserLoggedIn == true)
+		{
+			HPPlc.Models.ReturnMessage returnMessage = new HPPlc.Models.ReturnMessage();
+			HPPlc.Controllers.HomeController homeController = new HPPlc.Controllers.HomeController();
+			returnMessage = homeController.DownloadPDF(dwnlPdf);
+
+			if (returnMessage.status != null && returnMessage.status == "Success")
+			{
+				Response.Redirect(returnMessage.navigation);
+			}
+		}
+	}
+
+	//if user loggedin then redirecting on home page
+	//HPPlc.Models.SessionExpireAttribute.CheckUserLoggedIn("YES");
+
+	if (Request.QueryString.Count > 0 && !Request.QueryString.AllKeys.Contains("code") && Request.UrlReferrer != null)
+	{
+		//to maintain previous url
+		Response.Cookies["PreUrlRedirection"].Value = Request.UrlReferrer.ToString();
+	}
+	//try
+	//{
+	//	if (Request.Cookies["UserName"] != null && Request.Cookies["Password"] != null)
+	//	{
+	//		IsRemembered = "1";
+	//		UserName = Request.Cookies["UserName"].Value;
+	//		Password = Request.Cookies["Password"].Value;
+	//	}
+	//}
+	//catch { }
+
+	string qData = String.Empty;
+	string HpIdData = String.Empty;
+	string HpIdError = String.Empty;
+
+	if (Request.QueryString.Count > 0)
+	{
+		if (Request.QueryString.AllKeys.Contains("ref"))
+		{
+			if (Request.QueryString.Get("ref") != null)
+			{
+				qData = Request.QueryString.Get("ref").ToString();
+			}
+		}
+
+		if (Request.QueryString.AllKeys.Contains("code"))
+		{
+			if (Request.QueryString.Get("code") != null)
+			{
+				HpIdData = Request.QueryString.Get("code").ToString();
+			}
+		}
+		else if (Request.QueryString.AllKeys.Contains("error") && Request.QueryString.AllKeys.Contains("error_description"))
+		{
+			if (Request.QueryString.Get("error_description") != null)
+			{
+				HpIdError = Request.QueryString.Get("error_description").ToString();
+			}
+		}
+		else if (Request.QueryString.AllKeys.Contains("referralcode"))
+		{
+			if (Request.QueryString.Get("referralcode") != null)
+			{
+				referralCode = Request.QueryString.Get("referralcode").ToString();
+
+				Response.Cookies["referralCode"].Expires = DateTime.Now.AddMinutes(-1);
+				Response.Cookies["referralCode"].Value = referralCode;
+				Response.Cookies["referralCode"].Expires = DateTime.Now.AddMinutes(30);
+
+			}
+		}
+	}
+
+	string cultureUrl = ((culture == "/" || culture == "" || culture == null) ? string.Empty : culture);
+	var pageName = !string.IsNullOrEmpty(Convert.ToString(Model.Name)) ? Convert.ToString(Model.Name) : "";
+
+	string bundlingRedirectUrl = ConfigurationManager.AppSettings["bundlingRedirectUrl"].ToString();
+}
+
+<input type="hidden" id="hdHpIdCode" value="@HpIdData" />
+<input type="hidden" id="hdHpNotification" value="@titleData.NotificationTitle" />
+<input type="hidden" id="bundlingRedirectUrl" value="@bundlingRedirectUrl" />
+<input type="hidden" id="pageId" value="login" />
+
+@*<input type="hidden" id="enterOTPValidation" value="@titleData.EnterOtpvalidation" />
+	<input type="hidden" id="wrongOTPValidation" value="@titleData.WrongOtpvalidation" />
+	<input type="hidden" id="resendOTPSent" value="@titleData.ResendOtpsent" />
+	<input type="hidden" id="resendOTPSent" value="@titleData.ResendOtpsent" />
+	<input type="hidden" id="oTPAttemptMaximumLimit" value="@titleData.OTpattemptMaximumLimit" />
+
+	<input type="hidden" id="maskingEmail" value="@titleData.EmailMaskingTitle" />
+	<input type="hidden" id="maskingMobile" value="@titleData.MobileMaskingTitle" />
+	<input type="hidden" id="maskingTitle" value="@titleData.TimerLeft" />
+
+	<input type="hidden" id="resendOtpTimerTitle" value="@titleData.ResendOtptimerTitle" />
+	<input type="hidden" id="ResendBlockingMessage" value="@titleData.ResendBlockingMessage" />
+	<input type="hidden" id="validateAttemptTitle" value="@titleData.ValidateAttemptBlockingMessage" />
+	<input type="hidden" id="oTPAttemptedMaximumTimes" value="@titleData.OTpattemptedMaximumTimes" />*@
+
+<div class="overlayblur">
+	
+
+				@*@Html.Partial("/Views/Partials/Login/_loginSnd.cshtml")*@
+
+				@*<div class="whatferrow">
+						<div class="side-ltpnl">
+							<div class="gtestart" id="dvPreLogin">
+								@if (titleData.GetStartedHeaderMedia != null)
+								{
+									<div class="profilicon">
+										<div class="profiliconPlchldr">
+											<img class="imgPlacing" src="@titleData.GetStartedHeaderMedia.Url()" />
+										</div>
+									</div>
+								}
+								<div class="title-plc"><h1 class="titleforhtag">@titleData.PageTitle</h1></div>
+								@Html.Partial("/Views/Partials/Login/_login.cshtml")
+
+
+								@if (titleData.GetStartedFooterMedia != null)
+								{
+									<div class="btimg">
+										<img class="imgPlacing" src="@titleData.GetStartedFooterMedia.Url()" />
+									</div>
+								}
+							</div>
+							<div class="signin-section" id="dvPreLoginError" style="display:none;">
+								<p>@HpIdError</p>
+							</div>
+						</div>
+						<div class="side-rtpnl">
+							<div class="whatweofferinr">
+								<div class="top-texts">
+									<h2 class="title-plc">@titleData.Title</h2>
+									@if (titleData.Description != null)
+									{
+										IHtmlString descrp = titleData.Description;
+										<p class="sbtitle-plc">
+											@Html.Raw(descrp.ToHtmlString().Replace("<p>", "").Replace("</p>", ""))
+										</p>
+									}
+								</div>
+								<div class="whtoferitmrow">
+									@if (titleData.WhatWeOfferSection1 != null)
+									{
+										foreach (var item in titleData.WhatWeOfferSection1)
+										{
+											IHtmlString descrp = item.Description;
+											<div class="item">
+												@if (item.MediaFile != null)
+												{
+													<div class="img">
+														<div class="proflCrd">
+															<img class="imgPlacing" src="@item.MediaFile.Url()" alt="Media" />
+														</div>
+													</div>
+												}
+												<div class="shorttitle">
+													@Html.Raw(descrp.ToHtmlString().Replace("<p>", "").Replace("</p>", ""))
+												</div>
+											</div>
+										}
+									}
+
+								</div>
+
+								<div class="whatbelowiconlist">
+									@if (titleData.WhatWeOfferSection1 != null)
+									{
+										foreach (var item in titleData.WhatWeOfferSection2)
+										{
+											IHtmlString descrp = item.Description;
+											<div class="item">
+												@if (item.MediaFile != null)
+												{
+													<div class="img">
+														<div class="iconsplcHldr">
+															<img class="imgPlacing" src="@item.MediaFile.Url()" alt="Media" />
+														</div>
+													</div>
+												}
+												<div class="shorttitle">
+													@Html.Raw(descrp.ToHtmlString().Replace("<p>", "").Replace("</p>", ""))
+												</div>
+											</div>
+										}
+									}
+								</div>
+							</div>
+						</div>
+					</div>*@
+
+
+</div>
+
+
+@section CustomJsFiles
+	{
+	@*<script src="/CustumJs/HPidAccount.js?v4"></script>*@
+	<script>
+		$(document).ready(function () {
+			$("#headerTag").hide();
+			$("#footerTag").hide();
+			$(".overlayLogin").show();
+			
+			var lclval = localStorage.getItem('msgLoginId');
+			changeHeadermessage(lclval);
+		});
+	</script>
+}

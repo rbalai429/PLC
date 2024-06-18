@@ -1,0 +1,301 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using System.Configuration
+
+@{
+	Layout = "masterpage.cshtml";
+
+
+	var ageGroup = Model?.Root()?.SiblingsAndSelf()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()
+		?.Children()?.Where(x => x.ContentType.Alias == "masterRoot")?.FirstOrDefault()?.Children()
+		?.Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault()?.Children()?.OfType<NameListItem>();
+
+	var titleData = Model?.DescendantsOrSelf()?.OfType<Registration>()?.FirstOrDefault();
+
+
+	string name = String.Empty;
+	string mobile = String.Empty;
+	string ReferralCode = String.Empty;
+	string emailId = String.Empty;
+	string HPiD = String.Empty;
+
+	//Referral Code get
+	HttpCookie reqCookies = Request.Cookies["referralCode"];
+	if (reqCookies != null)
+	{
+		ReferralCode = reqCookies.Value;
+	}
+
+	//HPPlc.Models.HPUId.LoginUserInfoResponce loginuserInfoResponce = new HPPlc.Models.HPUId.LoginUserInfoResponce();
+	var loginuserInfoResponce = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.HpIdSession);
+	HPPlc.Models.Validate validate = new HPPlc.Models.Validate();
+
+	if (loginuserInfoResponce != null)
+	{
+		if (validate.ValidateEmail(loginuserInfoResponce) == true)
+		{
+			emailId = loginuserInfoResponce;
+		}
+
+		if (validate.ValidateMobile(loginuserInfoResponce) == true)
+		{
+			mobile = loginuserInfoResponce;
+		}
+	}
+
+
+
+	string culture = HPPlc.Models.CultureName.GetCultureName().Replace("/", "");
+	if (culture != null && (culture == "en-US" || culture == ""))
+	{ culture = ""; }
+	else { culture = "/" + culture; }
+
+	string offerSubscriptionUrl = String.Empty;
+	string IsOfferUrl = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.HpOfferRedirection);
+	string OfferURl = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.JoinNowUrl);
+	if (!String.IsNullOrWhiteSpace(OfferURl) && IsOfferUrl != null && IsOfferUrl.ToLower() == "yes")
+	{
+		offerSubscriptionUrl = OfferURl;
+	}
+
+	if (Request.QueryString.Count > 0)
+	{
+		if (Request.QueryString.AllKeys.Contains("u") && Request.QueryString.Get("u") != null && Request.QueryString.Get("u").ToLower() == "tata")
+		{
+			string bundlingRedirectUrl = ConfigurationManager.AppSettings["bundlingRedirectUrl"].ToString();
+			HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.JoinNowUrl, bundlingRedirectUrl);
+			HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.CouponCode, "TATA899");
+			offerSubscriptionUrl = bundlingRedirectUrl;
+		}
+		else
+		{
+			HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponCode);
+			offerSubscriptionUrl = String.Empty;
+		}
+	}
+
+	//if user loggedin then redirecting on home page
+	bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	if (IsUserLoggedIn == true || loginuserInfoResponce == null)
+	{
+		Response.Redirect("/my-account/login", false);
+	}
+}
+
+<input type="hidden" id="hdRegistrationMsg" value="@titleData.RegistrationSuccessMessage" />
+<input type="hidden" id="hdRegistrationMsgButton" value="@titleData.RegistrationSuccessMessageButton" />
+<input type="hidden" id="Culture" value="@culture" />
+<input type="hidden" id="bundlingRedirectUrl" value="@offerSubscriptionUrl" />
+<input type="hidden" id="hdHpSuccessMsg" value="@titleData.RegistrationSuccessMessage" />
+<input type="password" value="" style="display:none;" autocomplete="new-password" />
+<input type="hidden" id="emailAlreadyRegistered" value="@titleData.EmailAlreadyRegistered" />
+@*<input type="hidden" id="oTPAttemptedMaximumTimes" value="@titleData.OTpattemptedMaximumTimes" />*@
+<input type="hidden" id="mobileAlreadyRegistered" value="@titleData.MobileAlreadyRegistered" />
+@*<input type="hidden" id="enterOTPValidation" value="@titleData.EnterOtpvalidation" />
+	<input type="hidden" id="wrongOTPValidation" value="@titleData.WrongOtpvalidation" />
+	<input type="hidden" id="resendOTPSent" value="@titleData.ResendOtpsent" />
+	<input type="hidden" id="resendOTPSent" value="@titleData.ResendOtpsent" />
+	<input type="hidden" id="oTPAttemptMaximumLimit" value="@titleData.OTpattemptMaximumLimit" />*@
+
+@*<input type="hidden" id="maskingEmail" value="@titleData.EmailMaskingTitle" />
+	<input type="hidden" id="maskingEmailMobile" value="@titleData.EmailAndMobileMaskingTitle" />
+	<input type="hidden" id="maskingTitle" value="@titleData.TimerLeft" />*@
+
+@*<input type="hidden" id="resendOtpTimerTitle" value="@titleData.ResendOtptimerTitle" />
+	<input type="hidden" id="ResendBlockingMessage" value="@titleData.ResendBlockingMessage" />
+	<input type="hidden" id="validateAttemptTitle" value="@titleData.ValidateAttemptTitle" />*@
+
+
+<div class="main-wrp">
+	<div class="container-grey">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="subscription-block">
+					<div class="subinr nopadding">
+						<form method="POST" id="registrationForm" autocomplete="off" autofill="off" style="width:100%">
+							@Html.AntiForgeryToken()
+
+							@*<input id="email" name="email" type="hidden" value="@emailId" />
+								<input id="HPiD" name="HPiD" type="hidden" value="@HPiD" />*@
+							<div class="subleft center-box">
+								<h2>@titleData.TitleOfPage</h2>
+								<div class="subs-details">
+									<div class="sub-cmn">
+										<label>@titleData.EmailTitle <sup class="mandatory">*</sup></label>
+										<input type="text" class="enterEvent" id="email" name="email" value="@emailId" maxlength="250" tabindex="1" autocomplete="off" oncopy="return false" />
+										<span class="error" id="emailRequired" style="display:none;">@titleData.EmailRequired</span>
+										<span class="error" id="emailFormat" style="display:none;">@titleData.EmailFormat</span>
+									</div>
+
+									<div class="sub-cmn">
+										<label>@titleData.AgeGroupeTitle <sup class="mandatory">*</sup></label>
+										<select multiple="multiple" class="enterEvent multiple-select" id="ageGroup" name="ageGroup" tabindex="2">
+											@if (ageGroup != null && ageGroup.Count() > 0)
+											{
+												foreach (var items in ageGroup.Where(x => x.IsActice))
+												{
+													<option value="@items.Name"> @items.AlternateItemName </option>
+												}
+											}
+										</select>
+										<span class="error" id="agegroupRequired" style="display:none;">@titleData.AgeGroupRequired</span>
+									</div>
+
+									<div class="sub-cmn">
+										<label>@titleData.NameTitle </label>
+										<input type="text" class="enterEvent" id="name" name="name" maxlength="200" value="" tabindex="3" autocomplete="off" oncopy="return false" onpaste="return false" />
+										<span class="error" id="nameRequired" style="display:none;">@titleData.NameRequired</span>
+									</div>
+
+
+									<div class="sub-cmn">
+
+										<label>@titleData.MobileNoTitle </label>
+										<input type="text" class="enterEvent" maxlength="10" id="mobileno" value="@mobile" name="mobileno" tabindex="4" autocomplete="false" autofill="off" oncopy="return false" onpaste="return false" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+										<span class="error" id="mobilenoFormat" style="display:none;">@titleData.MobileNoRequired</span>
+
+									</div>
+								</div>
+
+								<div class="subs-details">
+
+									<div class="sub-cmn">
+
+
+										<label>@titleData.AreYouAparentOrStudent<sup class="mandatory">*</sup>ss</label>
+										<select id="RuParentOrStudent" name="RuParentOrStudent" class="enterEvent multiple-select" tabindex="5">
+											<option value="0">What are you? </option>
+											<option value="Parent">Parent </option>
+											<option value="Student">Student </option>
+											<option value="Teacher">Teacher </option>
+										</select>
+										<span class="error" id="AreYouParentOrStudent" style="display:none;">@titleData.AreYouAparentOrStudentMessage</span>
+
+									</div>
+									<div class="sub-cmn">
+										<label>@titleData.ReferralCode</label>
+										<input type="text" class="enterEvent" value="@ReferralCode" id="ReferralCode" name="ReferralCode" maxlength="50" autocomplete="no" tabindex="6" />
+										<span class="error" id="invalidReferral" style="display:none;">@titleData.InvalidReferralCode</span>
+
+									</div>
+								</div>
+								<div class="subs-details">
+
+									<div class="sub-cmn">
+									</div>
+								</div>
+
+								@*Consent Start*@
+								@Html.Raw(titleData.CommunicationTitle)
+
+								<div class="rdo-wrp">
+									<div class="rdo-collft">@titleData.CommunicationWhatsAppTitle</div>
+									<div class="rdo-colrit">
+										<ul>
+											<li>
+												<label class="rdo-box">
+													@titleData.YesTitle
+													<input type="radio" class="enterEvent" value="Yes" checked name="supportOnWhatsupFromHP" tabindex="7" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+											<li>
+												<label class="rdo-box">
+													@titleData.NoTitle
+													<input type="radio" class="enterEvent" value="No" name="supportOnWhatsupFromHP" tabindex="8" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+										</ul>
+									</div>
+								</div>
+								<span id="ConsentWhatsAppMessage" class="error" style="display:none;">@titleData.CommunicationOnWhatsAppRequired</span>
+
+								<div class="rdo-wrp">
+									<div class="rdo-collft">@titleData.CommunicationPhoneTitle </div>
+									<div class="rdo-colrit">
+										<ul>
+											<li>
+												<label class="rdo-box">
+													@titleData.YesTitle
+													<input type="radio" class="enterEvent" value="Yes" checked name="supportOnPhoneFromHP" tabindex="9" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+											<li>
+												<label class="rdo-box">
+													@titleData.NoTitle
+													<input type="radio" class="enterEvent" value="No" name="supportOnPhoneFromHP" tabindex="10" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+										</ul>
+									</div>
+
+								</div>
+								<span id="ConsentMobileMessage" class="error" style="display:none;">@titleData.CommunicationOnPhoneRequired</span>
+
+								<div class="rdo-wrp">
+									<div class="rdo-collft">@titleData.CommunicationEmailTitle</div>
+									<div class="rdo-colrit">
+										<ul>
+											<li>
+												<label class="rdo-box">
+													@titleData.YesTitle
+													<input type="radio" class="enterEvent" value="Yes" checked name="supportOnEmailFromHP" tabindex="11" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+											<li>
+												<label class="rdo-box">
+													@titleData.NoTitle
+													<input type="radio" class="enterEvent" value="No" name="supportOnEmailFromHP" tabindex="12" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+										</ul>
+									</div>
+
+								</div>
+								<span id="ConsentEmailMessage" class="error" style="display:none;">@titleData.CommunicationOnEmailRequired</span>
+
+								@*T&C*@
+								<div class="subs-checkbox" style="margin-top:10px">
+									<label class="container-label">
+										<input type="checkbox" class="enterEvent" value="Yes" name="termsChecked" tabindex="13" />
+										<span class="checkmark-label"></span>
+									</label>
+
+									@Html.Raw(titleData.TermsConditionContent)
+
+								</div>
+								<span id="termsChecked" class="error" style="display:none;">@titleData.TermsConditionRequired</span>
+
+
+								@**@
+								<div class="sub-savecancel">
+									<div class="subsave-btns">
+
+										@*<button id="CancelRegistration" type="button" style="cursor:pointer;" class="btn cancel">@titleData.CancelButtonText</button>*@
+
+										<button id="Registration" type="button" style="cursor:pointer;" class="btn btndisable styledisable" tabindex="14">@titleData.SubmitButtonText</button>
+
+									</div>
+
+									<div style="padding-top:30px; text-align:center;">
+										<span id="Msg" class="error" style="display:none;"></span>
+									</div>
+								</div>
+
+							</div>
+</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section CustomJsFiles
+{
+	<script src="/MyScripts/registration.js?v8"></script>
+}

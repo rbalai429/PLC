@@ -1,0 +1,190 @@
+USE [Prod_Plc_Ind ]
+GO
+
+/****** Object:  Table [dbo].[tblAttemptLoginLog]    Script Date: 09-03-2022 19:40:37 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[tblAttemptLoginLog](
+	[LogId] [int] IDENTITY(1,1) NOT NULL,
+	[UserId] [int] NOT NULL,
+	[DateOfAttemptLogin] [datetime] NULL
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[tblAttemptLoginLog] ADD  DEFAULT (getdate()) FOR [DateOfAttemptLogin]
+GO
+
+
+----------------------------------------------------------------------------------------
+
+USE [Prod_Plc_Ind ]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_Login]    Script Date: 09-03-2022 11:49:44 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+--  exec [dbo].[usp_AttemptLogin] 'NwrYEIsH+x49ZPrc8KiUOcClkglZFh/1ldW5MWaHulc='
+ALTER PROCEDURE [dbo].[usp_AttemptLogin]
+	-- Add the parameters for the stored procedure here
+	@username varchar(1500)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	
+	BEGIN TRY
+
+	DECLARE @UserId int
+	DECLARE @UserTypeAssign char(1) 
+	DECLARE @HPId varchar(100) 
+	
+	SET @UserId = ISNULL((SELECT UserId from tblRegistration WHERE (u_email = @UserName) AND IsActive = 1),0)
+	
+	IF (@UserId > 0)
+		BEGIN
+
+			INSERT INTO [dbo].[tblAttemptLoginLog](UserId)
+				SELECT UserId FROM [dbo].[tblRegistration] r WHERE IsActive = 1 AND u_email = @username
+
+			SET @UserTypeAssign = ISNULL((SELECT UserType from tblRegistration WHERE (UserId = @UserId) AND IsActive = 1),0)
+			SET @HPId = ISNULL((SELECT HPId from tblRegistration WHERE (UserId = @UserId) AND IsActive = 1),0)
+ 
+			IF (@UserTypeAssign = 'E' AND @HPId = '' AND @HPId = null)
+			BEGIN
+				SELECT 'existing' AS ResponseText
+			END
+
+			SELECT 'new' AS ResponseText
+
+		END
+		
+	END TRY
+	
+	BEGIN CATCH
+		
+			INSERT INTO dbo.ErrorDb(ErrorNumber,ErrorState,ErrorSeverity,ErrorProcedure,ErrorLine,ErrorMessage)
+			SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage;
+
+		END CATCH
+END
+
+
+-- exec [dbo].[usp_AttemptLogin] 'eqiazbnW4V06bu/qa7A573Kz85GiT65sZFlTWrzlZ8s='
+
+---------------------------------------------------------------------------------------------------------------------
+
+Home Controller : 
+
+[HttpPost]
+        public ActionResult PreLoginCheck(string EmailId)
+        {
+            Validate validate = new Validate();
+            string tobeNavigate = String.Empty;
+            string myusername = String.Empty;
+            dbProxy _db = new dbProxy();
+            LoggedIn loggedIn = new LoggedIn();
+
+            if (!String.IsNullOrWhiteSpace(EmailId))
+                myusername = clsCommon.Encrypt(EmailId.ToLower().Trim());
+
+            EmailId = System.Web.Security.AntiXss.AntiXssEncoder.HtmlEncode(EmailId, true);
+
+            if (!String.IsNullOrWhiteSpace(EmailId) && validate.ValidateEmail(EmailId) == true)
+            {
+
+                List<SetParameters> sp = new List<SetParameters>()
+                {
+                    new SetParameters{ ParameterName = "@username", Value = myusername },
+                };
+
+                loggedIn = _db.GetData<LoggedIn>("usp_AttemptLogin", loggedIn, sp);
+
+                if (loggedIn != null)
+                {
+                    HPIDAPIEnvironment objhpid = new HPIDAPIEnvironment();
+                    tobeNavigate = objhpid.GetLoginRedirectURL(EmailId);
+
+                    if(loggedIn.ResponseText == "existing")
+                    {
+                        if (!String.IsNullOrWhiteSpace(tobeNavigate))
+                            return Json(new { status = "Existing", navigation = tobeNavigate }, JsonRequestBehavior.AllowGet);
+                    }
+                    else if (loggedIn.ResponseText == "new")
+                    {
+                        if (!String.IsNullOrWhiteSpace(tobeNavigate))
+                            return Json(new { status = "Success", navigation = tobeNavigate }, JsonRequestBehavior.AllowGet);
+                    }   
+                }
+            }
+
+            return Json(new { status = "Fail", navigation = "" }, JsonRequestBehavior.AllowGet);
+        }
+		
+------------------------------------------------------------------------------------------------------------------------------------------
+
+JS File :
+
+$("#PreSignInBtn").on('click', function () {
+	var PreLoginEmailId = $('#PreLoginEmail').val();
+
+	if (PreLoginEmailId == "" || validateEmail(PreLoginEmailId) == false) {
+		$('#UserNameRequired').show();
+		$('#PreLoginEmail').focus();
+	}
+	else {
+		$("#prelogin").css('display', 'block');
+		$.ajax({
+			//async: false,
+			type: "POST",
+			url: "/umbraco/Surface/Home/PreLoginCheck",
+			data: JSON.stringify({ "EmailId": PreLoginEmailId }),
+			contentType: "application/json; charset=utf-8",
+			dataType: "JSON",
+			success: function (e) {
+				if (e.status == "Success") {
+					commonLayer("login", "Next Button");
+					location.href = e.navigation;
+				}
+				else if (e.status == "Existing") {
+					commonLayer("login", "Next Button");
+					Swal.fire({
+						//title: e.message,
+						html: 'Thanks to technical upgrade our systems are now more secure! We urge you to update your registration with us for continued access. Please click on OK to proceed.',
+						//icon: 'success',
+						showCancelButton: true,
+						confirmButtonColor: '#3085d6',
+						cancelButtonColor: '#d33',
+						confirmButtonText: 'OK'
+					}).then((result) => {
+						if (result.isConfirmed) {
+							window.location = e.navigation;
+						}
+					});
+				}
+			},
+			error: function (error) {
+				//alert(error);
+				$("#prelogin").css('display', 'none');
+			}, complete: function () {
+				$("#prelogin").css('display', 'none');
+			}
+		});
+	}
+});

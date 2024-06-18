@@ -1,0 +1,68 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using System.Configuration
+@{
+	Layout = "masterpage.cshtml";
+
+
+	var offerData = Model?.DescendantsOrSelf()?.OfType<FreeTrial>()?.FirstOrDefault();
+
+	//if (!String.IsNullOrEmpty(offerData.CouponCode))
+	//{
+	//	DateTime startDate = offerData.CouponValidityStartDate;
+	//	DateTime todayDate = Convert.ToDateTime(DateTime.Now.ToShortDateString());
+	//	DateTime endDate = offerData.CouponValidityEndDate;
+	//	if (todayDate.Date >= startDate.Date && todayDate.Date <= endDate.Date)
+	//	{
+	//		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.ExpertTalkId, 1);
+	//		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.CouponCode, offerData.CouponCode);
+	//	}
+	//}
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponTempDtls);
+	HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SplRedirection, "/subscription");
+
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	if (UserLoggedInOrNot == true)
+	{
+		Response.Redirect("/subscription");
+	}
+
+	//try
+	//{
+	//	string path = Server.MapPath("/Log/log.txt");
+
+	//	string ip = System.Web.HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+	//	if (string.IsNullOrEmpty(ip))
+	//	{
+	//		ip = System.Web.HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
+	//	}
+	//	string Url = Request.Url.ToString();
+	//	string sessionId = Session.SessionID.ToString();
+	//	string appendText = Url + " ---- " + sessionId + " ---- " + ip + " ---- " + System.DateTime.Now + Environment.NewLine;
+	//	System.IO.File.AppendAllText(path, appendText);
+	//}
+	//catch { }
+}
+
+
+<input type="hidden" id="pageId" value="freetrial" />
+
+<div class="overlayblur">
+
+
+</div>
+
+
+@section CustomJsFiles
+	{
+	@*<script src="/CustumJs/HPidAccount.js?v4"></script>*@
+	<script>
+		$(document).ready(function () {
+			var pathname = window.location.pathname;
+			$("#offerPageName").val(pathname);
+
+			$("#headerTag").hide();
+			$("#footerTag").hide();
+			$(".overlayLogin").show();
+		});
+	</script>
+}

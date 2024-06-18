@@ -1,0 +1,340 @@
+﻿@using HPPlc.Models.PDFGenerator;
+@model InvoiceModel
+    @{
+
+        Layout = null;
+    }
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html lang="en">
+<!--<![endif]-->
+<head>
+
+    <!-- Basic Page Needs
+      ================================================== -->
+    <meta charset="utf-8">
+    <title>HP PLC</title>
+    <meta name="description" content="HP PLC">
+    <meta name="author" content="HP PLC">
+
+    <!-- Mobile Specific Metas
+      ================================================== -->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- CSS
+      ================================================== -->
+    @*<link rel="stylesheet" href="common/css/app.css">*@
+    @*<link rel="stylesheet" href="common/css/responsive.css">*@
+
+    <!--[if lt IE 8]>
+           <div style=' clear: both; text-align:center; position: relative;'>
+             <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+               <img src="http://storage.ie6countdown.com/assets/100/images/banners/warning_bar_0000_us.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today." />
+            </a>
+          </div>
+        <![endif]-->
+    <!--[if lt IE 9]>
+            <script src="common/js/html5.js"></script>
+            <script src="common/js/css3-mediaqueries.js"></script>
+        <![endif]-->
+    <style>
+        .invoicewrp * {
+            box-sizing: border-box;
+        }
+
+        .invoicewrp .main-wrp {
+            margin-top: 0;
+            padding: 20px 0;
+        }
+
+        .invoicewrp .hp-logo {
+            margin-bottom: 12px;
+            width: 50px;
+        }
+
+        .invoice {
+            font-size: 13px;
+            line-height: 20px;
+        }
+
+            .invoice .addresdtl {
+                width: 27%;
+            }
+
+            .invoice p {
+                margin: 0 0 14px 0;
+                padding: 0px;
+            }
+
+            .invoice .textaligncntr {
+                text-align: center;
+            }
+
+            .invoice .prodtail {
+                border: 1px solid #b3b3b3;
+                width: 100%;
+                display: inline-block;
+                vertical-align: top;
+                margin-bottom: 15px;
+            }
+
+            .invoice .rwclum {
+                border-bottom: 1px solid #b3b3b3;
+                float: left;
+                width: 100%;
+            }
+
+                .invoice .rwclum .colum {
+                    width: 9%;
+                    display: inline-block;
+                    vertical-align: top;
+                    margin-left: -1px;
+                }
+
+                    .invoice .rwclum .colum span {
+                        padding: 6px 1px;
+                        display: inline-block;
+                        vertical-align: top;
+                        width: 100%;
+                    }
+
+                .invoice .rwclum .colum-lg {
+                    width: 14%;
+                    display: inline-block;
+                    vertical-align: top;
+                    margin-left: -1px;
+                }
+
+                    .invoice .rwclum .colum-lg span {
+                        padding: 6px 6px;
+                        display: inline-block;
+                        vertical-align: top;
+                        width: 100%;
+                    }
+
+                .invoice .rwclum.midpnl {
+                    min-height: 120px;
+                }
+
+                .invoice .rwclum.total {
+                    border-bottom: none;
+                    font-weight: 700;
+                    text-align: right;
+                }
+
+                    .invoice .rwclum.total span {
+                        text-align: left;
+                    }
+
+                .invoice .rwclum.discounttotal {
+                    font-weight: 700;
+                    text-align: right;
+                }
+
+                    .invoice .rwclum.discounttotal span {
+                        text-align: left;
+                    }
+
+        .pl-10 {
+            padding-left: 10px;
+        }
+
+        .mb-15 {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    @if (Model != null)
+    {
+        <div class="wrapper invoicewrp">
+            <div class="main-wrp">
+                <div class="container-fluid">
+                    <div class="container-box">
+                        <div class="container-inr">
+
+                            <div class="invoice">
+                                <div class="hp-logo">
+                                    @if (Model.Logo != null && !string.IsNullOrWhiteSpace(Model.Logo))
+                                    {
+                                        <a href="/">
+                                            <img src="@Model.Logo" alt="PLC">
+                                        </a>
+                                    }
+                                </div>
+                                @if (Model.HasAddress)
+                                {
+                                    <div class="addresdtl">
+                                        @Model.Address
+                                    </div>
+                                }
+                                @if (Model.HasGSTNo)
+                                {
+                                    <div class="mb-15">
+                                        GST NO:  @Model.GSTNo
+                                    </div>
+                                }
+                                <p>Customer Email : @Model.UserEmailId</p>
+
+                                <p>Invoice no : PLC 01/2021-22</p>
+                                <div class="prodtail">
+                                    <div class="rwclum tppnl">
+                                        <div class="colum pl-10">
+                                            <span>Date</span>
+                                        </div>
+                                        <div class="colum-lg">
+                                            <span>Description</span>
+                                        </div>
+                                        <div class="colum-lg">
+                                            <span>Subscription period</span>
+                                        </div>
+                                        @*<div class="colum-lg">
+                                                <span>Place of supply</span>
+                                            </div>*@
+                                        <div class="colum">
+                                            <span>SAC</span>
+                                        </div>
+                                        <div class="colum">
+                                            <span>Amount</span>
+                                        </div>
+                                        @if (Model.HasSGST)
+                                        {
+                                            <div class="colum">
+                                                <span>SGST @@  @Model.SGST%</span>
+                                            </div>
+                                        }
+                                        @if (Model.HasCGST)
+                                        {
+                                            <div class="colum">
+                                                <span>CGST @@ @Model.CGST%</span>
+                                            </div>
+                                        }
+                                        @if (Model.HasDiscount)
+                                        {
+                                            <div class="colum">
+                                                <span>Discount @@ @Model.Discount</span>
+                                            </div>
+                                        }
+                                        <div class="colum">
+                                            <span>Sub Total</span>
+                                        </div>
+                                    </div>
+                                    @{
+                                        decimal FinalTotal = 0;
+                                        foreach (InvoiceData item in Model.InvoiceList)
+                                        {
+                                            <div class="rwclum midpnl">
+                                                <div class="colum pl-10">
+                                                    <span>@(item.PaymentDate?.ToString("dd/MM/yyyy"))</span>
+                                                </div>
+                                                <div class="colum-lg">
+                                                    <span>
+                                                        @item.SubscriptionName - INR @item.SubscriptionPrice
+                                                    </span>
+                                                </div>
+                                                <div class="colum-lg">
+                                                    <span>@(item.SubscriptionStartDate?.ToString("dd/MM/yyyy")) till @(item.SubscriptionEndDate?.ToString("dd/MM/yyyy"))</span>
+                                                </div>
+                                                @*<div class="colum-lg">
+                                                        @if (!string.IsNullOrWhiteSpace(item.PlaseOfSupply))
+                                                        {
+                                                            <span> @item.PlaseOfSupply</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span> - </span>
+                                                        }
+                                                    </div>*@
+                                                <div class="colum">
+                                                    <span>@item.SAC</span>
+                                                </div>
+                                                <div class="colum">
+                                                    <span>@item.SubscriptionPrice</span>
+                                                </div>
+                                                <div class="colum">
+                                                    @if (Model.HasSGST && Model.SGST > 0 && item.SubscriptionPrice > 0)
+                                                    {
+                                                        <span>@(item.SubscriptionPrice % Model.SGST)</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>-</span>
+                                                    }
+                                                </div>
+                                                <div class="colum">
+                                                    @if (Model.HasCGST && Model.CGST > 0 && item.SubscriptionPrice > 0)
+                                                    {
+                                                        <span>@(item.SubscriptionPrice % Model.CGST)</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>-</span>
+                                                    }
+                                                </div>
+                                                @{
+                                                    var calSGCT = item.SubscriptionPrice % Model.SGST;
+                                                    var calCGST = item.SubscriptionPrice % Model.CGST;
+                                                    var subTotal = (item.SubscriptionPrice + calSGCT + calCGST);
+                                                    FinalTotal += subTotal.Value;
+                                                    <div class="colum">
+                                                        <span>@subTotal</span>
+                                                    </div>
+                                                }
+
+                                            </div>
+                                            if (item.Discount > 0)
+                                            {
+                                                FinalTotal -= item.Discount.Value;
+                                                <div class="rwclum discounttotal">
+                                                    <div class="colum"><span>Discount Amount</span></div>
+                                                    <div class="colum"><span>INR @item.Discount</span></div>
+                                                </div>
+                                            }
+                                        }
+                                        if (Model.InvoiceList != null && Model.InvoiceList.Count() > 0)
+                                        {
+                                            <div class="rwclum total">
+                                                <div class="colum"><span>Total</span></div>
+                                                <div class="colum"><span>INR @FinalTotal</span></div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                                @if (Model.PaymentMethod != null)
+                                {
+                                    <p>Payment method : @Model.PaymentMethod</p>
+                                }
+                                @if (Model.PaymentDate != null)
+                                {
+                                    <p>Payment date :  @(Model.PaymentDate?.ToString("dd/MM/yyyy"))</p>
+                                }
+                                @if (Model.ReferenceId != null)
+                                {
+                                    <p>Reference Id: @Model.ReferenceId</p>
+                                }
+
+                                <p class="textaligncntr">This is an computer generated invoice doesn’t require Signature</p>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+            </div>
+        </div>
+    }
+
+</body>
+</html>

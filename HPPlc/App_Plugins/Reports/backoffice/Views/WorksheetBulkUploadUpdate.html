@@ -1,0 +1,184 @@
+﻿
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-animate.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-sanitize.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap.js" integrity="sha512-3z5zbCPEG7DvKKz46yvPmKL+w+UDfwY0f2YWFVIwBb+2Y4E23jTZHZxG+naAiTllvMNQAhapPDKGHBT7V3fQOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap-tpls.js" integrity="sha512-Re9KhAaoh5qo/Cm/wtExVs7ETTKTx/81aXPHko2nWlUvTzELYhTwpp/DwUu+z8ul+DjtbJdPcmxEYwKewzG62w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap-csp.css" integrity="sha512-TSigfdiJq7G9AWJnE/8D3M/HcBs9wfKpbrCbMg4iSs8IRVujA854B5wd/glfPzBRaeqiLLz1jHm6swYsci2txQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<div ng-controller="WorkSheetBulkUploadUpdateController">
+
+    <div class="umb-panel umb-editor-wrapper ng-scope">
+        <div data-element="editor-header" class="umb-editor-header flex items-center">
+            <h1 class="umb-panel-header-name ">Worksheet Bulk Update</h1>
+        </div>
+    </div>
+    <div data-element="editor-container" class="umb-editor-container umb-panel-body umb-scrollable row-fluid ">
+        <div class="umb-pane">
+            <div>
+                <div class="row">
+
+                </div>
+                <ng-form id="LocalExcelUploadForm" enctype="multipart/form-data" method="POST" name="clinicAddForm" class="ng-pristine ng-valid ng-valid-required" val-form-manager>
+                    <div class="umb-table" id="export">
+                        <table>
+                            <tr><td>Program Type</td><td>:</td><td><select id="ddlProgramType"></select></td></tr>
+                            <tr>
+                                <td>Age Groupe</td>
+                                <td>:</td>
+                                <td>
+                                    <select id="ddlAgeGroupe"></select>
+                                    <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="ExportToExcelForUpdate()">
+                                        Export To Excel
+                                    </button>
+                                </td>
+
+                            </tr>
+                            <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                            <tr>
+                                <td>Upload Excel</td>
+                                <td>:</td>
+                                <td>
+                                    <input type="file" ng-disabled="FileUploaded" id="fileupload" name="fileupload" multiple accept=".xlsx, .xls, .csv" />
+                                    <button style="width:15%" ng-disabled="FileUploaded" class="btn umb-button__button btn-success umb-button-- umb-outline float-right" ng-click="FileUpload()">
+                                        <span ng-if="!FileUploaded">View File</span>
+                                        <span ng-if="FileUploaded"> View..</span>
+                                        <ul ng-if="FileUploaded" class="umb-load-indicator animated -half-second">
+                                            <li class="umb-load-indicator__bubble"></li>
+                                            <li class="umb-load-indicator__bubble"></li>
+                                            <li class="umb-load-indicator__bubble"></li>
+                                        </ul>
+                                    </button>
+                                </td>
+                            </tr>
+                        </table>
+
+
+                    </div>
+                </ng-form>
+                <div class="umb-table" id="dvLession" style="display:none;">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>NodeID</th>
+                                <th>IsPublished</th>
+                                <th>languageKey</th>
+                                <th>languageName</th>
+                                <th>AgeGroup</th>
+                                <th>SubjectID</th>
+                                <th>WeekID</th>
+                                <th>TopicID</th>
+                                <th>SubjectName</th>
+                                <th>WorksheetTitle</th>
+                                <th>Title</th>
+                                <th>SubTitle</th>
+                                <th>ShareContent</th>
+                                <th>SharingText</th>
+                                <th>Description</th>
+                                <th>IsGuestUserSheet</th>
+                                <th>CBSEContentIncluded</th>
+                                <th>IsQuizWorksheet</th>
+                                <th>IsEnableforDetailsPage</th>
+                                <th>DescriptionPageContent</th>
+                                <th>DesktopImageID</th>
+                                <th>DesktopImageWebpID</th>
+                                <th>MobileImageID</th>
+                                <th>MobileIamgeWebpID</th>
+                                <th>WhatsAppBannerID</th>
+                                <th>Subscription</th>
+                                <th>UploadPDF</th>
+                                <th>UploadPreviewPDF</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyLession">
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+                <div class="umb-table" id="dvStructure" style="display:none;">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>NodeID</th>
+                                <th>IsPublished</th>
+                                <th>languageKey</th>
+                                <th>languageName</th>
+                                <th>AgeGroup</th>
+                                <th>SubjectID</th>
+                                <th>SubjectName</th>
+                                <th>TopicID</th>
+                                <th>WorksheetTitle</th>
+                                <th>umbracoUrlAlias</th>
+                                <th>Title</th>
+                                <th>SubTitle</th>
+                                <th>Description</th>
+                                <th>IsGuestUserSheet</th>
+                                <th>IsEnableForDetailsPage</th>
+                                <th>Paid</th>
+                                <th>RankingIndex</th>
+                                <th>DesktopImageID</th>
+                                <th>DesktopImageWebpID</th>
+                                <th>MobileImageID</th>
+                                <th>MobileIamgeWebpID</th>
+                                <th>UploadPDF</th>
+                                <th>UploadPreviewPDF</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyStructure">
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="umb-table" id="dvTeacher" style="display:none;">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>NodeID</th>
+                                <th>IsPublished</th>
+                                <th>languageKey</th>
+                                <th>languageName</th>
+                                <th>AgeGroup</th>
+                                <th>WorksheetTitle</th>
+                                <th>umbracoUrlAlias</th>
+                                <th>Title</th>
+                                <th>SubTitle</th>
+                                <th>Description</th>
+                                <th>NoofDays</th>
+                                <th>IsGuestUserSheet</th>
+                                <th>IsEnableForDetailsPage</th>
+                                <th>Paid</th>
+                                <th>RankingIndex</th>
+                                <th>DesktopImageID</th>
+                                <th>DesktopImageWebpID</th>
+                                <th>MobileImageID</th>
+                                <th>MobileIamgeWebpID</th>
+                                <th>UploadPDF</th>
+                                <th>UploadPreviewPDF</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyTeacher">
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="dvFinalButton" style="display:none;">
+                    <a href="javascript:void(0)" id="aUploadWorksheet" class="btn umb-button__button btn-success umb-button-- umb-outline float-right">
+                        Upload Data
+                    </a>
+                    <div id="div_msg" class="text-danger"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<input type="hidden" id="hdnjson" value="" />
+<!--<input type="hidden" id="hdnLession" value="" />
+<input type="hidden" id="hdnStructure" value="" />
+<input type="hidden" id="hdnTeacher" value="" />-->

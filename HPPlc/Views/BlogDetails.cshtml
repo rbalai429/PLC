@@ -1,0 +1,220 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using System.Configuration
+@using System.Text
+@using HPPlc.Models.GridExtention
+
+@{
+	Layout = "masterpage.cshtml";
+
+	string tagName = String.Empty;
+	var blog = Umbraco?.Content(Model.Id).DescendantsOrSelf().OfType<BlogContent>().FirstOrDefault();
+
+	var blogTitle = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "blogRoute").OfType<BlogRoute>().FirstOrDefault();
+
+
+	var share = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "share").FirstOrDefault().Children.OfType<ShareItem>().Where(x => x.IsActive == true);
+
+	string siteUrl = ConfigurationManager.AppSettings["SiteUrl"].ToString();
+	var values = new List<string>();
+	if (blog != null)
+	{
+		foreach (var tag in blog.BlogTag)
+		{
+			values.Add(tag.Name);
+			tagName += tag.Name + ",";
+		}
+
+		if (!String.IsNullOrWhiteSpace(tagName))
+		{ tagName = tagName.TrimEnd(','); }
+	}
+
+	var blogRelatedBlogs = blogTitle.Children.Where(x => x.ContentType.Alias == "blogListing").FirstOrDefault().Children.OfType<BlogContent>().Where(x => x.BlogTag.Any(c => values.Contains(c.Name)) && x.Id != Model.Id && x.IsActive == true).Take(blogTitle.NoOfRelatedBlogDisplayOnBlogDetailsPage);
+	int TotalCountOfRelatedBlogs = blogTitle.Children.Where(x => x.ContentType.Alias == "blogListing").FirstOrDefault().Children.OfType<BlogContent>().Where(x => x.BlogTag.Any(c => values.Contains(c.Name))).Count();
+
+	//Blog Save as View
+	try
+	{
+		HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+		db.HPBlogSaveViewerLog(Model.Id.ToString());
+	}
+	catch (Exception ex)
+	{
+		HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+		error.PageName = "Blog Details";
+		error.MethodName = "HPBlogSaveViewerLog";
+		error.ErrorMessage = ex.Message;
+
+		HPPlc.Models.dbAccessClass.PostApplicationError(error);
+	}
+}
+
+@*@section styles{
+		<style href="~/common/css/Bootstrap.css"></style>
+	}*@
+
+
+<div class="main-wrp">
+	@Html.Partial("_Breadcrumb")
+	<div class="banner banner2">
+		@if (blog != null)
+		{
+			<picture>
+				@if (blog.BannerMobile != null)
+				{
+					<source data-srcset="@blog.BannerMobile.Url()" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" />
+				}
+
+				@if (blog.BannerMobileNextGen != null)
+				{
+					<source data-srcset="@blog.BannerMobileNextGen.Url()" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" type='image/webp' />
+				}
+
+				@if (blog.BannerDesktopNextGen != null)
+				{
+					<source data-srcset="@blog.BannerDesktopNextGen.Url()" srcset="/common/images/banner_loader.jpg" type='image/webp' />
+				}
+
+				@if (blog.BannerDesktop != null)
+				{
+					<img class='b-lazy' data-src="@blog.BannerDesktop.Url()" src='/common/images/banner_loader.jpg' alt="@(blog.BannerDesktop.Value<string>("altText"))" width="200" height="50" />
+				}
+			</picture>
+		}
+
+		<div class="caption-bnr">
+			<div class="caption-bnrin">
+				<h2>@blog.BannerTitle</h2>
+				@Html.Raw(blog.BannerDescription)
+			</div>
+		</div>
+	</div>
+
+	<div class="container-fluid grayshrbg">
+		<div class="container-box">
+			<div class="container-inr">
+
+				<div class="shr-row">
+					<div class="bck-clm"><a href="/blogs/">@blogTitle.BackTitle</a></div>
+					<div class="shr-clm">
+						<span>@blogTitle.ShareViaTitle</span>
+
+						@if (share != null)
+						{
+							foreach (var shareItem in share)
+							{
+								if (shareItem?.ModeOfShare?.Name?.ToString()?.ToLower() == "facebook" && !String.IsNullOrEmpty(blog?.Facebook))
+								{
+									<a href="javascript:void(0);" class="aFBShareFeed" title="@shareItem.ToolTips" onclick="commonShareLayer('Share_facebook','Blogs - @blog.Facebook');"><img src="@shareItem.Logo.Url()" alt="" /><span style="display:none;">@blog.Facebook</span></a>
+								}
+								else if (shareItem?.ModeOfShare?.Name?.ToString()?.ToLower() == "whatsapp" && !String.IsNullOrEmpty(blog?.WhatsApp))
+								{
+									<a href="javascript:void(0);" class="aWHTAppSH" title="@shareItem.ToolTips" onclick="commonShareLayer('Share_whatsapp','Blogs - @blog.WhatsApp');"><img src="@shareItem.Logo.Url()" alt="" /><span style="display:none;">@blog.WhatsApp</span></a>
+								}
+								else if (shareItem?.ModeOfShare?.Name?.ToString()?.ToLower() == "mail" && !String.IsNullOrEmpty(blog?.Mail))
+								{
+									<a href="javascript:void(0);" class="aMailSh" title="@shareItem.ToolTips" onclick="commonShareLayer('Share_mail','Blogs - @blog.Mail');"><img src="@shareItem.Logo.Url()" alt="" /><span style="display:none;">@(blog.Mail + '`' + blog.BlogTitle)</span></a>
+								}
+								else if (shareItem?.ModeOfShare?.Name?.ToString()?.ToLower() == "link")
+								{
+									<span id="copylinkId" style="display:none;"></span>
+									<a href="javascript:void(0);" class="aCopyText" title="@shareItem.ToolTips">
+										<img id="copyImageId" src="@shareItem.Logo.Url()" alt="" />
+										<span style="display:none;">@(siteUrl + blog.Url())</span>
+									</a>
+								}
+							}
+						}
+
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+
+
+	</div>
+	<div class="container-fluid educatn-pnl">
+		<div class="container-box">
+			<div class="container-inr">
+
+				<div class="articl-wrap">
+
+					<div class="articl-clmleft">
+						<em class="dt">@blog.BlogDate.ToString("MMMM d, yyyy")</em>
+						<div class="descTitlePlc">
+							<h1 class="titleforhtag">@blog.BlogTitle</h1>
+						</div>
+						<em class="autnm">@blog.AuthorName</em>
+
+
+						@Html.Raw(blog.BlogDescription)
+
+						@if (blog?.BlogDetails != null)
+						{
+							@Html.GetGridHtml(blog, "blogDetails", "Clean", true)
+						}
+					</div>
+					<div class="articl-clmrigth">
+						<div class="popl-tgs">
+
+							<strong>@blogTitle.PopularTagsTitle</strong>
+
+							<div class="pptg-clm">
+								@if (blog != null)
+								{
+									var blogTag = blog.BlogTag;
+									foreach (var item in blogTag)
+									{
+										<span><a href="@item.Url" onclick="commonLayer('Blog Details','Tag - @item.Name');">@item.Name</a></span>
+									}
+								}
+							</div>
+						</div>
+						@if (blogRelatedBlogs != null)
+						{
+							<div class="rltd-arti">
+
+								<strong>@blogTitle.RelatedArticlesTitle</strong>
+
+								<div class="ptinsld">
+
+									@Html.Partial("/Views/Partials/Blog/_BlogRelatedPost.cshtml", blogRelatedBlogs, new ViewDataDictionary(this.ViewData) { { "TotalCountOfRelatedBlogs", TotalCountOfRelatedBlogs }, { "NoOfRelatedBlogDisplayOnBlogDetailsPage", blogTitle.NoOfRelatedBlogDisplayOnBlogDetailsPage }, { "TagName", tagName } })
+
+								</div>
+
+							</div>
+						}
+
+
+
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+</div>
+@section metatags
+{
+
+	@if (blog != null)
+	{
+
+		@*<meta property="og:image" content="https://preprod.printlearncenter.com/common/images/bottom.png" />*@
+		<meta property='og:image' content='@(Url.GetCropUrl(imageCropperValue: blog.BlogMediaFile, width: 1400, height: 800, furtherOptions: "&format=jpg"))' />
+		<meta property="og:image:width" content="1400" />
+		<meta property="og:image:height" content="800" />
+		<meta property="og:title" content="@blog.BlogTitle" />
+		<meta property="og:description" content="@blog.Facebook" />
+	}
+}
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/Blog.js"></script>
+}

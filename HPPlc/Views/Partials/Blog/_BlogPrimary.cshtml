@@ -1,0 +1,31 @@
+﻿@model Umbraco.Web.PublishedModels.BlogContent
+@{
+	var readmore = (string)ViewData["readmore"];
+}
+@if (Model != null)
+{
+	<div class="add-wrksh">
+		@if (Model.BlogMediaFile != null)
+		{
+			<div class="imgd">
+				<div class="lftBnrPlce">
+					<img class="imgPlacing" src="@Url.GetCropUrl(imageCropperValue: Model.BlogMediaFile, width: 678,height: 375)" alt="Blog Image" />
+				</div>
+			</div>
+		}
+		<div class="txtd">
+			<div class="txtdinr">
+				@if (Model.BlogDate != null)
+				{
+					<em>@Model.BlogDate.ToString("MMMM d, yyyy")</em>
+				}
+
+				<strong>@Model.BlogTitle</strong>
+
+				@Html.Raw(Model.BlogDescription)
+				<em>@Model.AuthorName</em>
+				<a href="@Model.Url()" onclick="commonLayer('Blogs','@readmore');">@readmore</a>
+			</div>
+		</div>
+	</div>
+}

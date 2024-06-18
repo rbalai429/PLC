@@ -1,0 +1,211 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@*@using Umbraco.Web.Models*@
+@*@using HPPlc.Controllers*@
+
+@{
+	var CultureInfo = Model?.GetCultureFromDomains();
+
+	var titleText = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+				.Where(x => x.ContentType.Alias == "teachersBuyNow")?.OfType<TeachersBuyNow>()?.FirstOrDefault();
+
+	var subscriptionText = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+		.Where(x => x.ContentType.Alias == "teachersSubscriptionList")?.OfType<TeachersSubscriptionList>()?.FirstOrDefault();
+
+	List<HPPlc.Models.TempSubscriptionCreatedByUser> UsertempSubscription = new List<HPPlc.Models.TempSubscriptionCreatedByUser>();
+	UsertempSubscription = HPPlc.Models.SessionManagement.GetCurrentSession<List<HPPlc.Models.TempSubscriptionCreatedByUser>>(HPPlc.Models.SessionType.SubscriptionTempDtls);
+
+	var couponCodeAvailedData = HPPlc.Models.SessionManagement.GetCurrentSession<HPPlc.Models.Coupon.CouponCodeResponse>(HPPlc.Models.SessionType.CouponTempDtls);
+	//Check user eligible for discount for excel upload or not
+	//HPPlc.Models.dbAccessClass _db = new HPPlc.Models.dbAccessClass();
+	//HPPlc.Models.Responce response = new HPPlc.Models.Responce();
+	//response = _db.CheckExistingUserApplicableForPointsOrNot();
+
+	decimal totalPayableAmount = 0;
+	decimal totalSubscriptionAmount = 0;
+	decimal existingUserDiscountedAmount = 0;
+	decimal CouponDiscountAmount = 0;
+	//decimal SubscriptionDiscountAmount = 0;
+
+	HPPlc.Models.SubscriptionAmountCalc subscriptionAmountCalc = new HPPlc.Models.SubscriptionAmountCalc();
+	CouponDiscountAmount = subscriptionAmountCalc.GetCouponDiscountAmount();
+
+	existingUserDiscountedAmount = subscriptionAmountCalc.GetExistingUserDiscountAmount();
+	totalSubscriptionAmount = subscriptionAmountCalc.GetSubscriptionAmount();
+	totalPayableAmount = subscriptionAmountCalc.GetPayableAmount();
+	//SubscriptionDiscountAmount = subscriptionAmountCalc.GetDiscountAmount();
+	string CouponCode = String.Empty;
+}
+
+@if (UsertempSubscription != null && UsertempSubscription.Any() && UsertempSubscription.Count > 0)
+{
+<input type="hidden" id="cpncd" value="@CouponCode" />
+	<div class="cmn-rightsubs">
+		@try
+		{
+			<div class="subscdetails">
+				<h3>@titleText.SubscriptionDetailsTitle</h3>
+				@if (UsertempSubscription != null && UsertempSubscription.Any())
+				{
+					int discountRest = 0;
+					foreach (var items in UsertempSubscription.Where(x => Convert.ToInt32(x.SubscriptionPrice == "" ? "0" : x.SubscriptionPrice) > 0 && Convert.ToInt32(x.Ranking == "" ? "0" : x.Ranking) > 1))
+					{
+						var ageGroup = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+						.Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault()?.Children?
+						.OfType<NameListItem>().Where(x => x?.ItemValue == items?.AgeGroup)?.FirstOrDefault()?.AlternateClassName;
+
+						<ul class="cmn-rightsubs">
+							<li> <span>@subscriptionText.AgeTitle</span> <em>@ageGroup</em> </li>
+							<li> <span>@titleText.ValidFromTitle</span> <em>@DateTime.Now.ToString("ddd, MMM d, yyyy")</em> </li>
+							<li>
+								<span>@titleText.ValidToTitle</span>
+
+								<em>@DateTime.Now.AddMonths(items.ValidMonths).ToString("ddd, MMM d, yyyy")</em>
+							</li>
+							<li style="margin-top:20px;">
+								<span>@items.SubscriptionName</span>
+								<em>₹ @items.SubscriptionPrice</em>
+							</li>
+							@if (items.DiscountAmount > 0)
+							{
+								<li>
+									<span>@titleText.DiscountTitle</span>
+									<em>₹ @items.DiscountAmount</em>
+								</li>
+							}
+
+							@if (couponCodeAvailedData != null)
+							{
+								if (couponCodeAvailedData != null && couponCodeAvailedData.ResponseCode == 1 && couponCodeAvailedData.IsAppliedForSubscription == 1)
+								{
+									string[] subscriptnString = couponCodeAvailedData.SubscriptionRanking.Split(',');
+									if (subscriptnString != null)
+									{
+										foreach (var couponitem in subscriptnString.GroupBy(x => x))
+										{
+											//var CntCouponAmt = UsertempSubscription?.GroupBy(x => new { x.Ranking }).Any(g => g.Count() > 1);
+											if (couponitem.Key == items.Ranking && couponCodeAvailedData.BenefitRestrict == 1 && discountRest == 0)
+											{
+												discountRest++;
+												<li>
+													<div class="submonth-fix error">
+														@Html.Raw(couponCodeAvailedData.DiscountMessage)
+													</div>
+												</li>
+
+											}
+											else if (couponitem.Key == items.Ranking && couponCodeAvailedData.BenefitRestrict == 0)
+											{
+												<li>
+													<div class="submonth-fix error">
+														@Html.Raw(couponCodeAvailedData.DiscountMessage)
+													</div>
+												</li>
+
+											}
+										}
+									}
+								}
+								else if (couponCodeAvailedData != null && couponCodeAvailedData.ResponseCode == 1 && couponCodeAvailedData.IsCouponAppliedForAgeGroup == 1)
+								{
+									string[] agegroupString = couponCodeAvailedData.AgeGroupAppliedForCoupon.Split(',');
+									if (agegroupString != null)
+									{
+										foreach (var couponitem in agegroupString.GroupBy(x => x))
+										{
+											if (couponitem.Key == items.AgeGroup)
+											{
+												<li>
+													<div class="submonth-fix error">
+														@Html.Raw(couponCodeAvailedData.DiscountMessage)
+													</div>
+												</li>
+											}
+										}
+									}
+								}
+							}
+						</ul>
+					}
+				}
+
+			</div>
+			<div class="duhc" id="SubsCouponCode">
+				<div class="duc-top">
+					<p>@titleText.DoYouHaveAcouponTitle</p>
+					@*<span><img src="/common/images/coupon-slide.jpg"></span>*@
+				</div>
+				<div class="couponbox">
+					<div class="open-inner">
+						<input type="text" id="couponCode" name="couponCode" maxlength="15" value="@(couponCodeAvailedData == null ? CouponCode :couponCodeAvailedData?.CouponCodeName)" placeholder="@titleText.CouponPlaceholder" />
+
+						<button type="button" id="btnCouponAvail" class="btn" onclick="CouponCodeCheck();">@titleText.CouponApplyButton</button>
+					</div>
+				</div>
+
+				<div>
+					<span class="error" id="couponmessage" style="display:none;"></span>
+				</div>
+
+				@if (couponCodeAvailedData != null)
+				{
+					if (couponCodeAvailedData != null && couponCodeAvailedData.ResponseCode == 1)
+					{
+						<div class="submonth-fix error">
+							@titleText.TotalCouponDiscountAmt   ₹@CouponDiscountAmount
+						</div>
+
+						<div class="calcel-format">
+							<a class="sbcptn-btn" href="javascript:void(0)" onclick="CancelCouponCode();">@titleText.CouponCancelText</a>
+						</div>
+					}
+					else
+					{
+						<div class="error">
+							@Html.Raw(couponCodeAvailedData.ResponseMessage)
+						</div>
+					}
+				}
+			</div>
+
+			if (existingUserDiscountedAmount > 0)
+			{
+				<div class="submonth-fix">
+					<span>@titleText.ExistingUserDiscountAmt</span>
+					<em>₹ @existingUserDiscountedAmount</em>
+				</div>
+			}
+
+			if (CouponDiscountAmount > 0)
+			{
+				<div class="submonth-fix">
+					<span>@titleText.CouponDiscountAmt</span>
+					<em>₹ @CouponDiscountAmount</em>
+				</div>
+			}
+
+			if (totalPayableAmount >= 0)
+			{
+				<div class="submonth-fix">
+					<span>@titleText.TotalPayableAmt</span>
+					<em>₹ @totalPayableAmount</em>
+				</div>
+			}
+
+			<div>
+				<span class="error" id="msg_pay" style="display:none;"></span>
+			</div>
+			<div class="signin-btn">
+				@*<button id="paynow" type="button" class="btn">@titleText.ButtonTitleWhenPaid</button>*@
+				@if (totalPayableAmount > 0)
+				{
+					<a href="javascript:void(0);" class="btn" onclick="paynowStructureProgram()">@titleText.ButtonTitleWhenPaid</a>
+				}
+				else
+				{
+					<a href="javascript:void(0);" class="btn" onclick="paynowStructureProgram()">Subscribe Now</a>
+				}
+			</div>
+		}
+		catch { }
+	</div>
+}

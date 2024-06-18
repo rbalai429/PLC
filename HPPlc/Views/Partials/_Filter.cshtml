@@ -1,0 +1,195 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	var title = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+								.FirstOrDefault()?.DescendantsOrSelf()?
+								.Where(x => x.ContentType.Alias == "contentMenu")
+								.OfType<ContentMenu>().FirstOrDefault();
+
+	//var ageGroups = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault().DescendantsOrSelf()?
+	//						.Where(x => x.ContentType.Alias == "worksheetListingAgeWise")?.OfType<WorksheetListingAgeWise>();
+
+	var ageGroups = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?.Where(x => x.ContentType.Alias == "worksheetNode")?.FirstOrDefault()?.DescendantsOrSelf()?
+								.Where(x => x.ContentType.Alias == "worksheetListingAgeWise")?.OfType<WorksheetListingAgeWise>();
+
+
+	var subjects = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+					.Children?.Where(x => x.ContentType.Alias == "worksheetNode")?.FirstOrDefault()?.Children?
+					.Where(x => x.ContentType.Alias == "subjectsRoot")?.FirstOrDefault()?.Children?.OfType<Subjects>()?
+					.Where(x => x.IsActive == true)?.OrderBy(x => x.SubjectName).ToList();
+
+	var pageName = UmbracoContext?.PublishedRequest?.PublishedContent.Name;
+
+	List<Topics> topics = new List<Topics>();
+	//if (pageName != null && (pageName.ToLower().Contains("topic") || pageName.ToLower().Equals("home") || pageName.ToLower().Equals("worksheets") || pageName.ToLower().Equals("lesson plan")))
+	//{
+	//	topics = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+	//				 .FirstOrDefault()?.DescendantsOrSelf()?
+	//							.Where(x => x.ContentType.Alias == "topics")?.OfType<Topics>()?
+	//							.Where(x => x.IsActive == true).ToList();
+
+	//}
+}
+
+<input type="hidden" id="pageName" value="@pageName" />
+<div class="leftFltr">
+	<div class="mob-fliter">@(title?.FilterText)</div>
+	<div class="fltrBx">
+		<div class="fltrInr">
+			<div class="vwAll">
+				<div class="fltrTxt">@(title?.FiltersText)</div>
+				@*<label for="all">
+					<a class="aFilterReset" onclick="WorksheetReset();"><span>@title.ResetButton</span></a>
+				</label>*@
+			</div>
+
+			<div class="fltrBxin">
+				@if ((pageName != null || pageName != "") && (pageName.ToLower().Equals("home") || pageName.ToLower().Equals("worksheets") || pageName.ToLower().Equals("by subjects") || pageName.ToLower().Equals("lesson plan")))
+				{
+					<div class="acrd">
+						<div class="acrdHd">@(title?.SelectAge)</div>
+						<div class="chchlist">
+
+							<div class="chchlistin">
+								@if (ageGroups != null && ageGroups.Any())
+								{
+									int row = 0;
+									foreach (var age in ageGroups)
+									{
+										var className = Umbraco?.Content(age?.AgeGroup?.Udi).Value("alternateItemName");
+										<div class="chkBxItem chkBxItemWht">
+											<div class="cstm-chckbx">
+												<label for="@("chkSubcatId_" + row)">
+													<input type="checkbox"
+														   name="classes"
+														   value="@age.AgeGroup.Name"
+														   id="@("chkSubcatId_" + row)"
+														   title="@className"
+														   class="checbx chkFilterSubCategory classes" />
+													<strong class="chkInf"></strong>
+													<span>@className</span>
+												</label>
+											</div>
+										</div>
+										row++;
+									}
+								}
+
+								<div class="doneBtn">
+									<a href="javascript:void(0);" class="btn">@(title?.DoneTitle)</a>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				}
+
+				@if (subjects != null && subjects.Count > 0)
+				{
+					<div class="acrd">
+						<div class="acrdHd">@(title?.SelectCategory)</div>
+						<div class="chchlist">
+							<div class="chchlistin">
+								@if (subjects != null && subjects.Any())
+								{
+									int row = 0;
+									foreach (var subject in subjects)
+									{
+										<div class="chkBxItem chkBxItemWht">
+											<div class="cstm-chckbx">
+												<label for="@("subjects_" + row)">
+													<input type="checkbox"
+														   name="subjects"
+														   value="@subject.SubjectValue"
+														   id="@("subjects_" + row)"
+														   title="@subject.SubjectName"
+														   class="checbx chkFilterSubCategory subjects" />
+													<strong class="chkInf"></strong>
+													<span>@subject.SubjectName</span>
+												</label>
+											</div>
+										</div>
+
+										row++;
+									}
+								}
+
+								<div class="doneBtn">
+									<a href="javascript:void(0);" class="btn">@(title?.DoneTitle)</a>
+								</div>
+
+							</div>
+						</div>
+					</div>
+				}
+
+				@if (topics != null && topics.Count > 0)
+				{
+					<div class="acrd">
+						<div class="acrdHd">@(title?.SelectTopic)</div>
+						<div class="chchlist">
+							<div class="chchlistin">
+								@if (topics != null && topics.Any())
+								{
+									int row = 0;
+									foreach (var topic in topics)
+									{
+										<div class="chkBxItem chkBxItemWht">
+											<div class="cstm-chckbx">
+												<label for="@("topic_" + row)">
+													<input type="checkbox"
+														   name="subjects"
+														   value="@topic.TopicValue"
+														   id="@("topic_" + row)"
+														   title="@topic.TopicName"
+														   class="checbx chkFilterSubCategory topics" />
+													<strong class="chkInf"></strong>
+													<span>@topic.TopicName</span>
+												</label>
+											</div>
+										</div>
+
+										row++;
+									}
+								}
+
+								<div class="doneBtn">
+									<a href="javascript:void(0);" class="btn">@(title?.DoneTitle)</a>
+								</div>
+
+							</div>
+						</div>
+					</div>
+				}
+
+				@*<div class="moreChkList">
+
+					<div class="chchlistin">
+
+						<div class="chkBxItem chkBxItemWht" style="display:none;">
+							<div class="cstm-chckbx">
+								<label for="CbseContent">
+									<input type="checkbox"
+										   value="1"
+										   id="CbseContent"
+										   name="CbseContent"
+										   class="checbx chkFilterSubCategory CbseContent" />
+									<strong class="chkInf"></strong>
+									<span>@title.IncludeCbsecontent</span>
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>*@
+			</div>
+
+			<div class="filtrActn">
+				<button type="button" id="filterApply" class="btn btnblue applyBtn">@(title?.ApplyButtonText)</button>
+			</div>
+			<div>
+				<span class="error" id="validation" style="display:none;">@(title?.ValidationContent)</span>
+			</div>
+		</div>
+
+
+	</div>
+</div>

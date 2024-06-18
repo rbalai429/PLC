@@ -1,0 +1,52 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<HPPlc.Models.Mailer.SubscriptionMailerModel>
+@{
+    Layout = null;
+    var model = Model;
+
+	string mediaUrl = System.Configuration.ConfigurationManager.AppSettings["SiteUrl"].ToString();
+}
+@if (model != null)
+{
+    <html>
+    <head>
+		<title>Congratulations! You've unlocked free trial package. </title>
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    </head>
+
+    <body bgcolor="#FFFFFF" text="#000000">
+        <table width="650" border="0" cellspacing="0" cellpadding="0" align="center">
+            <tr>
+                <td style="border:1px solid #000000;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td valign="top"><a href="@mediaUrl" target="_blank"><img src="@(mediaUrl + "common/images/subsctptn/header.jpg")" width="651" height="338" border="0"></a></td>
+                        </tr>
+                        <tr>
+                            <td valign="top"><a href="@Model.PDFUrl" target="_blank"><img src="@(mediaUrl + "common/images/subsctptn/free.jpg")" width="651" height="470" border="0"></a></td>
+                        </tr>
+                        <tr>
+                            <td valign="top"><a href="@mediaUrl" target="_blank"><img src="@(mediaUrl + "common/images/subsctptn/cta.jpg")" width="651" height="149" border="0"></a></td>
+                        </tr>
+                        <tr>
+                            <td valign="top" bgcolor="#f1f1f2">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                        <td height="20"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><img src="@(mediaUrl + "common/images/subsctptn/clickhere.png")" width="351" height="46"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3A//www.printlearncenter.com/" target="_blank"><img src="@(mediaUrl + "common/images/subsctptn/FB.png")" width="29" height="46" border="0"></a><a href="https://twitter.com/intent/tweet?url=https://www.printlearncenter.com/&text=Visit%20Print%20Learn%20Center%20and%20subscribe%20to%20get%20100%20free%20worksheets%20every%20month" target="_blank"><img src="@(mediaUrl + "common/images/subsctptn/TW.png")" width="32" height="46" border="0"></a><a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A//www.printlearncenter.com/" target="_blank"><img src="@(mediaUrl + "common/images/subsctptn/ln.png")" width="32" height="46" border="0"></a><a href="https://api.whatsapp.com/send?phone=&text=Visit%20Print%20Learn%20Center%20and%20subscribe%20to%20get%20100%20free%20worksheets%20every%20month!%21%20https%3A%2F%2Fwww.printlearncenter.com%2F" target="_blank"><img src="@(mediaUrl + "common/images/subsctptn/wt.png")" width="33" height="46" border="0"></a></td>
+                                    </tr>
+                                    <tr>
+                                        <td><a href="@(mediaUrl + "my-account/registration")" target="_blank"><img src="@(mediaUrl + "common/images/subsctptn/img2.jpg")" width="651" height="130" border="0"></a></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>
+
+}

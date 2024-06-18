@@ -1,0 +1,71 @@
+﻿<div ng-controller="ReferralDetailReportController" ng-init="init()">
+
+    <div class="umb-panel umb-editor-wrapper ng-scope">
+        <div data-element="editor-header" class="umb-editor-header flex items-center">
+            <h1 class="umb-panel-header-name ">{{Title}}</h1>
+        </div>
+    </div>
+    <div data-element="editor-container" class="umb-editor-container umb-panel-body umb-scrollable row-fluid ">
+        <div class="umb-pane">
+            <div ng-if="!ReferralDetailLoad">
+                <div class="row">
+                    <div class="pb-5">
+                        <input type="text" id="query" style="margin-top:9px;" ng-model="inputValue" />
+                        <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="FilterData(inputValue)">
+                            Search
+                        </button>
+                        <button ng-if="inputValue.length>0" class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="ResetData()">
+                            Reset
+                        </button>
+                    </div>
+                    <div class="text-right pb-5" ng-if="ReferralDetailList.length>0">
+                        <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="ExportToExcel()">
+                            <span ng-if="!ReferralDetailReportDownload"> Export To Excel</span>
+                            <span ng-if="ReferralDetailReportDownload"> Exporting..</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="umb-table" id="export">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Contact</th>
+                                <th>Referee Name</th>
+                                <th>Referee Email</th>
+                                <th>Referee Contact</th>
+                                <th>Joined Date</th>
+                                <th>Referrer Code</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody ng-if="ReferralDetailList.length>0">
+                            <tr ng-repeat="item in ReferralDetailList">
+                                <td>{{item.u_name}}</td>
+                                <td>{{item.u_email}}</td>
+                                <td>{{item.u_whatsappno_prefix}}{{item.u_whatsappno}}</td>
+                                <td>{{item.RefereeName}}</td>
+                                <td>{{item.RefereeEmail}}</td>
+                                <td>{{item.RefereeWPrefix}}{{item.RefereeWNumber}}</td>
+                                <td>{{item.DOC|date:'medium'}}</td>
+                                <td>{{item.ReferrerCode}}</td>
+                                <td>{{item.IsActive == 1 ? "Active": "InActive"}}</td>
+                            </tr>
+                        </tbody>
+                        <tbody ng-if="ReferralDetailList.length==0">
+                            <tr>
+                                <td colspan="8"> <localize key="content_listViewNoItems"></localize></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <ul class="umb-load-indicator animated -half-second" ng-if="ReferralDetailLoad">
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+            </ul>
+        </div>
+    </div>
+</div>

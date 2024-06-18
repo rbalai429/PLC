@@ -1,0 +1,48 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	string OfferName = String.Empty;
+	if (ViewData["OfferName"] != null || ViewData["OfferName"] != "")
+	{
+		OfferName = ViewData["OfferName"].ToString();
+	}
+
+	var ageGroups = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+							.DescendantsOrSelf()?.Where(x => x.ContentType.Alias == "offerRoot")?.FirstOrDefault()?.Children?
+							.Where(x => x.ContentType.Alias == "specialOffersRoot")?.OfType<SpecialOffersRoot>()?
+							.Where(x => x.OfferName == OfferName)?.FirstOrDefault()?.Children?.OfType<SpecialOfferAge>()?.ToList();
+
+}
+
+
+
+@if (ageGroups != null && ageGroups.Count > 0)
+{
+
+	<div class="fltrTab">
+		<ul>
+			@foreach (var ageItem in ageGroups)
+			{
+				int row = 0;
+				var ageMasterData = Umbraco?.Content(ageItem?.ClassName?.Udi)?.DescendantsOrSelf()?.OfType<NameListItem>()?.FirstOrDefault();
+
+				if (ageMasterData != null)
+				{
+
+					<li>
+						
+							<label class="fltrChkbx">
+								<input type="radio" name="classname" class="filterClass" value="@ageMasterData.ItemValue"
+									   id="@(" chkSubcatId_" + row)" />
+								<span class="checkmark">@ageMasterData.AlternateClassName</span>
+							</label>
+						
+					</li>
+
+				}
+
+				row++;
+			}
+		</ul>
+	</div>
+}
+

@@ -1,0 +1,52 @@
+https://login.external.hp.com/idp/startSSO.ping?PartnerSpId=https%3A%2F%2Fanalysiscenter.veracode.com%2Fsaml 
+
+Email - Janak.kaith@hp.com
+Password - Lion@123
+
+Username: deepak.srivastava1@hp.com
+Password: jkm.ijt-86
+
+User name : manoj.singh1@hp.com
+
+Pwd: India@181184
+
+preprod ftp
+10.10.10.127
+ftp.preprod.printlearncenter.com|userweb504
+BH^$%#423454WSe
+
+---------Jump server----------
+Public IP : 3.110.178.2
+user - Administrator
+Pass : AB*BlmZ7RMfVIvO7Ojrm87SI(A@JhpXy
+
+---------- RDP ---------------
+host : 10.10.10.127
+user : Administrator
+password : y8(;VU(wRr);@CP$drP.55i4k)Frif(3
+
+deepak.srivastava1@hp.com
+jkm.ijt-86
+
+staging browser cred
+
+User name - userweb510
+Password - 7cbnaqdSkXDc
+
+Pre prod cred
+User name - userweb504
+Password - BH^$%#423454WSe
+
+sona.s@hp.com
+sonahp@2021
+
+
+
+https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/preprod.printlearncenter
+https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/printlearncenter.com
+
+user name - Ci-cd-code-deploy-at-930878497239
+Password- VM3S5Mg0CP42FPoQbWOumGBS95lqYKNOWCnx7GiEZeU=
+
+
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC76bhb+LnQD2pPxyRaPrxSuey5BeQrIWFb4tbW/JwFaH10ruy4R3rk9wkvG3xAfzSMiJLVlW41o/FpvDaBCJIJfOaeILjuQ48xOprznFV7YHn/JmZovdyKGr/GmFXiwS4z5Zx1argv2eBjFDusvhBGVbnYA0frz3hwEpp4tE+eswIDAQAB

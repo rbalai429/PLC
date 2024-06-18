@@ -1,0 +1,73 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+
+	HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.HpOfferRedirection, "Yes");
+}
+
+<!--Offer html start-->
+
+<div class="main-wrp holinomar">
+	<div class="holibanner">
+		<div class="items">
+			<a href="/subscription/buy-now/?subscriptionid=T5XZnQ6i6bYTXIFq9eoJzQ==" onclick="ClaimOffer()">
+				
+				<picture>
+					<source data-srcset="/common/images/Offer/bts-banner-mob.jpg" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" />
+					<img class='b-lazy' data-src="/common/images/Offer/bts-banner.jpg" src='/common/images/banner_loader.jpg' alt="" />
+				</picture>
+			</a>
+		</div>
+	</div>
+	<div class="container-fluid holioffer-bg">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="holiwrper-offer">
+					<div class="holioffer-wrp">
+						<div class="holioffer-row">Why HP Print Learn Center?</div>
+						<div class="holioffer-row hr-bor">Get 11000+ expert-designed printable worksheets, guided video tutorials, and free webinars that will help your child:</div>
+						<div class="holioffer-row2">
+							<div class="holioffer-clm">
+								<span><img src="/common/images/Offer/develop-icon.png" alt="" /></span>
+								<p>
+									Develop foundational 21st-century <br>
+									skills like critical thinking,<br>
+									problem-solving, and creativity
+								</p>
+							</div>
+							<div class="holioffer-clm holiclm-bor">
+								<span><img src="/common/images/Offer/master-age-icon.png" alt="" /></span>
+								<p>
+									Master age-appropriate<br>
+									fundamental learning concepts
+								</p>
+							</div>
+							<div class="holioffer-clm">
+								<span><img src="/common/images/Offer/reduce-screen-icon.png" alt="" /></span>
+								<p>
+									Reduce screen time with <br>
+									paper-pencil-based fun activities
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--Offer html end-->
+
+
+
+
+@section CustomJsFiles
+{
+	<script>
+
+		function ClaimOffer() {
+			commonLayer("Back to School", "Back to School Claim Offer");
+		}
+	</script>
+}

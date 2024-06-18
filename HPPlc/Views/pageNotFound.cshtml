@@ -1,0 +1,54 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+
+	var content = Model.DescendantsOrSelf().OfType<PageNotFound>().SingleOrDefault();
+
+	//try
+	//{
+	//	List<string> Cc = new List<string>();
+	//	Cc.Add("shruti.wadkar@digitas.com");
+	//	Cc.Add("ria.agrawal@digitas.com");
+	//	Cc.Add("naamwar.khan@digitas.com");
+	//	Cc.Add("raushan.kumar@digitas.com");
+	//	string body = String.Empty;
+	//	body = "Hi\n\n<br><br>";
+	//	body += Request.Url + " page not found.";
+
+	//	HPPlc.Models.Mailer.SenderMailer mailsend = new HPPlc.Models.Mailer.SenderMailer();
+	//	mailsend.SendPaymentEmailerContent("404 Page not found", "ashish.kumar@digitas.com", body, Cc, null);
+	//}
+	//catch (Exception ex)
+	//{
+	//	HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+	//	error.PageName = "Page not found";
+	//	error.MethodName = "Pagenotfound";
+	//	error.ErrorMessage = ex.Message;
+
+	//	HPPlc.Models.dbAccessClass.PostApplicationError(error);
+	//}
+}
+
+
+<div class="main-wrp">
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="error-box">
+					@if (content != null)
+					{
+						<h2>@content.Title</h2>
+						<p>@Html.Raw(content?.SubTitle)</p>
+						<div class="gotohm">
+							@if (!String.IsNullOrWhiteSpace(content?.Navigation?.Url))
+							{
+								<a href="@content.Navigation.Url">@content.Navigation.Name</a>
+							}
+						</div>
+					}
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>

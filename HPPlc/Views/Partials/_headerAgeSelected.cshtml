@@ -1,0 +1,26 @@
+﻿
+@*@{
+	string[] splitAgeGroup;
+	List<string> myAgeGroup = new List<string>();
+	string UserSelectedAgeGroup = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserAgeGroupSelected);
+	string UserAgeGroup = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserAgeGroup);
+	if (!String.IsNullOrWhiteSpace(UserAgeGroup))
+	{
+		splitAgeGroup = UserAgeGroup.Split(',');
+		for (int i = 0; i < splitAgeGroup.Length; i++)
+		{
+			myAgeGroup.Add(splitAgeGroup[i].ToString());
+		}
+	}
+}
+
+	<div id="LangSessionStore">
+		<div class="hd-title"><span>Select Age Group</span> <a href="javascript:;"></a></div>
+		<ul>
+			@foreach (var item in myAgeGroup)
+			{
+				<li><a href="javascript:void(0);" onclick="changeAgeGroup('@item')" class="@(UserSelectedAgeGroup == item ? "active" : String.Empty)">@item Years <span></span></a></li>
+			}
+		</ul>
+	</div>*@
+

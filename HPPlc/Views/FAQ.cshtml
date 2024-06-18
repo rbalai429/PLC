@@ -1,0 +1,237 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.FAQ>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpage.cshtml";
+}
+<style>
+	.disable-click {
+		pointer-events: none;
+		cursor: default;
+		text-decoration: none;
+		color: black;
+		opacity: 0.6;
+	}
+
+		.disable-click:hover {
+			cursor: not-allowed;
+		}
+</style>
+@if (Model != null)
+{
+	<input type="hidden" id="MaxCountAllowToSelect" value="@Model.MaximumDateSelection">
+	<div class="main-wrp">
+
+		@Html.Partial("_Breadcrumb")
+		<div class="container-fluid">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="faqMn">
+						<div class="tpBnr">
+							<h2 class="hdtitl">@Model.HeaderTitle</h2>
+							<div class="tpBnr">
+								<img class="imgPlacing" src="~/common/images/bannerFaq.jpg" alt="" />
+							</div>
+							@*@if (Model.ba != null && Model.HeaderImage.Url() != null)
+								{<img src="@Model.HeaderImage.Url()" alt="">
+								}
+								else
+								{
+							<img src="@Model.HeaderImage.Url()" alt="">
+								 }*@
+						</div>
+						<div class="cntctUs" id="contact-us">
+							<h1 class="hdTitle1">@Model.ContactUsTitle</h1>
+							@if (Model.ViaEmail != null)
+							{
+								var email = Model.ViaEmail.FirstOrDefault();
+								if (email != null)
+								{
+									<div class="lftCont">
+										@Html.Raw(email.SubTitle)
+										@foreach (var item in email.Descriptions)
+										{
+											<p class="smlltxt">@item</p>
+										}
+
+									</div>
+								}
+							}
+							@if (Model.ViaCall != null)
+							{
+								var ViaCall = Model.ViaCall.FirstOrDefault();
+								if (ViaCall != null)
+								{
+									<div class="lftCont ritCont">
+										@Html.Raw(ViaCall.SubTitle)
+										@foreach (var item in ViaCall.Descriptions)
+										{
+											<p class="smlltxt">@item</p>
+										}
+										@if (Model.RequestButton != null && !string.IsNullOrWhiteSpace(Model.RequestButton))
+										{
+
+											<a href="#RequestForm" class="rqst-call-bckBtn">@Model.RequestButton</a>
+										}
+									</div>
+								}
+							}
+							<div class="getCall-bck" id="RequestForm">
+								<span class="arrow-up"></span>
+								@if (Model.RequestTitle != null)
+								{
+									@Html.Raw(Model.RequestTitle)
+								}
+
+								<div class="frmRow">
+									@if (Model.FullName != null && !string.IsNullOrWhiteSpace(Model.FullName))
+									{
+										<div class="tdfrm">
+											<div class="tdfrmin">
+												<label>@Model.FullName</label>
+												<div class="inDvfld">
+													<input type="text" name="" id="FullName" value="">
+													@if (Model.FullNameRequired != null && !string.IsNullOrWhiteSpace(Model.FullNameRequired))
+													{
+														<span class="error" id="FullNameRequired" style="display:none;">@Model.FullNameRequired</span>
+													}
+												</div>
+											</div>
+										</div>
+									}
+									@if (Model.Mobile != null && !string.IsNullOrWhiteSpace(Model.Mobile))
+									{
+										<div class="tdfrm">
+											<div class="tdfrmin">
+												<label>@Model.Mobile</label>
+												<div class="inDvfld">
+													<input type="text" name="" value="" id="Mobile" maxlength="10" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')">
+													@if (Model.MobileRequired != null && !string.IsNullOrWhiteSpace(Model.MobileRequired))
+													{
+														<span class="error" id="MobileRequired" style="display:none;">@Model.MobileRequired</span>
+													}
+													@if (Model.InvalidMobile != null && !string.IsNullOrWhiteSpace(Model.InvalidMobile))
+													{
+														<span class="error" id="InvalidMobile" style="display:none;">@Model.InvalidMobile</span>
+													}
+												</div>
+											</div>
+										</div>
+									}
+								</div>
+								<div class="frmRow">
+									@if (Model.SelectDate != null && !string.IsNullOrWhiteSpace(Model.SelectDate))
+									{
+										<div class="tdfrm">
+											<div class="tdfrmin">
+												<label>@Model.SelectDate</label>
+												<div class="inDvfld">
+													<input type="text" name="txtDate" value="" placeholder="@Model.SelectDate" id="SelectDate" data-toggle="datepicker" required readonly />
+													@if (Model.DateRequired != null && !string.IsNullOrWhiteSpace(Model.DateRequired))
+													{
+														<span class="error" id="DateRequired" style="display:none;">@Model.DateRequired</span>
+													}
+												</div>
+											</div>
+										</div>
+									}
+									@if (Model.SelectTime != null && !string.IsNullOrWhiteSpace(Model.SelectTime))
+									{
+										<input type="hidden" id="selecttime" value="@Model.SelectTime" />
+										<div class="tdfrm">
+											<div class="tdfrmin">
+												<label>@Model.SelectTime</label>
+												<div class="inDvfld">
+													<select id="SelectTime">
+														<option value="">@Model.SelectTime</option>
+													</select>
+													@if (Model.TimeRequired != null && !string.IsNullOrWhiteSpace(Model.TimeRequired))
+													{
+														<span class="error" id="TimeRequired" style="display:none;">@Model.TimeRequired</span>
+													}
+												</div>
+											</div>
+										</div>
+									}
+								</div>
+								@*<div class="frmRow">
+									@if (Model.Remark != null && !string.IsNullOrWhiteSpace(Model.Remark))
+									{
+										<div class="tdfrm">
+											<div class="tdfrmin">
+												<label>@Model.Remark</label>
+												<div class="inDvfld">
+													<textarea id="Remark"></textarea>
+												</div>
+											</div>
+										</div>
+									}
+									@if (Model.Consent != null && !string.IsNullOrWhiteSpace(Model.Consent))
+									{
+										<div class="tdfrm">
+											<div class="tdfrmin">
+												<label>@Model.Consent</label>
+												<div class="inDvfld">
+													<select id="Consent">
+														<option value="">Select Consent</option>
+														<option value="Website">Website</option>
+														<option value="Email">Email</option>
+														<option value="Mobile">Mobile</option>
+													</select>
+
+												</div>
+											</div>
+										</div>
+									}
+								</div>*@
+								<div class="frmRow">
+									<div class="">
+										<div class="tdfrmin">
+											<div class="subs-checkbox">
+												<label class="container-label">
+													<input type="checkbox" value="Yes" id="AgreeTermText" name="AgreeTermText">
+													<span class="checkmark-label"></span>
+													<p> @Html.Raw(Umbraco.GetDictionaryValue("Agree Term Text", "Agree Term Text"))</p>
+												</label>
+
+											</div>
+										</div>
+									</div>
+
+								</div>
+								@if (Model.RequestSubmitButton != null && !string.IsNullOrWhiteSpace(Model.RequestSubmitButton))
+								{
+									<div class="frmRow">
+										<a href="javascript:void(0)" class="btn sbmt-btn disable-click">@Model.RequestSubmitButton</a>
+									</div>
+
+									<div class="tdfrmin">
+										<h4 class="success" id="SubmitSuccess" style="display:none"></h4>
+									</div>
+
+								}
+							</div>
+						</div>
+						<div class="faqs-acrd" id="faqs">
+							<h2 class="head2">@Model.FAqtitle</h2>
+							@Html.Raw(Model.FAqsubTitle)
+							@foreach (var item in Model?.FAqitems?.ToList())
+							{
+								<h5>@item.Title </h5>
+								<div class="acrdCont">
+									@Html.Raw(item.Description)
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="~/CustumJs/Faq.js"></script>
+	@*<script>
+		$('[data-toggle="datepicker"]').datepicker();
+	</script>*@
+}

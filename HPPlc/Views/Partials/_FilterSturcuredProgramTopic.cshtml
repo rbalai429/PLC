@@ -1,0 +1,37 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<List<Umbraco.Web.PublishedModels.Topics>>
+@{
+    var topics = Model;
+}
+
+@if (topics != null && topics.Any())
+{
+    int row = 0;
+    foreach (var topic in topics)
+    {
+        <div class="chkBxItem chkBxItemWht">
+            <div class="cstm-chckbx">
+                <label for="@(" topic_" + row)">
+                    <input type="checkbox"
+                           name="topics"
+                           value="@topic.TopicValue"
+                           id="@(" topic_" + row)"
+                           title="@topic.TopicName"
+                           class="checbx chkFilterSubCategory topics" />
+                    <strong class="chkInf"></strong>
+                    <span>@topic.TopicName</span>
+                </label>
+            </div>
+        </div>
+        row++;
+    }
+}
+else
+{
+    <div class="chkBxItem chkBxItemWht">
+        <div class="cstm-chckbx">
+            <label>
+                <span>No Topics Found</span>
+            </label>
+        </div>
+    </div>
+}

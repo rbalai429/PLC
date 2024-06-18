@@ -1,0 +1,299 @@
+﻿@inherits UmbracoViewPage
+@using Umbraco.Web.Models
+
+@{
+	var currentCulture = Model.GetCultureFromDomains();
+	if (!String.IsNullOrWhiteSpace(currentCulture))
+	{
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SelectedLanguageCulture, currentCulture);
+	}
+	string culture = HPPlc.Models.CultureName.GetCultureName();
+
+	var header = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "commonRoot").FirstOrDefault()?
+							   .Children?.Where(x => x.ContentType.Alias == "header").OfType<Header>().FirstOrDefault();
+
+	var languageDisplayOn = header?.LanguageNotDisplayOn?.Where(x => x.Name.Equals(Model.Name)).Any();
+
+	var SubscriptionMessageDisplayOnHeader = header?.DisplaySubscriptionMessageOnHeader?.Where(x => x.Name.Equals(Model.Name)).Any();
+
+	var CurrentselectedLang = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.SelectedLanguage);
+
+	//Check User LoggedIn Or Not
+	var LoggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+
+	string UserSelectedAgeGroup = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserAgeGroupSelected);
+
+	//HPPlc.Models.LoggedIn loggedIn = new HPPlc.Models.LoggedIn();
+	//loggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<HPPlc.Models.LoggedIn>(HPPlc.Models.SessionType.LoggedInDtls);
+	//Get value for open subscription popup
+	//string subscribePopup = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.subscriptionPopup);
+	//int NoOfSubscribed = HPPlc.Models.SessionManagement.GetCurrentSession<int>(HPPlc.Models.SessionType.NoOfSubscribed);
+
+	//var pageName = !string.IsNullOrEmpty(Convert.ToString(Model.Name)) ? Convert.ToString(Model.Name) : "";
+	var pageName = UmbracoContext.PublishedRequest.PublishedContent.Name;
+	string userLoggedInMode = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserRegistrationMode);
+
+}
+
+@if (header != null)
+{
+	<header id="headerTag">
+		<div class="header">
+			@*<div class="header-subscribe subscription-ended-color">
+				<div class="subscription-title">
+					@if (SubscriptionMessageDisplayOnHeader == true)
+					{
+						if (LoggedIn == "Y")
+						{
+							<span><a id="subscribeOpener" href="javascript:void(0);" onclick="commonLayer('@pageName','@header.ManageYourSubscription.ToString()');">@header.ManageYourSubscription</a></span>
+						}
+					}
+				</div>
+				</div>*@
+			<div class="header-main-section">
+				<div class="headerMMM"><a href="#mobile-menu"></a></div>
+				@if (header != null && header?.Logo?.Url() != null)
+				{
+					<div class="plc-logo">
+
+						<a href="@(culture == "" ? "/" : culture)" onclick="commonLayer('@pageName','PLC Icon');">
+							@if (header != null && header?.Logo?.Url() != null)
+							{
+								<img src="@(header?.Logo?.Url())" alt="PLC" width="82" height="42" />
+							}
+						</a>
+
+					</div>
+				}
+				<div class="col-hdr-lit">
+
+					@try
+					{
+						if (pageName != null && pageName != "" && pageName.ToLower() != "registration")
+						{
+							@Html.Partial("/Views/Partials/_TopTabsBonus.cshtml", new ViewDataDictionary(this.ViewData)
+						{
+						   {"AboutUsTitle",header?.AboutUs.Name },{ "AboutUsUrl", header?.AboutUs.Url },
+						   {"PricingTabTitle",header?.PricingTab.Name },{ "PricingTabUrl", header?.PricingTab.Url },
+						   {"ContactUsTitle",header?.ContactUs.Name },{ "ContactUsUrl", header?.ContactUs.Url },
+						})
+						}
+					}
+					catch (Exception ex) { }
+
+
+				</div>
+
+				@*@<div class="col-hdr-lit">
+						@try
+						{
+							if (pageName != null && pageName != "" && pageName.ToLower() != "registration")
+							{
+								@Html.Partial("/Views/Partials/_TopTabs.cshtml", new ViewDataDictionary(this.ViewData)
+							{
+							   {"AboutUsTitle",header?.AboutUs.Name },{ "AboutUsUrl", header?.AboutUs.Url },
+							   {"PricingTabTitle",header?.PricingTab.Name },{ "PricingTabUrl", header?.PricingTab.Url },
+							   {"ContactUsTitle",header?.ContactUs.Name },{ "ContactUsUrl", header?.ContactUs.Url },
+							})
+							}
+						}
+						catch (Exception ex) { }
+					</div>*@
+
+				<div class="col-hdr-rit newlayOut">
+					<div class="premium-signin pckgs">
+						@if (header != null && header.AboutUs != null && header.AboutUs?.Url != null)
+						{
+							<a href="@(header.AboutUs?.Url)" onclick="commonLayer('@pageName','About us');">
+
+								<span>
+									@header.AboutUs.Name
+								</span>
+							</a>
+						}
+					</div>
+					<div class="premium-signin pckgs">
+						@if (header != null && header.PricingTab != null)
+						{
+							<a href="@header.PricingTab.Url" onclick="commonLayer('@pageName','@header.PricingTab.Name');">
+								<span>
+									@header.PricingTab.Name
+								</span>
+							</a>
+						}
+					</div>
+
+					@*@if (LoggedIn == "Y")
+						{
+							List<HPPlc.Models.GetUserCurrentSubscription> mySubscription = new List<HPPlc.Models.GetUserCurrentSubscription>();
+							mySubscription = HPPlc.Models.SessionManagement.GetCurrentSession<List<HPPlc.Models.GetUserCurrentSubscription>>(HPPlc.Models.SessionType.SubscriptionInDtls);
+
+							if (mySubscription != null && mySubscription.Count > 0)
+							{*@
+					@try
+					{
+						if (Request.Url.AbsoluteUri.Contains("lesson"))
+						{
+							<div class="language-slct">
+								<div class="newIcn"><img src="/common/images/new-icon.png" alt="" height="24" width="24"></div>
+
+								@if ((header != null && header.LanguageName.Any()) || CurrentselectedLang != null)
+								{
+									if (CurrentselectedLang != null)
+									{
+										<span class="language-text">@CurrentselectedLang</span>
+									}
+									else
+									{
+										var selectedLang = header.LanguageName.Where(x => x.DefaultLanguage && x.IsActive).FirstOrDefault();
+										if (selectedLang != null)
+										{
+											<span class="language-text">@selectedLang.LanguageName</span>
+										}
+									}
+								}
+
+								<div class="language-overlay">
+									<div class="language-drop">
+										@Html.Partial("_headerLanguage")
+									</div>
+								</div>
+							</div>
+						}
+					}
+					catch { }
+
+					@*}
+						}*@
+
+					<div class="premium-signin sinin">
+
+						@*<a href="javascript:void(0);" class="signin-arrow">
+								<span class="prflIcnHdr"></span>
+							</a>*@
+
+						@try
+						{
+							if (pageName != null && !pageName.Contains("registration"))
+							{
+								if (header != null && header.SignIn != null && LoggedIn == null)
+								{
+									<a href="/my-account/login" class="loginMsg" data-id="6" onclick="commonLayer('@pageName','Login from header');">
+										<span>
+											@header.SignIn.Name
+										</span>
+									</a>
+								}
+							}
+						}
+						catch { }
+
+						@try
+						{
+							if (header != null && header?.SignOut != null && LoggedIn == "Y")
+							{
+								var headerMenu = header?.AfterLoggedInMenu;
+								<a href="javascript:void(0);" class="signin-arrow">
+									<span class="prflIcnHdr"></span>
+
+								</a>
+								<div class="signin-drop">
+									<div class="signin-dropInr">
+										<ul class="SininTopLink">
+											@if (headerMenu != null)
+											{
+												foreach (var items in headerMenu)
+												{
+													try
+													{
+														if (!(items != null && items?.SelectSubscriptions?.Name?.ToLower().Replace(" ", "") == "changepassword" && (!String.IsNullOrWhiteSpace(userLoggedInMode) && userLoggedInMode.ToLower() == "otp")))
+														{
+															<li><a href="@(items?.SelectSubscriptions?.Url)" target="@(items?.SelectSubscriptions?.Target)" onclick="commonLayer('@pageName','User Profile Icon(@(items?.SelectSubscriptions?.Name))');"><b><img src="@(items?.BrowseDocument?.Url())" alt="" width="1" height="1"></b> @(items?.SelectSubscriptions?.Name)</a></li>
+														}
+													}
+													catch { }
+												}
+											}
+
+											<li><a href="javascript:void(0);" onclick="SignOut();"><b><img src="/common/images/icon-my-acount.png" alt="" width="1" height="1"></b>@header.SignOut.Name</a></li>
+
+										</ul>
+
+										@*<ul class="SininBtLink">
+												@if (header != null && header.PricingTab != null)
+												{
+													<li>
+														<a href="@header.PricingTab.Url" onclick="commonLayer('@pageName','@header.PricingTab.Name');">
+															@header.PricingTab.Name
+														</a>
+													</li>
+												}
+
+											</ul>*@
+
+										@*<div class="tryOthrLnggs">
+												<span>Try other languages:</span>
+												<div class="selectinLng">
+													<select>
+														<option>English</option>
+														<option>Hindi</option>
+														<option>Tamil</option>
+													</select>
+												</div>
+											</div>*@
+									</div>
+
+								</div>
+							}
+						}
+						catch { }
+					</div>
+
+					@*<div class="hlp-cntr" onclick="commonLayer('@pageName','@header.HelpCenter');">
+							<span>@header.HelpCenter</span>
+							<div class="ddhlp-cnt">
+								<ul>
+									@if (header.ContactUs != null && !string.IsNullOrWhiteSpace(header.ContactUs.ToString()))
+									{
+										<li><a id="click" href="@header.ContactUs.Url" onclick="commonLayer('@pageName','@header.ContactUs.Name');">@header.ContactUs.Name</a></li>
+									}
+									@if (header.FAqs != null && !string.IsNullOrWhiteSpace(header.FAqs.ToString()))
+									{
+										<li><a id="click" href="@header.FAqs.Url" onclick="commonLayer('@pageName','@header.FAqs.Name');">@header.FAqs.Name</a></li>
+									}
+								</ul>
+							</div>
+						</div>*@
+
+					@if (header != null && header?.HPlogo?.Url() != null)
+					{
+						<div class="hp-logo" onclick="commonLayer('@pageName','HP Icon');">
+							@if (culture != null && culture == "en-US")
+							{
+								<a href='@(culture == "/" ? string.Empty : culture + "/")'>
+									@if (header != null && header?.HPlogo?.Url() != null)
+									{
+										<img src="@(header?.HPlogo?.Url())" alt="PLC" width="31" height="31" />
+									}
+								</a>
+							}
+							else
+							{
+								<a href='/en'>
+									@if (header != null && header?.HPlogo?.Url() != null)
+									{
+										<img src="@(header?.HPlogo?.Url())" alt="PLC" width="31" height="31" />
+									}
+								</a>
+							}
+						</div>
+					}
+				</div>
+
+
+
+			</div>
+		</div>
+
+	</header>
+}

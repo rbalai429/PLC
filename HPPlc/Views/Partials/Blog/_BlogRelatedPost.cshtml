@@ -1,0 +1,44 @@
+﻿@model IEnumerable<Umbraco.Web.PublishedModels.BlogContent>
+@{
+	int TotalCountOfRelatedBlogs = (int)ViewData["TotalCountOfRelatedBlogs"];
+	int NoOfRelatedBlogDisplayOnBlogDetailsPage = (int)ViewData["NoOfRelatedBlogDisplayOnBlogDetailsPage"];
+	string TagName = (string)ViewData["TagName"];
+}
+
+@if (Model != null)
+{
+	<div class="post-slidr">
+		@foreach (var blog in Model)
+		{
+			<div class="pp-postclm">
+				<div class="pp-postclm-inr">
+					@if (blog.BlogMediaFile != null)
+					{
+						<div class="pp-postclmlft">
+							<a href="@blog.Url()" onclick="commonLayer('BlogDetails','Related Post - @blog.BlogTitle');">
+								<div class="thumbsPlcHldr">
+									<img class="imgPlacing" src="@Url.GetCropUrl(imageCropperValue: blog.BlogMediaFile, width: 126,height: 79)" alt="Blog Image" />
+								</div>
+							</a>
+						</div>
+					}
+						<div class="pp-postclmrgt">
+							<em class="dt">@blog.BlogDate.ToString("MMMM d, yyyy")</em>
+							<p>
+								<a class="ra-fn" href="@blog.Url()" onclick="commonLayer('BlogDetails','Related Post - @blog.BlogTitle');">
+									@blog.BlogTitle
+								</a>
+							</p>
+							@*@Html.Raw(blog.BlogDescription)*@
+							<em class="autnm">@blog.AuthorName</em>
+						</div>
+					</div>
+			</div>
+		}
+	</div>
+
+	if (TotalCountOfRelatedBlogs > NoOfRelatedBlogDisplayOnBlogDetailsPage)
+	{
+		<div class="ppview-mor"><a href="/blogs/related-post?tag=@TagName" onclick="commonLayer('BlogDetails','Related Post - View more');">View more</a></div>
+	}
+}

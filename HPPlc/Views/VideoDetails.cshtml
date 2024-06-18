@@ -1,0 +1,138 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models
+@{
+	Layout = "masterpage.cshtml";
+	var CultureInfo = Model.GetCultureFromDomains();
+
+	var downloadText = Umbraco.GetDictionaryValue("Download Button");
+	var SubscribefordownloadText = Umbraco.GetDictionaryValue("Subscribe to download");
+	var buyNow = Umbraco.GetDictionaryValue("Upgrade to Premium");
+	var BuyNewSubscription = Umbraco.GetDictionaryValue("BuyNewSubscription");
+	var ageName = string.Empty;
+	//Check User LoggedIn Or Not
+	var UserLoggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+	if (Model.HasProperty("ageGroup"))
+	{
+		ageName = Model.GetProperty("ageGroup").Value<Link>().Name;
+	}
+	string qtype = String.Empty;
+	string qtypeid = String.Empty;
+
+	if (Request.QueryString != null && Request.QueryString.Count >= 2)
+	{
+		qtype = Request.QueryString.Get("type");
+		qtypeid = Request.QueryString.Get("typeid");
+	}
+}
+
+@section styles
+{
+	<link href="/common/css/video-js.css" rel="stylesheet" />
+}
+
+@section metatags
+{
+	@Html.Partial("/Views/Partials/_MetaDataBind.cshtml")
+}
+
+<style>
+	.loading-test {
+		height: 0;
+		width: 0;
+		padding: 15px;
+		border: 6px solid #ccc;
+		border-right-color: #888;
+		border-radius: 22px;
+		-webkit-animation: rotate 1s infinite linear;
+		position: relative;
+		margin: auto;
+	}
+
+	@@-webkit-keyframes rotate {
+
+		100% {
+			-webkit-transform: rotate(360deg);
+		}
+	}
+</style>
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input id="hdnqtype" type="hidden" value="age" />
+<input id="hdnqtypeid" type="hidden" value="@qtypeid" />
+<input id="hdnDownloadText" type="hidden" value="@downloadText" />
+<input id="hdnSubscribeforDownload" type="hidden" value="@SubscribefordownloadText" />
+<input id="hdnBuyNow" type="hidden" value="@buyNow" />
+<input id="hdnBuyNewSubscription" type="hidden" value="@BuyNewSubscription" />
+<input id="hdnAgeName" type="hidden" value="@ageName" />
+
+<div class="main-wrp">
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	@Html.Partial("_Breadcrumb")
+
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				@*<div class="title-fltr">
+						<div id="dvTitleWorksheet">
+							<h3>Video Details </h3>
+						</div>
+					</div>*@
+				<form id="form1" method="post">
+					@Html.AntiForgeryToken()
+
+					<div id="dvVideoTuturial">
+						<div class="container-fluid">
+							<div class="container-box">
+								<div class="container-inr">
+									<div class="loading-test" id="videoLoading"></div>
+									<div id="VideoDetailsDiv"></div>
+									@*<div class="list-items dvVideoSectionContainer" style="display:none">
+										</div>*@
+
+									@*<div class="list-items-coming">
+											Coming Soon ...
+										</div>*@
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</form>
+
+			</div>
+		</div>
+	</div>
+
+
+
+</div>
+<div class="scrollto_top">
+	<div class="scrolltt_inr">
+		<span></span>
+	</div>
+</div>
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/VideoDetails.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/video.core.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/videojs-contrib-eme.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/videojs-contrib-quality-levels.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/videojs-http-source-selector.js"></script>
+	<script type="text/javascript" src="/CustumJs/videojs/videojs-http-streaming.min.js"></script>
+
+
+
+	<script>
+		function loadMore(displayCount) {
+			loadMoreData(displayCount);
+		}
+	</script>
+}
+
+
+

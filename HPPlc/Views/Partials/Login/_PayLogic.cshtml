@@ -1,0 +1,278 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+
+@{
+	var titleData = Umbraco?.ContentAtRoot()?.Where(x => x?.ContentType?.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+		.Where(x => x?.ContentType?.Alias == "structureProgramRoot")?.OfType<StructureProgramRoot>()?.FirstOrDefault();
+
+
+	string IsUserisPaid = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.SubscribedOrNotBonus);
+	if (String.IsNullOrEmpty(IsUserisPaid))
+	{ IsUserisPaid = "0"; }
+}
+
+@*Free Downloads*@
+<div class="overlaySD" id="freeDwnld" style="display:none">
+	<div class="sdPopup">
+		<div class="sdPopupCont">
+			<span class="sdClose"></span>
+			<div class="sdHd">
+				<h5>Worksheet downloaded successfully! </h5>
+			</div>
+			<div class="sdImg"><img src="/common/images/Bonus/Bonus1.jpg" alt=""></div>
+			<div class="sdBtm">
+				@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+				{
+					@Html.Raw(titleData?.WorksheetDownloadDescription)
+				}
+				<div class="sdBtnRow">
+					@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+					{
+						<a href="/subscription?mode=wks" class="btn downllink viewpricing">@(titleData?.ViewPricingTitle)</a>
+					}
+					&nbsp;<a href="javascript:void(0);" class="btn secndryBtn payClose">@(titleData?.CloseTitle)</a>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+@*Free Downloads Just Login*@
+<div class="overlaySD" id="freeDwnldJustAfterLogin" style="display:none">
+	<div class="sdPopup">
+		<div class="sdPopupCont">
+			<span class="sdClose payCloselgn"></span>
+			<div class="sdHd">
+				<h5>Worksheet downloaded successfully! </h5>
+			</div>
+			<div class="sdImg"><img src="/common/images/Bonus/Bonus1.jpg" alt=""></div>
+			<div class="sdBtm">
+				@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+				{
+					@Html.Raw(titleData?.WorksheetDownloadDescription)
+				}
+				<div class="sdBtnRow">
+					@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+					{
+						<a href="/subscription?mode=wks" class="btn downllink viewpricing">@(titleData?.ViewPricingTitle)</a>
+					}
+					&nbsp;<a href="javascript:void(0);" class="btn secndryBtn payCloselgn">@(titleData?.CloseTitle)</a>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+@*User not have subscription*@
+
+<div class="overlaySD" id="PayRequirementJustLogin" style="display:none">
+	<div class="sdPopup">
+		<div class="sdPopupCont">
+			<span class="sdClose payCloselgn"></span>
+			<div class="sdHd">
+				<p><span class="cntOfDownload"></span></p>
+			</div>
+			@*<div class="sdHd_compl">
+					<h5>You’ve reached a download limit! Upgrade to enjoy uninterrupted access to 15,000+ expert-designed worksheets.</h5>
+				</div>*@
+			<div class="sdImg"><img src="/common/images/Bonus/Bonus1.jpg" alt=""></div>
+			<div class="sdBtm">
+				@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+				{
+					@Html.Raw(titleData?.WorksheetDownloadDescription)
+				}
+				<div class="sdBtnRow">
+					<a href="/subscription?mode=wks" class="btn downllink viewpricing">@(titleData?.ViewPricingTitle)</a>
+					@*@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+						{
+							<a href="/subscription?mode=wks" class="btn downllink viewpricing">@(titleData?.ViewPricingTitle)</a>
+						}*@
+					@*@&nbsp;<a href="javascript:void(0);" class="btn secndryBtn payCloselgn">@(titleData?.CloseTitle)</a>*@
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<div class="overlaySD" id="PayRequirement" style="display:none">
+	<div class="sdPopup">
+		<div class="sdPopupCont">
+			<span class="sdClose payClose"></span>
+			<div class="sdHd">
+				<p><span class="cntOfDownload"></span></p>
+			</div>
+			@*<div class="sdHd after10dwnload">
+					<h5>You’ve reached a download limit! Upgrade to enjoy uninterrupted access to 15,000+ expert-designed worksheets.</h5>
+				</div>*@
+			<div class="sdImg"><img src="/common/images/Bonus/Bonus1.jpg" alt="" /></div>
+			<div class="sdBtm">
+				@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+				{
+					@Html.Raw(titleData?.WorksheetDownloadDescription)
+				}
+				<div class="sdBtnRow">
+					<a href="/subscription?mode=wks" class="btn downllink viewpricing">@(titleData?.ViewPricingTitle)</a>
+					@*@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+						{
+							<a href="/subscription?mode=wks" class="btn downllink viewpricing">@(titleData?.ViewPricingTitle)</a>
+						}*@
+					&nbsp;<a href="javascript:void(0);" class="btn secndryBtn payClose closebtn">@(titleData?.CloseTitle)</a>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+@*User 10 free downloads*@
+
+<div class="overlaySD" id="freetrialJustLogin" style="display:none">
+	<div class="sdPopup">
+		<div class="sdPopupCont">
+			<span class="sdClose payCloselgn"></span>
+			<div class="sdHd">
+				<p><span class="cntOfDownload"></span></p>
+			</div>
+			@*<div class="sdHd_compl">
+					<h5>You’ve reached a download limit! Upgrade to enjoy uninterrupted access to 15,000+ expert-designed worksheets.</h5>
+				</div>*@
+			<div class="sdImg"><img src="/common/images/Bonus/Bonus1.jpg" alt=""></div>
+			<div class="sdBtm">
+				@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+				{
+					@Html.Raw(titleData?.WorksheetDownloadDescription)
+				}
+				<div class="sdBtnRow">
+					<a href="/subscription?mode=wks" class="btn downllink viewpricing">@(titleData?.ViewPricingTitle)</a>
+					@*@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+						{
+							<a href="/subscription?mode=wks" class="btn downllink viewpricing">@(titleData?.ViewPricingTitle)</a>
+						}*@
+					&nbsp;<a href="javascript:void(0);" class="btn secndryBtn payCloselgn">@(titleData?.CloseTitle)</a>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<div class="overlaySD" id="freetrialLoggrdIn" style="display:none">
+	<div class="sdPopup">
+		<div class="sdPopupCont">
+			<span class="sdClose payClose"></span>
+			<div class="sdHd">
+				<p><span class="cntOfDownload"></span></p>
+			</div>
+			@*<div class="sdHd after10dwnload">
+					<h5>You’ve reached a download limit! Upgrade to enjoy uninterrupted access to 15,000+ expert-designed worksheets.</h5>
+				</div>*@
+			<div class="sdImg"><img src="/common/images/Bonus/Bonus1.jpg" alt=""></div>
+			<div class="sdBtm">
+				@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+				{
+					@Html.Raw(titleData?.WorksheetDownloadDescription)
+				}
+				<div class="sdBtnRow">
+					<a href="/subscription?mode=wks" class="btn downllink viewpricing">@(titleData?.ViewPricingTitle)</a>
+					@*@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+						{
+							<a href="/subscription?mode=wks" class="btn downllink viewpricing">@(titleData?.ViewPricingTitle)</a>
+						}*@
+					&nbsp;<a href="javascript:void(0);" class="btn secndryBtn payClose">@(titleData?.CloseTitle)</a>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+@*Paid worksheet download just login*@
+<div class="overlaySD" id="paidDwnldJustLgn" style="display:none">
+	<div class="sdPopup">
+		<div class="sdPopupCont">
+			<span class="sdClose payCloselgn"></span>
+			<div class="sdHd">
+				<p><span class="cntOfDownload"></span></p>
+				@*<h5>Your worksheet is downloaded successfully</h5>*@
+				@*<p><span id="cntOfDownload"></span> @titleData.DownloadedTitle</p>*@
+			</div>
+			<div class="sdImg"><img src="/common/images/Bonus/Bonus3.jpg" alt="" /></div>
+			<div class="sdBtm">
+				@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+				{
+					@Html.Raw(titleData?.WorksheetDownloadDescription)
+				}
+				<div class="sdBtnRow">
+					@*@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+					{
+						<a href="javascript:void(0)" class="btn downllink viewpricing">@(titleData?.ViewPricingTitle)</a>
+					}*@
+					<a href="javascript:void(0)" class="btn downllink viewpricing pricing" style="display:none">@(titleData?.ViewPricingTitle)</a>
+					&nbsp;<a href="javascript:void(0);" class="btn secndryBtn payCloselgn">@(titleData?.CloseTitle)</a>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+@*Paid worksheet download*@
+<div class="overlaySD" id="paidDwnld" style="display:none">
+	<div class="sdPopup">
+		<div class="sdPopupCont">
+			<span class="sdClose"></span>
+			<div class="sdHd">
+				@*<h5>Your worksheet is downloaded successfully</h5>*@
+				<p><span class="cntOfDownload"></span></p>
+				@*<p><span class="cntOfDownload"></span> @titleData.DownloadedTitle</p>*@
+			</div>
+			<div class="sdImg"><img src="/common/images/Bonus/Bonus3.jpg" alt="" /></div>
+			<div class="sdBtm">
+				@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+				{
+					@Html.Raw(titleData?.WorksheetDownloadDescription)
+				}
+				<div class="sdBtnRow">
+					@*@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+					{
+						<a href="/subscription?mode=wks" class="btn downllink viewpricing">@(titleData?.ViewPricingTitle)</a>
+					}*@
+					<a href="/subscription?mode=wks" class="btn downllink viewpricing pricing" style="display:none">@(titleData?.ViewPricingTitle)</a>
+					&nbsp;<a href="javascript:void(0);" class="btn secndryBtn payClose">@(titleData?.CloseTitle)</a>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+
+@*Header Login*@
+<div class="overlaySD" id="HeaderLogin" style="display:none">
+	<div class="sdPopup">
+		<div class="sdPopupCont">
+			<span class="sdClose payCloselgn"></span>
+			<div class="sdHd">
+				<h5>Congratulations! You’ve unlocked 10 premium downloads.</h5>
+				@*<p><span class="cntOfDownload"></span> @titleData.DownloadedTitle</p>*@
+			</div>
+			<div class="sdImg"><img src="/common/images/Bonus/Bonus1.jpg" alt="" /></div>
+			<div class="sdBtm">
+				@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+				{
+					@Html.Raw(titleData?.WorksheetDownloadDescription)
+				}
+				<div class="sdBtnRow">
+					@if (!String.IsNullOrEmpty(IsUserisPaid) && IsUserisPaid == "0")
+					{
+						<a href="/subscription?mode=wks" class="btn downllink" onclick="commonLayer('Download Popup', 'Popup');">@(titleData?.ViewPricingTitle)</a>
+					}
+					&nbsp;<a href="javascript:void(0);" class="btn secndryBtn payCloselgn">@(titleData?.CloseTitle)</a>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>

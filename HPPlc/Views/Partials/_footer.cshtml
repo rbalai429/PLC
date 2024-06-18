@@ -1,0 +1,57 @@
+﻿@inherits UmbracoViewPage
+@using Umbraco.Web.Models
+
+@{
+	var currentCulture = Model.GetCultureFromDomains();
+
+	var footer = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "commonRoot")?.FirstOrDefault()?
+							   .Children.Where(x => x.ContentType.Alias == "footer")?.OfType<Footer>()?.FirstOrDefault();
+
+	//var pageName = !string.IsNullOrEmpty(Convert.ToString(Model.Name)) ? Convert.ToString(Model.Name) : "";
+	var pageName = UmbracoContext.PublishedRequest.PublishedContent.Name;
+}
+
+
+<footer id="footerTag" class="ftrFixd">
+	<div class="ftrArrow"></div>
+	<div class="footer ftrPadBtm">
+		<div class="footer-container">
+			<div class="ftr-link-row">
+				<div class="ftr-link">
+					<ul>
+						@try
+						{
+							if (footer != null && footer.FooterNavigation != null && footer.FooterNavigation.Any())
+							{
+								foreach (var item in footer?.FooterNavigation?.Where(x => x.IsActive))
+								{
+									<li><a href="@item.FooterNavigation.Url" rel="noopener" target="@item.FooterNavigation.Target" onclick="commonLayer('@pageName','@item.FooterNavigation.Name.ToString()');">@item.FooterNavigation.Name</a></li>
+								}
+
+							}
+						}
+						catch { }
+					</ul>
+				</div>
+			</div>
+			@if (footer != null)
+			{
+				<div class="copyright-row">@Html.Raw(footer.Copyright)</div>
+			}
+		</div>
+
+		<div class="paymentMode">
+			<ul>
+				@if (footer != null && footer.PaymentSource != null && footer.PaymentSource.Any())
+				{
+					foreach (var item in footer.PaymentSource.Where(x => x.IsActive))
+					{
+						<li><img class='b-lazy' data-src="@item.MediaFile.Url()" alt="" width="98" height="41"></li>
+					}
+				}
+			</ul>
+
+		</div>
+	</div>
+</footer>
+

@@ -1,0 +1,270 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<HPPlc.Models.Videos.VideosItems>
+@using HPPlc.Models.Videos;
+@using System.Globalization;
+
+@{
+	var model = Model;
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+}
+@if (model != null && Model.NestedItems != null && Model.NestedItems.Any())
+{
+	<div class="list-items">
+
+		<div class="video-tutorials">
+			<div class="title-fltr-fix">
+				<div class="descTitlePlc">
+					<h1 class="titleforhtag"> @Model.Title</h1>
+				</div>
+			</div>
+			@if (Model.Description != null)
+			{
+				IHtmlString description = Model.Description;
+
+				<div class="title-fltr-fix">
+					<div class="descTitle">
+						@Html.Raw("<p>" + description.ToHtmlString().Replace("<p>", "").Replace("</p>", "") + "  <a href='javascript: void(0);' onclick='gotobottomfaq();'>" + model.ReadMore + "</a>" + "</p>")
+					</div>
+				</div>
+			}
+
+
+			<div class="recommended-list">
+				<div class="list-items">
+					@foreach (NestedItems nested in Model?.NestedItems)
+					{
+						var detailData = string.Empty;
+						if (!string.IsNullOrEmpty(Model.Title))
+						{
+							detailData = Model.Title;
+						}
+						if (!string.IsNullOrEmpty(nested.Title))
+						{
+							detailData = detailData + "-" + nested.Title;
+						}
+						<div class="item-col">
+							<div class="card-box">
+								<div data-vid="@nested.VideoPreviewId" class="card-video video-open">
+
+									@* <div>@(nested.VideoPreviewId + "," + nested.VimeoURL)</div> *@
+
+									@if (nested != null && nested.IsPlayVideos)
+									{
+										<a data-id="@nested.DataId" href="@nested.VideoUrl">
+											<span class='play-btn'></span>
+											<div class="vidPlchldr">
+												<picture>
+													@if (nested.NextGenImage != null && !string.IsNullOrWhiteSpace(nested.NextGenImage))
+													{
+														<source srcset="@nested.NextGenImage" type='image/webp' media="(max-width: 680px)">
+													}
+													@if (nested.ImagesSrc != null)
+													{
+														<img class="imgPlacing" alt="@nested.AltText" src="@nested.ImagesSrc" height="1" width="1" />
+													}
+												</picture>
+											</div>
+										</a>
+									}
+									else
+									{
+										<a href="@nested.SubscriptionUrl">
+											<span class='play-btn'></span>
+											<div class="vidPlchldr">
+												<picture>
+													@if (nested.NextGenImage != null && !string.IsNullOrWhiteSpace(nested.NextGenImage))
+													{
+														<source srcset="@nested.NextGenImage" type='image/webp' media="(max-width: 680px)">
+													}
+													@if (nested.ImagesSrc != null)
+													{
+														<img class="imgPlacing" alt="@nested.AltText" src="@nested.ImagesSrc" height="1" width="1" />
+													}
+												</picture>
+											</div>
+										</a>
+									}
+
+
+								</div>
+								<div class="card-cont">
+									<div class="card-dscptn">
+										<div class="card-title">@nested.Title</div>
+										@nested.Description
+									</div>
+
+									@if (nested.socialItems != null && (nested.socialItems.FBShare != null || nested.socialItems.EmailShare != null || nested.socialItems.WhatAppShare != null))
+									{
+										if (nested.subscriptionStatus != null)
+										{
+											<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@nested.subscriptionStatus.DownloadString</span><span style='display:none'>@detailData</span></a></div>
+										}
+										var detailShareData = string.Empty;
+										if (!string.IsNullOrEmpty(model.AgeValue))
+										{
+											detailShareData = model.AgeValue;
+										}
+										if (!string.IsNullOrEmpty(nested.Volume))
+										{
+											detailShareData = detailShareData + "-" + nested.Volume;
+										}
+										if (!string.IsNullOrEmpty(nested.Title.ToString()))
+										{
+											detailShareData = detailShareData + "-" + nested.Title;
+										}
+
+										<div class='card-social-icon'>
+											<div class='share-icon'>
+												<div class='share-box'>
+													<ul>
+														@if (nested.socialItems.FBShare != null)
+														{
+															<li><a href='javascript:void(0)' class='fb-icon aFBShare' onclick="commonShareLayer('Share_facebook','@detailShareData');"><span style='display:none'>@nested.socialItems.FBShare</span></a></li>
+														}
+														@if (nested.socialItems.WhatAppShare != null)
+														{
+															<li>
+																<a href='javascript:void(0)' class='whatsapp-icon aWHTAppSH' onclick="commonShareLayer('Share_whatsapp','@detailShareData');">
+																	<span style='display:none'>
+																		@nested.socialItems.WhatAppShare
+																	</span>
+																</a>
+															</li>
+														}
+														@if (nested.socialItems.EmailShare != null)
+														{
+															<li>
+																<a href='javascript:void(0)' class='mail-icon aMailSh' onclick="commonShareLayer('Share_mail','@detailShareData');">
+																	<span style='display:none'>
+																		@nested.socialItems.EmailShare
+																	</span>
+																</a>
+															</li>
+														}
+													</ul>
+												</div>
+											</div>
+										</div>
+									}
+
+								</div><div class="card-btn-print cardFooter">
+
+									@if (nested.subscriptionStatus != null)
+									{
+										string culture = HPPlc.Models.CultureName.GetCultureName().Replace("/", "");
+										if (String.IsNullOrWhiteSpace(culture))
+										{ culture = "en-US"; }
+
+										System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
+
+										string downloadButton = String.Empty;
+										if (UserLoggedInOrNot == true)
+										{
+											downloadButton = Umbraco.GetDictionaryValue("Download Button");
+										}
+										else
+										{
+											downloadButton = Umbraco.GetDictionaryValue("FreeDownload");
+										}
+										var subscribetodownloadButton = Umbraco.GetDictionaryValue("Subscribe to download");
+										var upgradetopremiumButton = Umbraco.GetDictionaryValue("Upgrade to Premium");
+										var buyNewSubscriptionButton = Umbraco.GetDictionaryValue("BuyNewSubscription");
+										//var detailData = Model.Title + "-" + nested.Category;
+
+										if (nested.subscriptionStatus.Condition1)
+										{
+											<div class='btn-col'>
+												<a href="@nested.subscriptionStatus.DownloadUrl" class='btn downllink' onclick="return addVideoDownloadDataLayer('@detailData','@downloadButton','Video-Detail');">@downloadButton <span class='download-icon'></span></a>
+											</div>
+											@*<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@nested.subscriptionStatus.DownloadString</span><span style='display:none'>@detailData</span></a></div>*@
+										}
+										//2. if user not loggedin and worksheet not mapped with isguestuser true
+										else if (nested.subscriptionStatus.Condition2)
+										{
+											<div class='btn-col btn-ful'>
+												<a href="javascript:void(0)" class='btn subs-downllink' onclick="addVideoSubscribeDataLayer('@detailData','@subscribetodownloadButton','@nested.subscriptionStatus.SubscriptionUrl','Video-Detail');">@subscribetodownloadButton <span class='download-icon'></span></a>
+												<span style='display:none'>@nested.subscriptionStatus.SubscriptionUrl</span>
+											</div>
+										}
+										// 3.1 if User have free subscription and have referral
+										else if (nested.subscriptionStatus.Condition3)
+										{
+											<div class='btn-col'>
+												<a href="@nested.subscriptionStatus.DownloadUrl" class='btn downllink' onclick="return addVideoDownloadDataLayer('@detailData','@downloadButton','Video-Detail');"> @downloadButton<span class='download-icon'></span></a>
+											</div>
+											@*<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@nested.subscriptionStatus.DownloadString</span><span style='display:none'>@detailData</span></a></div>*@
+										}
+										// 3.2 if User have loggedin and age group is same with worksheet and worksheet is free
+										else if (nested.subscriptionStatus.Condition4)
+										{
+											<div class='btn-col'>
+												<a href="@nested.subscriptionStatus.DownloadUrl" class='btn downllink' onclick="return addVideoDownloadDataLayer('@detailData','@downloadButton','Video-Detail');"> @downloadButton <span class='download-icon'></span></a>
+											</div>
+											@*<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@nested.subscriptionStatus.DownloadString</span><span style='display:none'>@detailData</span></a></div>*@
+										}
+										else if (nested.subscriptionStatus.Condition5)
+										{
+											<div class='btn-col'>
+												<a href="@nested.subscriptionStatus.DownloadUrl" class='btn downllink' onclick="return addVideoDownloadDataLayer('@detailData','@downloadButton','Video-Detail');"> @downloadButton <span class='download-icon'></span></a>
+											</div>
+											@*<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@nested.subscriptionStatus.DownloadString</span><span style='display:none'>@detailData</span></a></div>*@
+										}
+										else if (nested.subscriptionStatus.Condition6)
+										{
+											<div class='btn-col btn-ful'>
+												<a href="javascript:void(0)" class='btn subs-downllink' onclick="addVideoSubscribeDataLayer('@detailData','@upgradetopremiumButton','@nested.subscriptionStatus.SubscriptionUrl','Video-Detail');"> @upgradetopremiumButton <span class='download-icon'></span></a>
+												<span style='display:none'>@nested.subscriptionStatus.SubscriptionUrl</span>
+											</div>
+										}
+										else if (nested.subscriptionStatus.Condition7)
+										{
+											<div class='btn-col btn-ful'>
+												<a href="javascript:void(0)" class='btn subs-downllink' onclick="addVideoSubscribeDataLayer('@detailData','@buyNewSubscriptionButton','@nested.subscriptionStatus.SubscriptionUrl','Video-Detail');"> @buyNewSubscriptionButton <span class='download-icon'></span></a>
+												<span style='display:none'>@nested.subscriptionStatus.SubscriptionUrl</span>
+											</div>
+										}
+										else if (nested.subscriptionStatus.Condition8)
+										{
+											<div class='btn-col btn-ful'>
+												<a href="javascript:void(0)" class='btn subs-downllink' onclick="addVideoSubscribeDataLayer('@detailData','@buyNewSubscriptionButton','@nested.subscriptionStatus.SubscriptionUrl','Video-Detail');"> @buyNewSubscriptionButton <span class='download-icon'></span></a>
+												<span style='display:none'>@nested.subscriptionStatus.SubscriptionUrl</span>
+											</div>
+										}
+										else if (nested.subscriptionStatus.Condition9)
+										{
+											<div class='btn-col btn-ful'>
+												<a href="javascript:void(0)" class='btn subs-downllink' onclick="addVideoSubscribeDataLayer('@detailData','@buyNewSubscriptionButton','@nested.subscriptionStatus.SubscriptionUrl','Video-Detail');"> @buyNewSubscriptionButton <span class='download-icon'></span></a>
+												<span style='display:none'>@nested.subscriptionStatus.SubscriptionUrl</span>
+											</div>
+										}
+										else
+										{
+											<div class='btn-col btn-ful'>
+												<a href="javascript:void(0)" class='btn subs-downllink' onclick="addVideoSubscribeDataLayer('@detailData','@buyNewSubscriptionButton','@nested.subscriptionStatus.SubscriptionUrl','Video-Detail');"> @buyNewSubscriptionButton <span class='download-icon'></span></a>
+												<span style='display:none'>@nested.subscriptionStatus.SubscriptionUrl</span>
+											</div>
+										}
+									}
+
+								</div>
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+			<input type="hidden" name="DisplayCount" id="DisplayCount" value="@Model.LoadMore" />
+			@if (Model.LoadMore > 0)
+			{
+				<div class="load-more" id="videosByIdLoadMore"><a href="javascript:void(0);"></a></div>
+			}
+		</div>
+	</div>
+
+	<div class='vid_preview'>
+		<div class="video-preview-cont">
+			<div class="video-preview-vid">
+				<div class="vimiovid" id="vimiovids"></div>
+				<div class="preview_hd"></div>
+			</div>
+		</div>
+	</div>
+}

@@ -1,0 +1,247 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.MyAccount>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpagespecialoffer.cshtml";
+
+	var CultureInfo = Model.GetCultureFromDomains();
+
+	bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	if (IsUserLoggedIn == false)
+	{
+		Response.Redirect("/learn-365");
+	}
+
+	var regData = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+						.FirstOrDefault()?.DescendantsOrSelf()?.OfType<AccountRoot>()?.FirstOrDefault();
+
+	var SpecialData = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+						.FirstOrDefault()?.DescendantsOrSelf()?.OfType<SpecialPlanRoot>()?.FirstOrDefault();
+
+	var titleData = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+						.FirstOrDefault()?.DescendantsOrSelf()?.OfType<Login>()?.FirstOrDefault();
+
+	//get data from database
+	HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+	HPPlc.Models.MyProfile myProfile = new HPPlc.Models.MyProfile();
+	myProfile = db.GetMyProfileForSpecialPlan();
+
+	string name = String.Empty;
+	string email = String.Empty;
+	string mobileno = String.Empty;
+	string alternatemobileno = String.Empty;
+
+	if (myProfile != null)
+	{
+		if (!String.IsNullOrWhiteSpace(myProfile.Name))
+		{ name = HPPlc.Models.clsCommon.Decrypt(myProfile.Name); }
+
+		if (!String.IsNullOrWhiteSpace(myProfile.Email))
+		{ email = HPPlc.Models.clsCommon.Decrypt(myProfile.Email); }
+
+		if (!String.IsNullOrWhiteSpace(myProfile.Mobileno))
+		{ mobileno = HPPlc.Models.clsCommon.Decrypt(myProfile.Mobileno); }
+
+		if (!String.IsNullOrWhiteSpace(myProfile.MobileAlternateNo))
+		{ alternatemobileno = HPPlc.Models.clsCommon.Decrypt(myProfile.MobileAlternateNo); }
+	}
+}
+
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input type="hidden" id="pageId" value="Plan365login" />
+<input type="hidden" id="otpVerifiedMode" value="Plan365login" />
+
+<input type="hidden" id="enterOTPValidation" value="@titleData.EnterOtpvalidation" />
+<input type="hidden" id="wrongOTPValidation" value="@titleData.WrongOtpvalidation" />
+<input type="hidden" id="resendOTPSent" value="@titleData.ResendOtpsent" />
+
+<input type="hidden" id="oTPAttemptMaximumLimit" value="@titleData.OTpattemptMaximumLimit" />
+
+<input type="hidden" id="maskingEmail" value="@titleData.EmailMaskingTitle" />
+<input type="hidden" id="maskingMobile" value="@titleData.MobileMaskingTitle" />
+<input type="hidden" id="maskingTitle" value="@titleData.TimerLeft" />
+
+<input type="hidden" id="resendOtpTimerTitle" value="@titleData.ResendOtptimerTitle" />
+<input type="hidden" id="ResendBlockingMessage" value="@titleData.ResendBlockingMessage" />
+<input type="hidden" id="validateAttemptTitle" value="@titleData.ValidateAttemptBlockingMessage" />
+<input type="hidden" id="oTPAttemptedMaximumTimes" value="@titleData.OTpattemptedMaximumTimes" />
+<input type="hidden" id="mobileAlternateNo" value="@myProfile.MobileAlternateNo" />
+
+<div class="main-wrp">
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	@Html.Partial("_BreadcrumbSpecialPlan")
+
+	@Html.AntiForgeryToken()
+
+	<div class="container-fluid ref-column1 plc365learn">
+		<div class="profile-wrp">
+			<div class="prf-lft-tb">
+				@Html.Partial("/Views/Partials/_MyAccount365Tab.cshtml")
+			</div>
+			<div class="prf-rgt-tb">
+				<div class="prf-rgt-pd">
+					<div class="myaccountform">
+						<div class="prf-rgt-tit">
+							<h1 class="titleforhtag">@Model.Title</h1>
+						</div>
+
+						@if (myProfile != null)
+						{
+							<div class="sploginFrmBox">
+
+								<div class="lgn-fild-row ">
+									<label>@regData.NameTitle<sup class="mandatory">*</sup></label>
+									<div class="lgn-fildbox">
+										<input type="text" class="input-lgn errorclean" id="name" name="name" value="@name" tabindex="1" maxlength="200" autocomplete="off" />
+
+										<span class="error" id="nameRequired" style="display:none;">@regData.NameRequired</span>
+									</div>
+								</div>
+
+								<div class="lgn-fild-row ">
+									<label>Age group</label>
+									<div class="lgn-fildbox">
+										<input type="text" class="input-lgn errorclean" id="agegroup" readonly tabindex="2" value="3-6 Years" maxlength="200" autocomplete="off" />
+									</div>
+								</div>
+
+								<div class="lgn-fild-row ">
+									<label>@regData.EmailTitle</label>
+									<div class="lgn-fildbox">
+										<input type="text" class="input-lgn errorclean" id="email" name="email" readonly tabindex="3" value="@email" maxlength="200" autocomplete="off" />
+									</div>
+								</div>
+
+								<div class="lgn-fild-row ">
+									<label>Mobile no.</label>
+									<div class="lgn-fildbox">
+										<input type="text" class="input-lgn errorclean" id="mobileno" name="mobileno" readonly tabindex="4" value="@mobileno" maxlength="10" autocomplete="off" onpaste="return false" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+									</div>
+								</div>
+
+
+								<div class="lgn-fild-row alternatemobile">
+									<label>Alternate mobile no.</label>
+									<div class="lgn-fildbox">
+										<input type="text" class="input-lgn errorclean" id="alternatemobileno" name="alternatemobileno" tabindex="5" value="@alternatemobileno" maxlength="10" autocomplete="off" onpaste="return false" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+
+										<span class="error" id="alternateNoFormat" style="display:none;">Please enter valid format for Mobile alternate no.</span>
+									</div>
+								</div>
+
+								<div class="lgn-fild-row addalternatemobile">
+									<a href="javascript:void(0);" id="alternatenumberadd">+Add correspondence mobile no.</a>
+								</div>
+
+
+								<div class="lgn-fild-row ">
+									<button type="button" id="UpdateProfile" class="btn blckBtn" tabindex="6">@regData.SaveButtonTitle</button>
+
+									<span id="message" class="error" style="display:none"></span>
+								</div>
+
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="overlayLogin" style="display:none">
+		<div class="loginPopup">
+			<div class="loginPopupCont">
+				<div class="loginCol">
+					<div class="loginBannerCont">
+						@if (SpecialData.MediaFile != null)
+						{
+							<div class="loginBnr"> <img src="@SpecialData.MediaFile.Url()" alt="Special Plan Media"> </div>
+						}
+						<p>@SpecialData.LeftPanelTitle</p>
+						<h5>@SpecialData.LeftPanelSubTitle</h5>
+					</div>
+				</div>
+
+
+				<div class="loginCol">
+					<div class="loginFrmRow">
+						<span class="loginClose"></span>
+						<!--Login form HTML Start-->
+						<div class="sploginFrmBox" id="SP365Login">
+							<h2>Add correspondence mobile no.</h2>
+							@*<p>Enter if any correspondence mobile no. w</p>*@
+							<div class="lgn-fild-row ">
+								<label>Mobile number<sup class="mandatory">*</sup></label>
+								<div class="lgn-fildbox">
+									<input type="text" class="input-lgn errorclean" id="newalternatemobileno" name="newalternatemobileno" tabindex="1" maxlength="10" autocomplete="off" onpaste="return false" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+								</div>
+								<span class="error" id="cMobileNoRequired" style="display:none;">Please enter valid mobile no.</span>
+							</div>
+							<div id="NextBtn" class="lgn-fild-row ">
+								<button type="button" id="AddAlternateNoNext" tabindex="2" class="btn blckBtn">Next</button>
+							</div>
+
+							<span id="Msg" class="error dvdr" style="display:none"></span>
+						</div>
+						<!--Login form HTML End-->
+						<!--OTP HTML Start-->
+						<div class="sploginFrmBox ofr-frm" id="SP365Otp" style="display:none">
+							<h2>Enter OTP<sup class="mandatory">*</sup></h2>
+							<p id="MaskingMessage" class="otpmaskingmessage"></p>
+
+							<div class="lgn-otp-row">
+								<input type="number" class="input-lgn otpspecialplanalternatemobilefield ofrfrm-input" maxlength="1" id="digit-1" name="digit-1" data-next="digit-2" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+								<input type="number" class="input-lgn otpspecialplanalternatemobilefield ofrfrm-input" maxlength="1" id="digit-2" name="digit-2" data-next="digit-3" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+								<input type="number" class="input-lgn otpspecialplanalternatemobilefield ofrfrm-input" maxlength="1" id="digit-3" name="digit-3" data-next="digit-4" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+								<input type="number" class="input-lgn otpspecialplanalternatemobilefield ofrfrm-input" maxlength="1" id="digit-4" name="digit-4" data-next="digit-3" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+							</div>
+							<div class="cclear">
+								<a id="clear" href="javascript:void(0);" style="display:none" onclick="ClearOtp()" class="resendotp clearhide">Clear OTP</a>
+							</div>
+							<div class="otp-timer-send">
+								<a id="resendotp" href="javascript:void(0);" onclick="RegistrationResendOtp()" class="resendotp disnone">Resend OTP</a>
+								<div id="timerdiv" class="tmr-col"> <span id="timer"></span></div>
+							</div>
+
+							<div class="lgn-fild-row">
+								<span id="MsgOtp" class="error dvdr" style="display:none;"></span>
+								<span class="error dvdr" id="preloginmessage" style="display:none"></span>
+								<div id="error" class="error dvdr" name="error" style="display:none;"></div>
+							</div>
+
+							<div id="countdown" style="display:none" class="countdownStyle dvdr"> <div class="labeltext"><span id="timerMsg"></span></div></div>
+
+						</div>
+						<!--OTP HTML end-->
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section CustomJsFiles
+{
+	<script>
+		$(document).ready(function () {
+			debugger
+			var mobileAlternateNo = $("#mobileAlternateNo").val();
+			if (mobileAlternateNo == null || mobileAlternateNo == '' || mobileAlternateNo == 'undefined') {
+				$(".addalternatemobile").show();
+				$(".alternatemobile").hide();
+			}
+			else {
+				$(".addalternatemobile").hide();
+				$(".alternatemobile").show();
+			}
+		});
+	</script>
+	<script src="~/CustumJs/SpecialPlan/Special365UpdateProfile.js?v1"></script>
+}

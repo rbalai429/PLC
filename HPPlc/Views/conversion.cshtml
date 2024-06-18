@@ -1,0 +1,44 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+}
+
+<div class="main-wrp">
+	<div class="container-grey">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="subscription-block">
+					<div class="subinr">
+						<div class="subleft center-box">
+							<div class="subs-details">
+								<div class="sub-cmn">
+									<label>Conversion Type</label>
+									<select id="ConvertionType" name="ConvertionType">
+										<option value="1" selected>Text</option>
+										<option value="2">Integer</option>
+									</select>
+								</div>
+								<div class="sub-cmn">
+									<label>Conversion Text</label>
+									<input type="text" id="txtConversionText" name="txtConversionText" />
+								</div>
+
+								<div class="sub-cmn">
+									<button id="buttonsubmit" style="width:100px;" type="button" class="btn">Go</button>
+								</div>
+								<div class="sub-cmn">
+									<span id="spConverted" style="font-size:large;color:red;display:none;"></span>
+								</div>
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			</div>
+		</div>
+	</div>
+			@section CustomJsFiles
+{
+				<script src="/CustumJs/Conversion.js"></script>
+			}

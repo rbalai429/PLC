@@ -1,0 +1,219 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.SPpayResponse>
+@using ContentModels = Umbraco.Web.PublishedModels;
+
+@using System.Configuration;
+@using DotNetIntegrationKit;
+@using HPPlc.Controllers;
+@using System.Threading.Tasks;
+
+@{
+	Layout = "masterpagespecialoffer.cshtml";
+
+	var message = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+						.DescendantsOrSelf()?.Where(x => x.ContentType.Alias == "subscriptionTypeRoot")?
+						.FirstOrDefault()?.Children.Where(c => c.ContentType.Alias == "payResponse")?.OfType<PayResponse>()?
+						.FirstOrDefault();
+
+	var culture = Model.GetCultureFromDomains();
+	if (!String.IsNullOrWhiteSpace(culture) && culture == "en-US")
+	{ culture = ""; }
+
+	//string culture = HPPlc.Models.CultureName.GetCultureName().Replace("/", "");
+
+	bool vResponse = false;
+	string strPG_TxnStatus = string.Empty,
+			   strPG_ClintTxnRefNo = string.Empty,
+			   strPG_TPSLTxnBankCode = string.Empty,
+			   strPG_TPSLTxnID = string.Empty,
+			   strPG_TxnAmount = string.Empty,
+			   strPG_TxnDateTime = string.Empty,
+			   strPG_TxnDate = string.Empty,
+			   strPG_TxnTime = string.Empty;
+	string strPGResponse;
+	string[] strSplitDecryptedResponse;
+	string payStatus = String.Empty;
+
+	HPPlc.Models.SubscriptionSuccessParam rtnStatus = new HPPlc.Models.SubscriptionSuccessParam();
+
+	try
+	{
+		string EncryptKey = ConfigurationManager.AppSettings["EncryptKey"].ToString();
+		string EncryptIV = ConfigurationManager.AppSettings["EncryptIV"].ToString();
+		string MerchantCode = ConfigurationManager.AppSettings["MerchantCode"].ToString();
+
+		//string str = Request["msg"];
+		if (Request["msg"] != null)
+		{
+			strPGResponse = Request["msg"].ToString();  //Reading response of PG
+
+			if (strPGResponse != "" || strPGResponse != null)
+			{
+				//LBL_DisplayResult.Text = "Response :: " + strPGResponse;
+				string loinparamer = String.Empty;
+				string PaymentId = String.Empty;
+				HPPlc.Models.dbAccessClass storeData = new HPPlc.Models.dbAccessClass();
+				//SubscriptionController storeData = new SubscriptionController();
+
+				RequestURL objRequestURL = new RequestURL();    //Creating Object of Class DotNetIntegration_1_1.RequestURL
+				string strDecryptedVal = null;                  //Decrypting the PG response
+
+				strDecryptedVal = objRequestURL.VerifyPGResponse(strPGResponse, EncryptKey, EncryptIV);
+
+				if (strDecryptedVal.StartsWith("ERROR"))
+				{
+					//lblValidate.Text = strDecryptedVal;
+					rtnStatus = storeData.SetResponseFromPG("Error", null);
+				}
+				else
+				{
+					strSplitDecryptedResponse = strDecryptedVal.Split('|');
+					if (!String.IsNullOrEmpty(strSplitDecryptedResponse.ToString()))
+					{
+						strPG_TxnStatus = strSplitDecryptedResponse[0].ToString().Split('=')[1].ToString();
+
+						if (strPG_TxnStatus == "0300" || strPG_TxnStatus == "0200")
+						{
+							payStatus = "Success";
+						}
+						else if (strPG_TxnStatus == "0396")
+						{
+							payStatus = "AWAITED";
+						}
+						else
+						{
+							payStatus = "Fail";
+						}
+
+						//Save in database
+						rtnStatus = storeData.SetResponseFromPG_SpecialPlan(payStatus, strSplitDecryptedResponse);
+					}
+				}
+			}
+		}
+	}
+	catch (Exception ex)
+	{
+		HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+		error.PageName = "SpecialPlanPayResponse.cshtml";
+		error.MethodName = "OnLoad";
+		error.ErrorMessage = ex.Message;
+
+		HPPlc.Models.dbAccessClass.PostApplicationError(error);
+	}
+
+
+	try
+	{
+		<input id="payStatus" type="hidden" value="@payStatus" />
+		<input id="SuccessTitle" type="hidden" value="@message.SuccessTitle" />
+		<input id="SuccessMessage" type="hidden" value="@message.SuccessMessage" />
+		<input id="FailedTitle" type="hidden" value="@message.FailedTitle" />
+		<input id="FailedMessage" type="hidden" value="@message.FailedMessage" />
+		<input id="AbortedTitle" type="hidden" value="@message.AbortedTitle" />
+		<input id="AbortedMessage" type="hidden" value="@message.AbortedMessage" />
+		<input id="AwaitedTitle" type="hidden" value="@message.AwaitedTitle" />
+		<input id="AwaitedMessage" type="hidden" value="@message.AwaitedMessage" />
+		<input id="PendingTitle" type="hidden" value="@message.PendingTitle" />
+		<input id="PendingMessage" type="hidden" value="@message.PendingMessage" />
+		<input id="ErrorTitle" type="hidden" value="@message.ErrorTitle" />
+		<input id="ErrorMessage" type="hidden" value="@message.ErrorMessage" />
+		<input id="HomeLink" type="hidden" value="@message.PopupHomeText" />
+		<input id="Culture" type="hidden" value="@culture" />
+	}
+	catch (Exception ex)
+	{
+		HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+		error.PageName = "Pay Response Value Input";
+		error.MethodName = "PayResponse";
+		error.ErrorMessage = ex.Message;
+
+		HPPlc.Models.dbAccessClass.PostApplicationError(error);
+	}
+
+
+	string IsEnableTrackerCode = ConfigurationManager.AppSettings["IsEnableTrackerCode"].ToString();
+	if (rtnStatus.InvoiceData != null && IsEnableTrackerCode == "Y")
+	{
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.PayResponseTracker, rtnStatus);
+	}
+}
+
+<div class="main-wrp">
+
+	<div class="container-fluid ContnPlc">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="ContnPlcin">
+
+					<div class="PayResponseMessage">
+						<h1 class="hdTitle1" id="PayResponseTitle"></h1>
+						<h2 class="hdtitl" id="PayResponseMessage"></h2>
+						@*<div class="btn-wrp">
+								<div class="btn-col">
+									<a href="/my-account" class="btn">Complete profile</a>
+								</div>
+							</div>*@
+						<div class="linktext">@Model.Description</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="thankBtmRow">
+					<div class="thankBtmCont">
+						@if (Model.FooterItems != null)
+						{
+							var footerItems = Model.FooterItems;
+							foreach (var rootItems in Model.FooterItems)
+							{
+								<h3>@Html.Raw(rootItems.Title)</h3>
+								<h4>@Html.Raw(rootItems.Description)</h4>
+								<div class="thankBtmThum">
+									@foreach (var items in rootItems.NestedContent)
+									{
+
+										<div class="thumColCer">
+											@if (items.MediaFile != null)
+											{
+												<div class="thumCerImg"><img src="@items.MediaFile.Url()" alt=""></div>
+											}
+											<h5>@items.Title</h5>
+											@Html.Raw(items.Description)
+
+										</div>
+
+									}
+								</div>
+							}
+						}
+					</div>
+				</div>
+
+
+
+
+			</div>
+		</div>
+	</div>
+
+</div>
+
+@section CustomJsFiles
+{
+	<script src="~/MyScripts/payResponseSpecialPlan.js"></script>
+
+	$(document).ready(function () {
+
+	});
+
+	@*<script>
+			$(document).ready(function () {
+				$('#headerTag').hide();
+				$('#footerTag').hide();
+			})
+		</script>*@
+}

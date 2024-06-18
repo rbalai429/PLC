@@ -1,0 +1,117 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using HPPlc.Models;
+@{
+    List<BannerElement> lstBanner = new List<BannerElement>();
+
+    var banners = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+                        .Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault()?.Children?
+                        .Where(x => x.ContentType.Alias == "banner")?.OfType<Banner>().FirstOrDefault()?.BannerItems.OfType<BannerElement>().Where(x => x.Activated == true).ToList();
+
+    //var pageName = !string.IsNullOrEmpty(Convert.ToString(Model.Name)) ? Convert.ToString(Model.Name) : "";
+    var pageName = UmbracoContext.PublishedRequest.PublishedContent.Name;
+    if (banners != null)
+    {
+        List<GetUserCurrentSubscription> GetUserAllSubscription = new List<GetUserCurrentSubscription>();
+        GetUserAllSubscription = SessionManagement.GetCurrentSession<List<GetUserCurrentSubscription>>(SessionType.SubscriptionInDtls);
+
+        if (GetUserAllSubscription == null)
+        {
+            lstBanner = banners?.Where(x => Umbraco.Content(x.SubscriptionType.Select(b => b.Udi)).ToList().OfType<Subscriptions>().Any(o => o.Ranking == "1") || (x.BannerAllowForGuestUser == true) || !x.SubscriptionType.Any()).ToList();
+        }
+        else
+        {
+            //string sd = GetUserAllSubscription?.Where(c => c.Ranking == "2")?.FirstOrDefault()?.Ranking;
+            lstBanner = banners?.Where(x => (Umbraco.Content(x.SubscriptionType.Select(b => b.Udi)).ToList().OfType<Subscriptions>().All(o => o?.Ranking == (GetUserAllSubscription?.Where(c => c?.Ranking == o?.Ranking)?.FirstOrDefault()?.Ranking.ToString()))) || !x.SubscriptionType.Any()).ToList();
+        }
+    }
+
+
+    if (lstBanner != null && lstBanner.Any())
+    {
+        <div class="banner">
+
+            <div class="slider-banner">
+                @foreach (var BannerItem in lstBanner)
+                {
+                    var IsVideo = BannerItem.IsVideo;
+
+                    if (IsVideo == "No")
+                    {
+                        Boolean IsBannerShow = false;
+                        Boolean IsUserLogin = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+                        var isEnableTracker = BannerItem.IsEnableTracker ? "Yes" : "No";
+                        var DesktopImage = BannerItem.DesktopImage;
+                        var desktopNextGenImage = BannerItem.DesktopNextGenImage;
+
+                        var MobileImage = BannerItem.MobileImage;
+                        var mobileNextGenImage = BannerItem.MobileNextGenImage;
+
+                        var IsWonkBanner = BannerItem.IsWonkBanner.ToString();
+                        var WonkMessage = BannerItem.WonkBannerMessage;
+                        var WonkURL = BannerItem.WonkUrl;
+
+                        var BannerLink = BannerItem.Value<Umbraco.Web.Models.Link>("bannerURL");
+                        var bannerUrlAppend = BannerItem.Heading;
+                        string vBannerURL = "javascript:void(0)";
+                        string vTarget = "";
+                        if (BannerLink != null)
+                        {
+                            vBannerURL = BannerLink.Url;
+                            vTarget = BannerLink.Target;
+
+                            if (!String.IsNullOrWhiteSpace(bannerUrlAppend))
+                            {
+                                vBannerURL += bannerUrlAppend;
+                            }
+                        }
+                        if (!BannerItem.BannerAllowForGuestUser && !BannerItem.BannerAllowForLoginUser)
+                        {
+                            IsBannerShow = true;
+                        }
+                        else if (BannerItem.BannerAllowForGuestUser && BannerItem.BannerAllowForLoginUser)
+                        {
+                            IsBannerShow = true;
+                        }
+                        else if (BannerItem.BannerAllowForGuestUser && !IsUserLogin)
+                        {
+                            IsBannerShow = true;
+                        }
+                        else if (BannerItem.BannerAllowForLoginUser && IsUserLogin)
+                        {
+                            IsBannerShow = true;
+                        }
+                        if (DesktopImage != null && IsBannerShow)
+                        {
+                            <div class="items">
+                                <a href="javascript:void(0);" onclick="WonkBanner('@IsWonkBanner','@WonkMessage','@WonkURL','@vBannerURL','@vTarget','@isEnableTracker','@pageName','@BannerItem.Title','@BannerItem.SubTitle')">
+                                    <picture>
+                                        @if (MobileImage != null)
+                                        {
+                                            <source data-srcset="@MobileImage.Url()" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" />
+                                        }
+
+                                        @if (mobileNextGenImage != null)
+                                        {
+                                            <source data-srcset="@mobileNextGenImage.Url()" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" type='image/webp' />
+                                        }
+
+                                        @if (desktopNextGenImage != null)
+                                        {
+                                            <source data-srcset="@desktopNextGenImage.Url()" srcset="/common/images/banner_loader.jpg" type='image/webp' />
+                                        }
+
+                                        @if (DesktopImage != null)
+                                        {
+                                            <img class='b-lazy' data-src="@DesktopImage.Url()" src='/common/images/banner_loader.jpg' alt="@(DesktopImage.Value<string>("altText"))" width="200" height="50" />
+                                        }
+                                    </picture>
+                                </a>
+                            </div>
+                        }
+                    }
+                }
+            </div>
+        </div>
+    }
+}
+

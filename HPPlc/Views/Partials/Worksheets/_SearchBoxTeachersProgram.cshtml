@@ -1,0 +1,97 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+
+<div class="container-fluid srchBar paddingbottom">
+    <div class="container-box">
+        <div class="container-inr">
+           
+            <div class="srchBx">
+                <span class="clsBtn"></span>
+                <div class="srchBxin">
+
+                    <input type="text" value="" id="txtSearch" class="srcField" autocomplete="on" placeholder="Search from 15,000+ worksheets, guided-videos, and webinars!">
+                    <a class="srchClear" style="display:none;"><i>x</i></a>
+                    <button type="submit" class="srchIcon"><img src="/common/images/search-icon-mobile.png" alt=""></button>
+                </div>
+                <div class="SerchContnt" id="rowSerchlistSerchContnt" style="display: none;" oncontextmenu="return false;">
+                    <div class="rowSerch" id="rowSerchlist" style="display: none;">
+                        <div class="serchLabl">Recent Search</div>
+                        <div class="rcntSrch">
+                            <ul id="recentsearchitemlist">
+                               
+                            </ul>
+                        </div>
+                    </div>
+
+
+                    <div class="srcList">
+                        <ul id="searchitemlist">
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="overlaynorecordfound" style="display:none;">
+
+    <div class="loginPopup">
+
+        <div class="loginPopupCont">
+
+            <div class="loginColl">
+
+                <div class="loginFrmRow">
+
+                    <span class="loginClose btnnorecordfoundclose"></span>
+ 
+                    <div class="loginFrmBox">
+
+                        <!-- <h2>Sign-Up share</h2> -->
+
+						<p>
+							Oops, your worksheet seems to be playing hide and seek! Please share more details, and we’ll make it available for you.
+						</p>
+
+                        <div class="lgn-fild-row ">
+
+                            <!-- <label>Mobile Number</label> -->
+
+							<div class="lgn-fildbox">
+
+								<!-- <input type="text" class="input-lgn" placeholder="9988776655"> -->
+
+								<textarea class="input-lgn textarea-lgn" maxlength="250" id="usernorecordfoundmessage"></textarea>
+								<label class="error" style="display:none;" id="usernorecordfounderror"></label>
+							</div>
+
+                        </div>
+
+                        <div class="lgn-fild-row ">
+
+                            <button type="button" class="btn blckBtn btnnorecordfound" id="btnnorecordfoundData">Submit</button>
+
+                        </div>
+
+                        <p class="agreeText">Meanwhile, here are some great worksheets that you might like...</p>
+
+                        <!-- <div class="agreeText"> <strong>By proceeding, I agree to:</strong> Receive the Learn365 worksheets and
+
+                          other communication by HP on my WhatsApp. <span>HP Print Learn Center's <a href="#">privacy policy</a>
+
+                            and <a href="#">T&C</a>.</span> </div> -->
+
+                    </div>
+ 
+ 
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

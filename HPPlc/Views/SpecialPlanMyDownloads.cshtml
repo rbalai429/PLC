@@ -1,0 +1,115 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.MyDownloads>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpagespecialoffer.cshtml";
+
+	var CultureInfo = Model.GetCultureFromDomains();
+
+	bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	if (IsUserLoggedIn == false)
+	{
+		Response.Redirect("/learn-365");
+	}
+}
+
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input type="hidden" id="pageId" value="Plan365login" />
+
+<div class="main-wrp">
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	@Html.Partial("_BreadcrumbSpecialPlan")
+
+	<div class="container-fluid ref-column1 plc365learn">
+		<div class="profile-wrp">
+			<div class="prf-lft-tb">
+				@Html.Partial("/Views/Partials/_MyAccount365Tab.cshtml")
+			</div>
+			<div class="prf-rgt-tb">
+				<div class="prf-rgt-pd">
+					<div class="prf-rgt-tit">
+						<h1 class="titleforhtag">@Model.Title</h1>
+					</div>
+					<div class="sub-main-cont">
+
+						<div class="tab-cont">
+
+							<div id="SpecialPlanWorksheet">
+								<div class="lds-roller col50-box" id="worksheetDetailsLoading"></div>
+							</div>
+
+							<div id="faqbox">
+								@Html.CachedPartial("_footerSEOContent", Model, 3600)
+								@Html.Partial("_footerContentData")
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@*<div class="container-fluid ref-column1 plc365learn">
+	<div class="profile-wrp">
+		<div class="prf-lft-tb">
+			@Html.Partial("/Views/Partials/_MyAccount365Tab.cshtml")
+		</div>
+		<div class="prf-rgt-tb">
+			<div class="prf-rgt-pd">
+				<div class="prf-rgt-tit">
+					<h1 class="titleforhtag">@Model.Title</h1>
+				</div>
+				<div class="container-box">
+					<div class="container-inr">
+						<div class="ContnPlcin">
+							@if (Model.HasProperty("title"))
+							{
+								<div class="descTitlePlc">
+									<h1 class="titleforhtag">@Html.Raw(Model.GetProperty("title").Value<string>().ToString())</h1>
+								</div>
+							}
+
+
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="video-tutorials">
+
+				<div class="container-fluid">
+					<div class="container-box">
+						<div class="container-inr">
+							<div class="ListingMnPlcin">
+
+								<div id="SpecialPlanWorksheet">
+									<div class="lds-roller col50-box" id="worksheetDetailsLoading"></div>
+								</div>
+
+								<div id="faqbox">
+									@Html.CachedPartial("_footerSEOContent", Model, 3600)
+									@Html.Partial("_footerContentData")
+								</div>
+
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+
+*@
+
+@section CustomJsFiles
+{
+	<script src="/CustumJs/SpecialPlan/SPMyDownloads.js?v1"></script>
+}

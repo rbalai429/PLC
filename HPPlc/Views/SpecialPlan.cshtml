@@ -1,0 +1,352 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.SpecialPlanRoot>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpagespecialoffer.cshtml";
+
+	var CultureInfo = Model.GetCultureFromDomains();
+	string pageName = HPPlc.Models.GetPageName.pagename();
+	string redirectUrl = String.Empty;
+
+	//CheckUserSpecialPlanRedeemed
+	bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	HPPlc.Models.SpecialRedirectionCheck specialRedirectionCheck = new HPPlc.Models.SpecialRedirectionCheck();
+	if (IsUserLoggedIn == true)
+	{
+		HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+		specialRedirectionCheck = db.CheckUserSpecialPlanRedeemed();
+	}
+
+	var titleData = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+						.FirstOrDefault()?.DescendantsOrSelf()?.OfType<Login>()?.FirstOrDefault();
+
+	var regData = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+						.FirstOrDefault()?.DescendantsOrSelf()?.OfType<Registration>()?.FirstOrDefault();
+
+
+	//bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	//if (IsUserLoggedIn == false)
+	//{
+	//	redirectUrl = "/my-account/login";
+	//}
+}
+
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input type="hidden" id="pageId" value="Plan365login" />
+<input type="hidden" id="otpVerifiedMode" value="Plan365login" />
+<input type="hidden" id="userIsExistingOrNew" value="" />
+<input type="hidden" id="planAvailedCheck" value="@specialRedirectionCheck" />
+
+
+<input type="hidden" id="enterOTPValidation" value="@titleData.EnterOtpvalidation" />
+<input type="hidden" id="wrongOTPValidation" value="@titleData.WrongOtpvalidation" />
+<input type="hidden" id="resendOTPSent" value="@titleData.ResendOtpsent" />
+@*<input type="hidden" id="resendOTPSent" value="@titleData.ResendOtpsent" />*@
+<input type="hidden" id="oTPAttemptMaximumLimit" value="@titleData.OTpattemptMaximumLimit" />
+
+<input type="hidden" id="maskingEmail" value="@titleData.EmailMaskingTitle" />
+<input type="hidden" id="maskingMobile" value="@titleData.MobileMaskingTitle" />
+<input type="hidden" id="maskingTitle" value="@titleData.TimerLeft" />
+
+<input type="hidden" id="resendOtpTimerTitle" value="@titleData.ResendOtptimerTitle" />
+<input type="hidden" id="ResendBlockingMessage" value="@titleData.ResendBlockingMessage" />
+<input type="hidden" id="validateAttemptTitle" value="@titleData.ValidateAttemptBlockingMessage" />
+<input type="hidden" id="oTPAttemptedMaximumTimes" value="@titleData.OTpattemptedMaximumTimes" />
+
+<input type="hidden" id="emailAlreadyRegistered" value="@regData.EmailAlreadyRegistered" />
+<input type="hidden" id="mobileAlreadyRegistered" value="@regData.MobileAlreadyRegistered" />
+
+<div class="addinclassfxd">
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	
+	<div class="container-fluid ContnPlc">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="ContnPlcin">
+					@if (Model.HasProperty("title"))
+					{
+						<div class="descTitlePlc">
+							<h1 class="titleforhtag">@Html.Raw(Model.GetProperty("title").Value<string>().ToString())</h1>
+						</div>
+					}
+
+					@*@if (Model.HasProperty("description"))
+						{
+							IHtmlString description = Model.Value<IHtmlString>("description");
+
+							<div class="descContPlc">
+								@Html.Raw("<p>" + description.ToHtmlString().Replace("<p>", "").Replace("</p>", "") + "  <a href='javascript: void(0);' onclick='gotobottomfaq();'>" + Model?.Parent?.Value<string>("readMore") + "</a>" + "</p>")
+							</div>
+						}*@
+					<div class="dvdr"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="video-tutorials">
+
+		<div class="container-fluid">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="ListingMnPlcin">
+
+						<div id="SpecialWorksheetList">
+							<div class="lds-roller col50-box" id="worksheetDetailsLoading"></div>
+						</div>
+
+						<div id="faqbox">
+							@Html.CachedPartial("_footerSEOContent", Model, 3600)
+							@Html.Partial("_footerContentData")
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	@if (specialRedirectionCheck.UserId == 0)
+	{
+		<div class="agegroupfixedrow">
+			<div class="container-fluid">
+				<div class="container-box">
+					<div class="container-inr">
+						<div class="ageGroupWrp">
+							<div class="specialPlanDtls">
+								@Html.Raw(Model.Description)
+							</div>
+							<div class="agegroupdetail">
+								@*<div class="title"><p>@Model.SelectedAgeGroup</p></div>*@
+
+								<div class='btn-col btn-half'>
+									<a href="javascript:void(0);" id="SpecialPlan" class='btn downllink'>@Model.ButtonText</a>
+								</div>
+							</div>
+
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+</div>
+<div class="scrollto_top">
+	<div class="scrolltt_inr">
+		<span></span>
+	</div>
+</div>
+<div class="mob-fliter">Filter</div>
+
+<form method="POST" id="preloginForm">
+	@Html.AntiForgeryToken()
+	<div class="overlayLogin" style="display:none">
+		<div class="loginPopup">
+			<div class="loginPopupCont">
+				<div class="loginCol">
+					<div class="loginBannerCont">
+						@if (Model.MediaFile != null)
+						{
+							<div class="loginBnr"> <img src="@Model.MediaFile.Url()" alt="Special Plan Media"> </div>
+						}
+						<p>@Model.LeftPanelTitle</p>
+						<h5>@Model.LeftPanelSubTitle</h5>
+					</div>
+				</div>
+
+
+				<div class="loginCol">
+					<div class="loginFrmRow">
+						<span class="loginClose"></span>
+						<!--Login form HTML Start-->
+						<div class="sploginFrmBox" id="SP365Login">
+							<h2>@Model.LoginTitle</h2>
+							<p>@Model.LoginSubTitle</p>
+							<div class="lgn-fild-row ">
+								<label>@Model.MobileNoTitle<sup class="mandatory">*</sup></label>
+								<div class="lgn-fildbox">
+									<input type="text" class="input-lgn errorclean" id="PreLoginEmail" tabindex="1" maxlength="200" autocomplete="off" onkeyup="this.value=this.value.toLowerCase();" />
+								</div>
+								<span class="error" id="UserNameRequired" style="display:none;">@titleData.EnterUserNameRequired</span>
+							</div>
+							<div id="NextBtn" class="lgn-fild-row ">
+								<button type="button" id="PreSignInBtn" tabindex="2" class="btn blckBtn">@Model.ButtonTitle</button>
+								@*<a href="javascript:void(0)" id="spLoginNext" class="btn blckBtn">@Model.ButtonTitle</a>*@
+							</div>
+							<div class="agreeText"> @Html.Raw(Model.TCprivacy) </div>
+
+							<span id="Msg" class="error dvdr" style="display:none"></span>
+						</div>
+						<!--Login form HTML End-->
+						<!--OTP HTML Start-->
+						<div class="sploginFrmBox ofr-frm" id="SP365Otp" style="display:none">
+							<h2>@titleData.EnterOtp<sup class="mandatory">*</sup></h2>
+							<p id="MaskingMessage" class="otpmaskingmessage"></p>
+
+
+							<div class="lgn-otp-row">
+								<input type="number" class="input-lgn otpspecialplanfield ofrfrm-input" maxlength="1" id="digit-1" name="digit-1" data-next="digit-2" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+								<input type="number" class="input-lgn otpspecialplanfield ofrfrm-input" maxlength="1" id="digit-2" name="digit-2" data-next="digit-3" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+								<input type="number" class="input-lgn otpspecialplanfield ofrfrm-input" maxlength="1" id="digit-3" name="digit-3" data-next="digit-4" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+								<input type="number" class="input-lgn otpspecialplanfield ofrfrm-input" maxlength="1" id="digit-4" name="digit-4" data-next="digit-3" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" style="border: 1px solid #b3b3b3;" />
+							</div>
+							<div class="cclear">
+								<a id="clear" href="javascript:void(0);" style="display:none" onclick="ClearOtp()" class="resendotp clearhide">Clear OTP</a>
+							</div>
+							<div class="otp-timer-send">
+								<a id="resendotp" href="javascript:void(0);" onclick="RegistrationResendOtp()" class="resendotp disnone">@titleData.ResendOtp</a>
+								<div id="timerdiv" class="tmr-col"> <span id="timer"></span></div>
+							</div>
+
+
+							<div class="lgn-fild-row">
+								<span id="MsgOtp" class="error dvdr" style="display:none;"></span>
+								<span class="error dvdr" id="preloginmessage" style="display:none"></span>
+								<div id="error" class="error dvdr" name="error" style="display:none;"></div>
+							</div>
+
+							<div id="countdown" style="display:none" class="countdownStyle dvdr"> <div class="labeltext"><span id="timerMsg"></span></div></div>
+
+						</div>
+						<!--OTP HTML end-->
+
+						<div id="sp365Consent" style="display:none">
+							<div class="lgn-fild-row ">
+								<label><span id="modeToEnter"></span><sup class="mandatory">*</sup></label>
+								<div class="lgn-fildbox">
+									<input type="text" class="input-lgn errorclean" id="useremailormobile" name="useremailormobile" tabindex="2" maxlength="200" autocomplete="off" onkeyup="this.value=this.value.toLowerCase();" />
+
+									<span class="error" id="emailFormat" style="display:none;">@regData.EmailFormat</span>
+									<span class="error" id="mobilenoFormat" style="display:none;">@regData.MobileNoRequired</span>
+									<span class="error" id="fieldRequired" style="display:none;"></span>
+								</div>
+							</div>
+
+							<div class="lgn-fild-row ">
+								<label>@regData.NameTitle<sup class="mandatory">*</sup></label>
+								<div class="lgn-fildbox">
+									<input type="text" class="input-lgn errorclean" id="name" name="name" tabindex="1" maxlength="200" autocomplete="off" />
+
+									<span class="error" id="nameRequired" style="display:none;">@regData.NameRequired</span>
+								</div>
+							</div>
+
+
+							<div class="lgn-fild-row ">
+								<span style="font-size:12pt">@Html.Raw(Model.ConsentTitle)</span>
+
+								<div class="rdo-wrp">
+									<div class="rdo-collft">@regData.CommunicationWhatsAppTitle</div>
+									<div class="rdo-colrit">
+										<ul>
+											<li>
+												<label class="rdo-box">
+													@regData.YesTitle
+													<input type="radio" class="enterEvent" value="Yes" checked name="supportOnWhatsupFromHP" tabindex="3" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+											<li>
+												<label class="rdo-box">
+													@regData.NoTitle
+													<input type="radio" class="enterEvent" value="No" name="supportOnWhatsupFromHP" tabindex="4" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+										</ul>
+									</div>
+								</div>
+
+								<div class="rdo-wrp">
+									<div class="rdo-collft">@regData.CommunicationPhoneTitle </div>
+									<div class="rdo-colrit">
+										<ul>
+											<li>
+												<label class="rdo-box">
+													@regData.YesTitle
+													<input type="radio" class="enterEvent" value="Yes" checked name="supportOnPhoneFromHP" tabindex="5" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+											<li>
+												<label class="rdo-box">
+													@regData.NoTitle
+													<input type="radio" class="enterEvent" value="No" name="supportOnPhoneFromHP" tabindex="6" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+										</ul>
+									</div>
+
+								</div>
+
+								<div class="rdo-wrp">
+									<div class="rdo-collft">@regData.CommunicationEmailTitle</div>
+									<div class="rdo-colrit">
+										<ul>
+											<li>
+												<label class="rdo-box">
+													@regData.YesTitle
+													<input type="radio" class="enterEvent" value="Yes" checked name="supportOnEmailFromHP" tabindex="7" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+											<li>
+												<label class="rdo-box">
+													@regData.NoTitle
+													<input type="radio" class="enterEvent" value="No" name="supportOnEmailFromHP" tabindex="8" />
+													<span class="checkmark-subs"></span>
+												</label>
+											</li>
+										</ul>
+									</div>
+
+								</div>
+							</div>
+
+
+							@*<div class="subs-checkbox" style="margin-top:10px">
+									<label class="container-label">
+										<input type="checkbox" class="enterEvent" value="Yes" name="termsChecked" tabindex="14" />
+										<span class="checkmark-label"></span>
+									</label>
+
+									@Html.Raw(regData.TermsConditionContent)
+
+								</div>*@
+
+							<div class="lgn-fild-row ">
+								<button type="button" id="VerifyandPayment" class="btn blckBtn" tabindex="9">@Model.PaymentButtonText</button>
+
+								<span id="message" class="error" style="display:none"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@section CustomJsFiles
+{
+
+	<script src="~/CustumJs/SpecialPlan/Special365Plan.js?v5"></script>
+	<script>
+		$(document).ready(function () {
+			var planAvailedCheck = $("#planAvailedCheck").val();
+			if (planAvailedCheck != null || planAvailedCheck != '' || planAvailedCheck == 0) {
+				$(".footer").removeClass("ftrPadBtm");	
+			}
+		});
+	</script>
+
+}

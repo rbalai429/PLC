@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "ASP.NET MVC Progressive Web App",
+  "short_name": "PWA App",
+  "description": "Implementing PWA behavior into existing ASP.NET MVC 5 app.",
+  "theme_color": "#2196f3",
+  "background_color": "#2196f3",
+  "display": "standalone",
+  "start_url": ".",
+  "icons": [
+    {
+      "src": "common/images/icon/logo144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "common/images/icon/logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "common/images/icon/logo168.png",
+      "sizes": "168x168",
+      "type": "image/png"
+    },
+    {
+      "src": "common/images/icon/logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.example.app1",
+      "id": "com.example.app1"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://itunes.apple.com/app/example-app1/id123456789"
+    }
+  ]
+}

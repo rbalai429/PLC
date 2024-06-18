@@ -1,0 +1,184 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.ReferEarn>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpage.cshtml";
+
+	//HPPlc.Models.SessionExpireAttribute.CheckUserLoggedIn();
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	if (UserLoggedInOrNot == false)
+	{
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SplRedirection, Request.RawUrl);
+		Response.Redirect("/");
+	}
+
+	string UserReferralCode = string.Empty;
+	string Url = System.Configuration.ConfigurationManager.AppSettings["SiteUrl"].ToString() + "my-account/login?referralcode=";
+	bool IsGeneratedReferralCode = false;
+	if (TempData["IsGeneratedReferralCode"] != null)
+	{
+		IsGeneratedReferralCode = (bool)TempData["IsGeneratedReferralCode"];
+	}
+	if (!IsPost)
+	{
+		TempData["IsGeneratedReferralCode"] = null;
+		UserReferralCode = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserReferralCode);
+		Url = Url + UserReferralCode;
+	}
+	Url = Url + HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserReferralCode);
+
+	<div class="main-wrp">
+		@try
+		{
+			@Html.Partial("/Views/Partials/_Banner.cshtml");
+		}
+		catch (Exception ex) { }
+		@Html.Partial("_Breadcrumb")
+		@*@if (string.IsNullOrWhiteSpace(UserReferralCode))
+		{
+			if (!IsGeneratedReferralCode)
+			{
+				<div class="container-fluid ref-column1">
+					<div class="container-box">
+						<div class="container-inr">
+							<div class="top-texts">
+								<h1 class="title-plc"> @Model.Title<br> @Model.SubTitle <em> @Model.Description</em></h1>
+
+								@if (Model.GenerateReferralCodeButton != null)
+								{
+									using (Html.BeginUmbracoForm("GenerateReferralCode", "Home", null, new Dictionary<string, object> { { "id", "GenerateReferralcodeForm" } }))
+									{
+										<input type="submit" class="sbcptn-btn" onclick="commonLayer('ReferEarn','@Model.GenerateReferralCodeButton.Name');" value="@(Model.GenerateReferralCodeButton?.Name)" />
+									}
+								}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="container-fluid hwitWork">
+					<div class="container-box">
+						<div class="container-inr">
+							<div class="top-texts"><h3 class="title-plc">@Model.Howitworkse</h3></div>
+							<ul>
+								@{
+									if (Model != null && Model.HowItWorksItems != null)
+									{
+										int count = 1;
+										foreach (HowItWorksItems item in Model.HowItWorksItems.ToList())
+										{
+											<li>
+												<div class="imgb"><img src="@(item.Image?.Url())" alt=""></div>
+												<div class="txtb">
+													<strong>@count</strong><span>@(item.Title)</span>
+												</div>
+											</li>
+											count++;
+										}
+									}
+								}
+							</ul>
+						</div>
+					</div>
+				</div>
+			}
+			else
+			{
+				<div class="container-fluid">
+					<div class="container-fluid aftermsg">
+						<div class="aftermsgin">
+							<div class="container-box">
+								<div class="container-inr">
+
+									<div class="top-texts">
+										<h3 class="title-plc">@Model.ThanksForGeneratingTitle</h3>
+										<h4>@Model.SubTitle</h4>
+									</div>
+									<div class="msgbx">
+										<p>
+											<span>@Model.ShortDescription</span>
+											@Model.LongDescription <span class="couponBold">@(HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserReferralCode))</span>
+										</p>
+									</div>
+									@Html.Partial("/Views/Partials/_SocialShare.cshtml")
+								</div>
+							</div>
+						</div>
+					</div>
+
+
+				</div>
+			}
+		}
+		else
+		{*@
+		<div class="container-fluid thansk-refr">
+			<div class="container-fluid aftermsg">
+				<div class="aftermsgin">
+					<div class="container-box">
+						<div class="container-inr">
+
+							<div class="top-texts">
+								<h3 class="title-plc">@Model.ThanksForGeneratingTitle</h3>
+								<h4>@Model.SubTitle</h4>
+							</div>
+							<div class="donethumb"><img src="/common/images/icon-thumb.jpg" alt=""></div>
+							<div class="msgbx">
+								<p>
+									<span>@Model.ShortDescription</span>
+									@Model.LongDescription <span class="couponBold"> @(HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserReferralCode))</span>
+								</p>
+							</div>
+							@Html.Partial("/Views/Partials/_SocialShare.cshtml")
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		@*}*@
+		@*<div class="container-fluid tncRefr">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="top-texts"><h3 class="title-plc">@Model.TermsAndConditionsTitle</h3></div>
+					<ul>
+						@if (Model != null && Model.TermsAndConditionsItems != null)
+						{
+							foreach (string item in Model.TermsAndConditionsItems)
+							{
+								<li><a href="#">@item</a></li>
+							}
+						}
+					</ul>
+				</div>
+			</div>
+		</div>*@
+
+		@*<div class="container-fluid hwitWork">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="top-texts"><h3 class="title-plc">@Model.Howitworkse</h3></div>
+					<ul>
+						@{
+							if (Model != null && Model.HowItWorksItems != null)
+							{
+								int count = 1;
+								foreach (HowItWorksItems item in Model.HowItWorksItems.ToList())
+								{
+									<li>
+										<div class="imgb"><img src="@(item.Image?.Url())" alt=""></div>
+										<div class="txtb">
+											<strong>@count</strong><span>@(item.Title)</span>
+										</div>
+									</li>
+									count++;
+								}
+							}
+						}
+					</ul>
+				</div>
+			</div>
+		</div>*@
+	</div>
+}
+@section CustomJsFiles
+{
+	<script src="/MyScripts/SocialShare.js"></script>
+}

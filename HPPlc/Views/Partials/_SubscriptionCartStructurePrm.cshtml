@@ -1,0 +1,79 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	string message = String.Empty;
+	string MessageText = String.Empty;
+	if (ViewData["Message"] != null)
+	{
+		message = ViewData["Message"].ToString();
+	}
+	if (ViewData["MessageText"] != null)
+	{
+		MessageText = ViewData["MessageText"].ToString();
+	}
+
+	List<HPPlc.Models.TempSubscriptionCreatedByUser> UsertempSubscription = new List<HPPlc.Models.TempSubscriptionCreatedByUser>();
+	UsertempSubscription = HPPlc.Models.SessionManagement.GetCurrentSession<List<HPPlc.Models.TempSubscriptionCreatedByUser>>(HPPlc.Models.SessionType.SubscriptionTempDtls);
+
+	var titles = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+												.Where(x => x.ContentType.Alias == "bonusBuyNow")?.OfType<BonusBuyNow>().FirstOrDefault();
+
+}
+<div class="sbcpn-dtls">
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tbody>
+			<tr>
+				@*<th>@titles.AgeTitle</th>*@
+				<th>@titles.PlanTitle</th>
+			</tr>
+			@if (UsertempSubscription != null && UsertempSubscription.Any())
+			{
+				foreach (var items in UsertempSubscription)
+				{
+					<tr>
+						@*<td>@items.AgeGroup @titles.YearsTitle</td>*@
+						@if (!String.IsNullOrEmpty(items.SubscriptionPrice))
+						{
+							<td>
+								₹ @items.SubscriptionPrice
+							</td>
+						}
+						else
+						{
+							<td>@titles.NotSelectedPlanTitle</td>
+						}
+
+						@*<td>
+							<a href="javascript:void(0);" onclick="deleteItem(@items.SrNo)"><img src="/common/images/delete-icon.png" alt=""></a>
+						</td>*@
+						<td>
+							<div class="chng-plan">
+								@if (!String.IsNullOrEmpty(items.SubscriptionPrice) && items.SubscriptionPrice.Any(char.IsLetter) == false && Convert.ToInt32(items.SubscriptionPrice) > 0)
+								{
+									<a href="javascript:void(0);" class="linkcp" onclick="changePlan(@items.SrNo)">@titles.ChangePlanTitle</a>
+								}
+								else
+								{
+									<a href="javascript:void(0);" class="linkcp" onclick="changePlan(@items.SrNo)">@titles.AddPlanTitle</a>
+								}
+							</div>
+						</td>
+					</tr>
+				}
+			}
+		</tbody>
+	</table>
+
+	@if (message == "Fail")
+	{
+		<span class="error">Age agoup can not add.</span>
+	}
+	else if (message == "agevalidation")
+	{
+		<span class="error">You can select upto @MessageText Age groups only. </span>
+	}
+	else
+	{
+		<span class="error">@MessageText</span>
+	}
+
+</div>

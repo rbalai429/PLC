@@ -1,0 +1,126 @@
+﻿@using HPPlc.Models.Constant;
+@using HPPlc.Models.Mailer;
+@model RegistrationMailerModel
+@{
+
+    Layout = null;
+    var helper = Umbraco.Web.Composing.Current.UmbracoHelper;
+    var node = helper.Content(Constant.RegistrationMailer) as RegistrationMailer;
+    var siteDomain = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>HP</title>
+    <meta name="description" content="HP">
+    <meta name="author" content="HP">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        #Table_01 {
+            width: 700px;
+            background: #fff;
+        }
+
+        @@media only screen and (max-width:699px) {
+            #Table_01 {
+                width: 98% !important;
+                background: #fff;
+            }
+
+            .sm_btn {
+                width: 150px !important;
+            }
+
+            img {
+                width: 100% !important;
+            }
+
+            .sm_img {
+                width: auto !important;
+            }
+
+            .sm_pd {
+                padding: 0 10px !important;
+            }
+        }
+    </style>
+</head>
+@if (node != null)
+{
+    <body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+        <table border="0" align="center" cellpadding="0" cellspacing="0" id="Table_01" width="700" style="border:#ccc 1px solid; ">
+            <tr>
+                <td align="center" valign="top">
+                    @if (node.HeaderBanner != null && node.HeaderBanner.Url() != null)
+                    {<img src="@(node.HeaderBanner.Url())" alt="">
+                    }
+                </td>
+            </tr>
+
+            <tr>
+                <td align="left" valign="top" style="padding:0px 60px;" class="sm_pd">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td align="left" valign="top">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:19px; color:#323232; text-align:left;">
+
+                                    <tr>
+                                        <td align="left" valign="top">&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        @if (node.Title != null && !string.IsNullOrWhiteSpace(node.Title))
+                                        {
+                                            <td align="left" valign="top"><strong style="font-size: 22px; color: #5f98d1; font-weight: bold">@node.Title</strong></td>
+                                        }
+                                    </tr>
+                                    <tr>
+                                        <td align="left" valign="top">&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" valign="top">@node.HelloText $Name,</td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" valign="top">&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        @if (node.BodyContent != null)
+                                        {
+                                            @Html.Raw(node.BodyContent)
+                                        }
+                                    </tr>
+									<tr style="padding-top:50px"><td></td></tr>
+                                    <tr>
+                                        @if (node.VerifyButton != null)
+                                        {
+                                            <td align="center" valign="middle"><a href="#Link" target="_blank">@(node.VerifyButton?.Name)</a></td>
+                                        }
+                                    </tr>
+
+                                    <tr>
+                                        <td align="left" valign="top">&nbsp;</td>
+                                    </tr>
+
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                @if (node.FooterText != null)
+                {
+                    <td align="center" valign="top" style="font-family:Arial, Helvetica, sans-serif; font-size:11px; line-height:19px; color:#414042; padding: 20px 10px; background: #eff1f4">
+                        @Html.Raw(node.FooterText)
+                        @if (node.UnsubscribeButton != null)
+                        {
+                            <strong>@(node.UnsubscribeButton?.Name)</strong>
+                        }
+                    </td>
+                }
+            </tr>
+        </table>
+    </body>
+}
+</html>

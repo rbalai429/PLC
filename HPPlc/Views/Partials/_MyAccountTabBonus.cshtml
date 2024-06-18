@@ -1,0 +1,19 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+
+	var contentMenu = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+						.Where(x => x.ContentType.Alias == "accountRoot").OfType<AccountRoot>().FirstOrDefault();
+
+	string culture = HPPlc.Models.CultureName.GetCultureName();
+	culture = culture == "/" ? String.Empty : culture;
+}
+
+@if (contentMenu != null && contentMenu.MyAccountBonusNavigation.Any())
+{
+	<ul class="navigations">
+		@foreach (var menu in contentMenu.MyAccountBonusNavigation.Where(x => x.IsActive))
+		{
+			<li class="@menu.ContentFestive"><a href="@(menu?.ContentItem?.Url + "?type=bns")" class="">@menu.ContentItem.Name</a></li>
+		}
+	</ul>
+}

@@ -1,0 +1,24 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.HeaderSection>
+@using ContentModels = Umbraco.Web.PublishedModels;
+
+
+<div class="main-wrp">
+    @if (Model.HeaderBackgroundImages != null && Model.HeaderBackgroundImages.Url() != null)
+    {
+        <div class="banner banner2 noorgn">
+			<div class="abtBnr">
+				<picture>
+					<source srcset="@Model.HeaderBackgroundImagesMobile.Url()" media="(max-width: 680px)">
+					<source srcset="@Model.HeaderBackgroundImages.Url()">
+					<img class="imgPlacing" src="@Model.HeaderBackgroundImages.Url()">
+				</picture>
+			</div>
+            <div class="caption-bnr">
+                <div class="caption-bnrin">
+                    <h2>@Model.Title</h2>
+                    <p>@Model.Description</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>

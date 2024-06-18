@@ -1,0 +1,116 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.Offer>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpage.cshtml";
+
+	//Hp offer redirection
+	Response.Cookies["IsBundleUser"].Expires = DateTime.Now.AddMinutes(-1);
+	Response.Cookies["IsBundleUser"].Value = "YES";
+	Response.Cookies["IsBundleUser"].Expires = DateTime.Now.AddMinutes(30);
+
+	HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.HpBundlePopupOpenCount, 0);
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponCode);
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponTempDtls);
+	string InviteUrlCode = String.Empty;
+
+	//Response.Redirect("/");
+	try
+	{
+		HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+		db.HPCouponBundleOffer();
+	}
+	catch (Exception ex)
+	{
+		HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+		error.PageName = "offer page";
+		error.MethodName = "Tracker Method";
+		error.ErrorMessage = ex.Message;
+
+		HPPlc.Models.dbAccessClass.PostApplicationError(error);
+	}
+
+	try
+	{
+		if (Request.QueryString.AllKeys.Contains("u"))
+		{
+			if (Request.QueryString.Get("u") != null)
+			{
+				InviteUrlCode = Request.QueryString.Get("u");
+				if (!String.IsNullOrEmpty(InviteUrlCode))
+				{
+					HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.InviteUrlCode, InviteUrlCode);
+				}
+			}
+		}
+	}
+	catch { }
+	//try
+	//{
+	//	string path = Server.MapPath("/Log/log.txt");
+
+	//	string ip = System.Web.HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+	//	if (string.IsNullOrEmpty(ip))
+	//	{
+	//		ip = System.Web.HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
+	//	}
+	//	string Url = Request.Url.ToString();
+	//	string sessionId = Session.SessionID.ToString();
+	//	string appendText = Url + " ---- " + sessionId + " ---- " + ip + " ---- " + System.DateTime.Now + Environment.NewLine;
+	//	System.IO.File.AppendAllText(path, appendText);
+	//}
+	//catch { }
+}
+
+<!--Popup bundling-->
+
+
+<div class="main-wrp">
+	@Html.Partial("_Breadcrumb")
+	<div class="offerbackbg">
+		<div class="whtBx congpopup congsticpge">
+
+			<div id="bundlingDataBind">
+
+			</div>
+		</div>
+
+	</div>
+
+</div>
+
+	
+
+	@section CustomJsFiles
+{
+		<script>
+			$(document).ready(function () {
+				IsBundlingUser();
+
+				//debugger
+				//var lclval = localStorage.getItem('msgLoginId');
+				//changeHeadermessage(lclval);
+
+				//try {
+				//	/*HP Coupon Bundling Tracker*/
+				//	commonLayer("Offer", "HP Bundling Landing");
+				//	//window.location = '/';
+				//}
+				//catch {
+				//	//console.log("");
+				//}
+			});
+
+			function OfferTracker(mediaTitle, title) {
+				debugger
+				try {
+					commonLayer('Offer', title);
+				}
+				catch { //dffgg }
+
+					//changeHeadermessage(mediaTitle);
+				}
+
+				localStorage.setItem('msgLoginId', mediaTitle);
+			}
+		</script>
+	}

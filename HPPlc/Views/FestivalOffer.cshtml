@@ -1,0 +1,63 @@
+﻿
+@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models
+@{
+	Layout = "masterpage.cshtml";
+
+	var CultureInfo = Model.GetCultureFromDomains();
+	var vrNoreId = Model.Id;
+	var CurrentPageDetails = Umbraco?.Content(vrNoreId);
+
+
+	Response.Redirect("/free-downloads/diwali-worksheets/", true);
+}
+
+@section metatags
+{
+	@Html.Partial("/Views/Partials/_MetaDataBind.cshtml")
+}
+<div class="main-wrp">
+
+	@Html.Partial("_Breadcrumb")
+	<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+
+	@if (SignUpSection != null)
+		{
+			@Html.Partial("/Views/Partials/_TopSection.cshtml", SignUpSection)
+		}
+
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	@try
+	{
+		@Html.Partial("/Views/Partials/_TopTabs.cshtml", new ViewDataDictionary(this.ViewData)
+				{
+				{ "workSheetTab", Umbraco.GetDictionaryValue("Worksheet") },
+				{ "videoTab", Umbraco.GetDictionaryValue("VideoTutorials") },
+				{ "expertTalkTab", Umbraco.GetDictionaryValue("ExpertTalk") },
+				{ "festivalOffersTab", Umbraco.GetDictionaryValue("FestivalOffersName") },
+				{ "selectedIndex", 4 }
+				});
+	}
+	catch { }
+
+	<div class='video-tutorials'>
+		<div class="container-fluid" id="festival-offers">
+			<div class="container-box">
+				<div class="container-inr">
+					<div id="festival-offers-WorksheetList">
+						<div class="lds-roller" id="festival-offers-worksheetLoading"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/FestivalOffers.js"></script>
+}

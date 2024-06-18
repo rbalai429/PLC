@@ -1,0 +1,233 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<HPPlc.Models.WorkSheet.WorkSheetVideoModel>
+@using HPPlc.Models.WorkSheet;
+@using System.Globalization;
+
+@{
+	var model = Model;
+	string pageName = HPPlc.Models.GetPageName.pagename();
+
+	string classForQuiz = string.Empty;
+	bool tobeDisplayQuiButton = false;
+
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+	string Paid = Umbraco.GetDictionaryValue("Paid");
+	string Free = Umbraco.GetDictionaryValue("Free");
+}
+@if (model != null && Model.WorkSheets != null && Model.WorkSheets.Any() && Model.WorkSheets.Count() > 0)
+{
+	foreach (WorkSheetVideoItems item in Model.WorkSheets)
+	{
+		foreach (dynamic nested in item?.NestedItems)
+		{
+			if (nested.IsWorkSheet)
+			{
+				var detailData = string.Empty;
+				if (!string.IsNullOrEmpty(nested?.Title))
+				{
+					detailData = nested.Title;
+				}
+				if (nested?.SelectedClasses != null)
+				{
+					detailData = detailData + " - " + string.Join(",", nested.SelectedClasses);
+				}
+				if (nested?.SelectedSubjects != null)
+				{
+					detailData = detailData + " - " + string.Join(",", nested.SelectedSubjects);
+				}
+				if (nested?.SelectedTopics != null)
+				{
+					detailData = detailData + " - " + string.Join(",", nested.SelectedTopics);
+				}
+
+				<div class="dtls-lft">
+					<div class="dtls-thum">
+
+						<div class="card-img">
+
+							<div id="viewer" class="pdfViewBox"></div>
+
+						</div>
+					</div>
+				</div>
+
+				<div class="dtls-rit">
+					<div class="dtls-cont dtlsNew">
+						@if (nested.IsPaid)
+						{
+							<div class="paidIconDtl">
+								<em></em><i>@Paid</i>
+							</div>
+						}
+						else
+						{
+							<div class="paidIconDtl">
+								@Free
+							</div>
+						}
+						<h3>@nested.Title</h3>
+						@*<div class="dtls-title">@nested.Volume <span>@nested.Subject</span> </div>*@
+						@*<div class="dtls-title">@nested.Topic </div>*@
+						@*<div class="dtls-quiz">
+
+								@if (nested.IsQuizWorksheet == true && tobeDisplayQuiButton == true)
+									{
+										<span>Quiz</span>
+									}
+							</div>*@
+						@if (nested.SelectedClasses != null)
+						{<div class="sheetTag">
+								<ul>
+									@foreach (var SelectedClass in nested.SelectedClasses)
+									{
+										@*<li><a href="@item.ClassUrl">@SelectedClass </a></li>*@
+										<li>@SelectedClass</li>
+									}
+								</ul>
+							</div>
+						}
+
+						<h4>@nested.SubTitle</h4>
+						@*@Html.Raw(nested.Description)*@
+
+						@if (nested.SelectedSubjects != null)
+						{<div class="sheetTag">
+								<ul>
+									@foreach (var SelectedSubject in nested.SelectedSubjects)
+									{
+										@*<li><a href="@item.SubjectUrl">@SelectedSubject </a></li>*@
+										<li>@SelectedSubject</li>
+									}
+								</ul>
+							</div>
+						}
+						@if (nested.SelectedTopics != null)
+						{
+							<div class="sheetTag">
+								<ul>
+									@foreach (var SelectedTopic in nested.SelectedTopics)
+									{
+										@*<li><a href="@item.TopicsUrl">@SelectedTopic </a></li>*@
+										<li>@SelectedTopic</li>
+									}
+								</ul>
+							</div>
+						}
+						<div class="dtls-btn">
+							@if (nested.subscriptionStatus != null)
+							{
+								string culture = HPPlc.Models.CultureName.GetCultureName().Replace("/", "");
+								if (String.IsNullOrWhiteSpace(culture))
+								{ culture = "en-US"; }
+
+								System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
+								string downloadButton = String.Empty;
+								downloadButton = Umbraco.GetDictionaryValue("Download Button");
+
+								//string subscribeToDownload = Umbraco.GetDictionaryValue("Subscribe to download");
+								//string upgradeToPremium = Umbraco.GetDictionaryValue("Upgrade to Premium");
+								//string buyNewSubscription = Umbraco.GetDictionaryValue("BuyNewSubscription");
+
+								//string asf = HPPlc.Models.clsCommon.GetDictionaryValueForLanguage("Download Button",null,null);
+
+								//var detailData = item.Title + "-" + nested.Volume + "-" + nested.Category;
+
+								if (UserLoggedInOrNot == true)
+								{
+									<a href="javascript:void(0);" onclick="downloadDocmnt('dwnld','@nested.subscriptionStatus.DownloadUrl','@(nested.IsPaid ? "Paid" : "Free")','@(detailData + " - Download")','worksheet','@nested.WorksheetId','@(nested.IsPaid ? "7" : "8")')" class="btn downllink">@downloadButton</a>
+								}
+								else
+								{
+									<a href="javascript:void(0)" onclick="Login('dwnld','@nested.subscriptionStatus.DownloadUrl','@(nested.IsPaid ? "Paid" : "Free")','@(detailData + " - Download")','worksheet','@nested.WorksheetId','@(nested.IsPaid ? "7" : "8")')" class="btn downllink">@downloadButton</a>
+								}
+							}
+
+
+							<div class="dtls-printshare">
+								<div class='print-col' style="cursor:pointer">
+									@if (UserLoggedInOrNot == true)
+									{
+										<a href="javascript:void(0);" onclick="downloadDocmnt('print','@nested.subscriptionStatus.DownloadString','@(nested.IsPaid ? "Paid" : "Free")','@(detailData + " - Print")','worksheet','@nested.WorksheetId','@(nested.IsPaid ? "7" : "8")')"><span style='display:none;'>@nested.subscriptionStatus.DownloadString</span><span style='display:none'>@detailData</span><em>Print</em></a>
+									}
+									else
+									{
+										<a href="javascript:void(0);" onclick="Login('print','@nested.subscriptionStatus.DownloadUrl','@(nested.IsPaid ? "Paid" : "Free")','@(detailData + " - Print")','worksheet','@nested.WorksheetId','@(nested.IsPaid ? "7" : "8")')"><span style='display:none;'>@nested.subscriptionStatus.DownloadString</span><span style='display:none'>@detailData</span><em>Print</em></a>
+									}
+								</div>
+
+								@if (nested.socialItems != null && (nested.socialItems.FBShare != null || nested.socialItems.EmailShare != null || nested.socialItems.WhatAppShare != null))
+								{
+
+									var detailShareData = string.Empty;
+									try
+									{
+										if (!string.IsNullOrEmpty(item.Title))
+										{
+											detailShareData = item.Title;
+										}
+										if (!string.IsNullOrEmpty(nested.Volume))
+										{
+											detailShareData += detailShareData + "-" + nested.Volume;
+										}
+										if (!string.IsNullOrEmpty(nested.Description.ToString()))
+										{
+											System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex("<[^>]*>");
+											string dtls = rx.Replace(nested.Description.ToString(), "").Replace("\n", "");
+
+											detailShareData += detailShareData + "-" + dtls;
+										}
+									}
+									catch { }
+
+									<div class="card-social-icon">
+										<div class="share-icon">
+											<em>Share</em>
+											<div class="share-box">
+
+												<ul>
+													@if (nested.socialItems.FBShare != null)
+													{
+														<li><a href='javascript:void(0)' class='fb-icon aFBShare' onclick="commonShareLayer('Share_facebook','@detailShareData');"><span style='display:none'>@nested.socialItems.FBShare</span></a></li>
+													}
+													@if (nested.socialItems.WhatAppShare != null)
+													{
+														<li>
+															<a href='javascript:void(0)' class='whatsapp-icon aWHTAppSH' onclick="commonShareLayer('Share_whatsapp','@detailShareData');">
+																<span style='display:none'>
+																	@nested.socialItems.WhatAppShare
+																</span>
+															</a>
+														</li>
+													}
+													@if (nested.socialItems.EmailShare != null)
+													{
+														<li>
+															<a href='javascript:void(0)' class='mail-icon aMailSh' onclick="commonShareLayer('Share_mail','@detailShareData');">
+																<span style='display:none'>
+																	@nested.socialItems.EmailShare
+																</span>
+															</a>
+														</li>
+													}
+
+												</ul>
+											</div>
+										</div>
+									</div>
+								}
+
+
+							</div>
+
+						</div>
+
+					</div>
+				</div>
+				if (!String.IsNullOrWhiteSpace(nested.PreviewPdf))
+				{
+					<input type="hidden" id="PreviewPdf" value="@nested.PreviewPdf" />
+				}
+			}
+		}
+	}
+}

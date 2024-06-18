@@ -1,0 +1,59 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.BuyNow>
+@using ContentModels = Umbraco.Web.PublishedModels;
+
+@{
+	Layout = "masterpage.cshtml";
+	bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	if (IsUserLoggedIn == false)
+	{
+		//manage session before redirection on login page
+		HPPlc.Models.ManageSessionForSubscription manageSessionForSubscription = new HPPlc.Models.ManageSessionForSubscription();
+		manageSessionForSubscription.SetSessionForSpecialRedirection(Model.Url(),"specialplanredirection");
+
+		//Check user is loggedIn or not
+		HPPlc.Models.SessionExpireAttribute.CheckUserLoggedIn("Subsptn");
+	}
+}
+
+<form method="POST" name="paymentForm" id="paymentForm" action="">
+	@Html.AntiForgeryToken()
+
+	<div class="main-wrp">
+		@Html.Partial("_BreadcrumbSpecialPlan")
+		<div class="container-grey">
+			<div class="container-box">
+				<div class="container-inr">
+
+					<div class="subscription-block">
+						<div class="subinr nopadding">
+
+							<div class="subleft">
+								@if (!String.IsNullOrEmpty(Model.Title))
+								{
+									<h1 class="subscrpHead">@Html.Raw(Model.Title)</h1>
+								}
+
+								<div class="descContPlc">
+									@Html.Raw(Model.Description)
+								</div>
+								<div id="dvSubscriptionCart">
+									@Html.Partial("/Views/Partials/_SubscriptionSpecialPlanCart.cshtml")
+								</div>
+							</div>
+
+							<div class="subright" id="SubscriptionPay">
+								@Html.Partial("/Views/Partials/_SubscriptionSpecialPlanPay.cshtml")
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="~/CustumJs/SpecialPlans.js"></script>
+}

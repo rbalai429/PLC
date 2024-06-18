@@ -1,0 +1,134 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using HPPlc.Models.Blog
+
+@{
+	Layout = "masterpage.cshtml";
+
+	List<PopularBlog> popularBlog = new List<PopularBlog>();
+	List<BlogContent> blogContent = new List<BlogContent>();
+	HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+
+	var titleValue = Model?.Parent?.DescendantsOrSelf().OfType<BlogRoute>().FirstOrDefault();
+	var blogs = Model?.DescendantsOrSelf().Where(x => x.ContentType.Alias == "blogListing")?
+		.FirstOrDefault().Children?.OfType<BlogContent>().ToList()?
+		.Where(x => x.IsPrimaryPost == false && x.IsActive == true).OrderByDescending(x => x.Id).Take(titleValue.HowManyBlogsToBeDisplay);
+
+	var countOfBlogs = Model?.DescendantsOrSelf().Where(x => x.ContentType.Alias == "blogListing")?
+		.FirstOrDefault().Children?.OfType<BlogContent>().ToList()?
+		.Where(x => x.IsPrimaryPost == false && x.IsActive == true).ToList().Count;
+
+	var blogPrimary = Model?.DescendantsOrSelf().Where(x => x.ContentType.Alias == "blogListing")?
+		.FirstOrDefault().Children?.OfType<BlogContent>().ToList()?.Where(x => x.IsPrimaryPost && x.IsActive == true).FirstOrDefault();
+
+	int blogBalanceCnt = (countOfBlogs - titleValue.HowManyBlogsToBeDisplay == null ? 0 : titleValue.HowManyBlogsToBeDisplay);
+
+	//Popular Blog
+	try
+	{
+		popularBlog = db.GetPopularBlog(titleValue.NoOfPopularBlogDisplayOnBlogListingPage);
+
+		if (popularBlog != null)
+		{
+			//var popularBlg = new List<string>();
+			foreach (var blogId in popularBlog.Take(titleValue.NoOfPopularBlogDisplayOnBlogListingPage))
+			{
+				//popularBlg.Add(blogId.BlogItemId);
+
+				BlogContent popular = Model?.DescendantsOrSelf().Where(x => x.ContentType.Alias == "blogListing")?
+							.FirstOrDefault()?.Children?.Where(c => c.Id.ToString() == blogId.BlogItemId).OfType<BlogContent>().Where(k => k.IsActive == true).SingleOrDefault();
+
+				if (popular != null)
+				{
+					blogContent.Add(popular);
+				}
+			}
+
+
+
+			//.OrderByDescending(popularBlog.Where(l => l.BlogItemId.ToString()))?
+			//.OrderByDescending(lst => popularBlog.Any(y => lst.Id.ToString() == popularBlog.Any(k => k.BlogItemId == lst.BlogItemId)))
+			//.Take(titleValue.NoOfPopularBlogDisplayOnBlogListingPage).ToList();
+
+			//blogContent = blogContent.OrderBy(lst => popularBlog.All(y => y.BlogItemId == lst.Id.ToString())).ToList();
+		}
+	}
+	catch (Exception ex)
+	{
+		HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+		error.PageName = "Blog Details";
+		error.MethodName = "HPBlogSaveViewerLog";
+		error.ErrorMessage = ex.Message;
+
+		HPPlc.Models.dbAccessClass.PostApplicationError(error);
+	}
+}
+
+<input type="hidden" id="blogBindedOnPage" value="@titleValue.HowManyBlogsToBeDisplay" />
+<input type="hidden" id="HowManyBlogsToBeDisplay" value="@titleValue.HowManyBlogsToBeDisplay" />
+<input type="hidden" id="TotalCountOfBlogs" value="@countOfBlogs" />
+<input type="hidden" id="OlderPostsTitle" value="@titleValue.OlderPostsTitle" />
+
+<div class="main-wrp">
+	<div class="banner banner2">
+		@try
+		{
+			@Html.Partial("/Views/Partials/_Banner.cshtml");
+		}
+		catch { }
+	</div>
+
+	@Html.Partial("_Breadcrumb")
+
+	<div class="container-fluid educatn-pnl">
+		<div class="container-box">
+			<div class="container-inr">
+
+				<div class="faq-wrp">
+					@Html.Partial("/Views/Partials/Blog/_BlogMenu.cshtml")
+
+					<div class="blg-wrp">
+						@if (Model.HasProperty("title"))
+						{
+							<div class="descTitlePlc">
+								<h1 class="titleforhtag">@Model.Value("title")</h1>
+							</div>
+						}
+						@if (blogPrimary != null)
+						{
+							@Html.Partial("/Views/Partials/Blog/_BlogPrimary.cshtml", blogPrimary, new ViewDataDictionary(this.ViewData) { { "readmore", titleValue.ReadMore } })
+						}
+						<div class="pp-sht">
+
+							@if (blogs != null && blogs.Any())
+							{
+								<div id="blogListing">
+									<div class="lds-roller" id="blogListingLoading" style="display:none;"></div>
+									@Html.Partial("/Views/Partials/Blog/_BlogListing.cshtml", blogs, new ViewDataDictionary(this.ViewData) { { "TotalCountOfBlogs", countOfBlogs }, { "blogTobeDisplay", titleValue.HowManyBlogsToBeDisplay }, { "blogOlderPostTitle", titleValue.OlderPostsTitle } })
+								</div>
+							}
+							@if (blogContent != null && blogContent.Any())
+							{
+								<div class="pp-post">
+									<strong>@titleValue.PopularPostsTitle</strong>
+									@Html.Partial("/Views/Partials/Blog/_BlogPopularPost.cshtml", blogContent, new ViewDataDictionary(this.ViewData) { { "TotalCountOfPopularBlogs", popularBlog?.FirstOrDefault()?.TotalPopularBlog }, { "NoOfPopularBlogDisplayOnBlogListingPage", titleValue.NoOfPopularBlogDisplayOnBlogListingPage } })
+								</div>
+							}
+						</div>
+
+
+
+
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/Blog.js"></script>
+}

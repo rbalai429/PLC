@@ -1,0 +1,131 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.AddAgeGroup>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpage.cshtml";
+
+	//Check user loggedin or not
+	HPPlc.Models.SessionExpireAttribute.CheckUserLoggedIn();
+
+	string UserAgeGroupEnrolledOrNot = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.AgeGroupExistsOrNot);
+	//if (!String.IsNullOrEmpty(UserAgeGroupEnrolledOrNot) && UserAgeGroupEnrolledOrNot.ToLower() == "yes")
+	//{
+	//	Response.Redirect("/subscription");
+	//}
+
+	string PlanId = string.Empty, selectedAgegroup = string.Empty, redirectUrl = string.Empty;
+	if (Request.QueryString.Count > 0)
+	{
+		PlanId = Request.QueryString.Get("subscriptionid").ToString();
+		if (!String.IsNullOrEmpty(PlanId))
+		{
+			redirectUrl = "subscriptionid=" + PlanId;
+		}
+	}
+
+	string culture = HPPlc.Models.CultureName.GetCultureName();
+
+	List<NameListItem> ageGroups;
+	ageGroups = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+						.Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault()?.Children?
+						.OfType<NameListItem>().Where(x => x.IsActice).ToList();
+
+	//get data from database
+	HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+	HPPlc.Models.MyProfile myprofile = new HPPlc.Models.MyProfile();
+	myprofile = db.GetProfile();
+
+	string userType = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.RegistrationMode);
+}
+
+<input id="usertype" type="hidden" value="@userType" />
+<input id="redirectparam" type="hidden" value="@redirectUrl" />
+<input id="culture" type="hidden" value="@culture" />
+
+<div class="main-wrp">
+	@Html.Partial("_Breadcrumb")
+	<div class="container-grey">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="signinsect-cmn">
+					<h2>@Model.Title</h2>
+					<div class="selectage-group">
+						<p>@Model.SubTitle</p>
+						<em><img src="/common/images/drop-arrow-black.png"></em>
+					</div>
+					<div class="selectage-inputs">
+						<ul>
+							@if (ageGroups != null && ageGroups.Any())
+							{
+								if (myprofile.SelectedAgeGroup != null)
+								{
+									foreach (var items in ageGroups.Where(x => x.IsActice))
+									{
+										string[] selectedAge = myprofile.SelectedAgeGroup.Split(',');
+										if (selectedAge != null)
+										{
+											string ValueExists = Array.Find(selectedAge, e => e == items?.ItemValue);
+											if (!String.IsNullOrEmpty(ValueExists))
+											{
+												<li>
+													<label class="container-label">
+														<input type="checkbox" name="ageSelected" id="ageSelected" value="@items.ItemValue" selected disabled />
+														<span class="checkmark-label" style="background: rgb(27, 142, 212);"></span>@items.ItemName
+													</label>
+												</li>
+											}
+											else
+											{
+												<li>
+													<label class="container-label">
+														<input type="checkbox" name="ageSelected" id="ageSelected" value="@items.ItemValue" />
+														<span class="checkmark-label"></span>@items.ItemName
+													</label>
+												</li>
+											}
+										}
+									}
+								}
+								else
+								{
+									foreach (var items in ageGroups.Where(x => x.IsActice))
+									{
+
+										<li>
+											<label class="container-label">
+												<input type="checkbox" name="ageSelected" id="ageSelected" value="@items.ItemValue" />
+												<span class="checkmark-label"></span>@items.ItemName
+											</label>
+										</li>
+
+									}
+								}
+							}
+						</ul>
+					</div>
+					<div>
+						<span id="msgbox" class="error"></span>
+					</div>
+					<div class="lds-roller" id="addagegroup" style="display:none"></div>
+					<div class="selected-itemdiv">
+						@*<p>2 of 3 selected</p>*@
+						<button id="btnAddExistingUserAgeGroup" type="button" class="btn">@Model.ButtonText</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/AddSubscriptions.js"></script>
+
+
+	<script type="text/javascript">
+		$(".selectage-group").click(function () {
+			$(this).find("em").toggleClass("active");
+			$(".selectage-inputs").slideToggle();
+		});
+	</script>
+}
+

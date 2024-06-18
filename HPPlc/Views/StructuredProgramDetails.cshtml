@@ -1,0 +1,84 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.StructureProgramItems>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpage.cshtml";
+	var CultureInfo = Model.GetCultureFromDomains();
+
+	var SelectedAgeValues = Model.Value<IEnumerable<Umbraco.Web.Models.Link>>("SelectAgeGroup").Select(x => x.Udi);
+	var selectedAgeContent = Umbraco.Content(SelectedAgeValues);
+	var SelectedClasssValues = selectedAgeContent.Select(x => x.Value<string>("alternateClassName")).ToList();
+
+	var className = string.Concat(string.Join(", ", SelectedClasssValues), " ", "WorkSheets");
+}
+<input type="hidden" id="hdnWorksheet" value="@Model.Id" />
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+
+<input id="page" type="hidden" value="Bonus" />
+<input id="closeDesc" type="hidden" value="Close Structure program Login" />
+
+<div class="main-wrp">
+
+	@Html.Partial("_Breadcrumb")
+
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="dtls-wrp">
+					<h1>@className</h1>
+					<div class="dtls-row dtls-pdf-wsheet" id="WorksheetSingle">
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="container-fluid rltdWorkst">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="ListingMnPlcin">
+					<div class="list-items">
+						<div class="fit-hd">
+							<h4>Related Worksheets By Topic</h4>
+						</div>
+						<div class="video-thum-row" id="relatedworksheetbytopic">
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="container-fluid rltdWorkst">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="ListingMnPlcin">
+					<div class="list-items">
+						<div class="fit-hd">
+							<h4>Related Worksheets By Subject</h4>
+						</div>
+						<div class="video-thum-row" id="relatedworksheetbysubject">
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+@*<div class="overlayLogin" style="display:none">
+		@Html.Partial("/Views/Partials/Login/_loginSnd.cshtml")
+	</div>*@
+
+@Html.Partial("/Views/Partials/Login/_payLogic.cshtml")
+
+@section CustomJsFiles
+{
+
+	<script type="text/javascript" src="~/CustumJs/BonusWorksheet/RelatedStructuredProgram.js"></script>
+	<script src="/lib/webviewer.min.js" type="text/javascript"></script>
+}

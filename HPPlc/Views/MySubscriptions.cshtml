@@ -1,0 +1,508 @@
+﻿@inherits UmbracoViewPage
+@using HPPlc.Controllers;
+@{
+	if (Request.QueryString.Count > 0 && Request.QueryString.AllKeys.Contains("type"))
+	{
+		Layout = "masterpage.cshtml";
+	}
+	else
+	{
+		Layout = "masterpage.cshtml";
+	}
+	//Check user is loggedIn or not
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.CheckUserLoggedIn("Subsptn");
+
+	var titleData = Model?.DescendantsOrSelf()?.OfType<MySubscriptions>()?.FirstOrDefault();
+
+	string cultureISO = HPPlc.Models.CultureName.GetCultureName();
+
+	//get data from database
+	HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+	HPPlc.Models.MyProfile myprofile = new HPPlc.Models.MyProfile();
+	myprofile = db.GetProfile();
+
+	List<HPPlc.Models.SelectedAgeGroup> myagegroup = new List<HPPlc.Models.SelectedAgeGroup>();
+	myagegroup = db.GetUserSelectedUserGroup();
+	string agegroup = string.Empty;
+	if (myagegroup != null && myagegroup.Any())
+	{
+		foreach (var age in myagegroup)
+		{
+			agegroup = agegroup + age.AgeGroup + ",";
+		}
+	}
+
+	//get subscription details on click on manage your subscription header
+	HPPlc.Models.dbProxy _db = new HPPlc.Models.dbProxy();
+	int UserId = HPPlc.Models.SessionManagement.GetCurrentSession<int>(HPPlc.Models.SessionType.UserId);
+	List<HPPlc.Models.GetYourSubscriptionDetails> subscriptionDetails = new List<HPPlc.Models.GetYourSubscriptionDetails>();
+	List<HPPlc.Models.SetParameters> sp = new List<HPPlc.Models.SetParameters>()
+{
+			new HPPlc.Models.SetParameters{ ParameterName = "@QType", Value = "0" },
+			new HPPlc.Models.SetParameters{ ParameterName = "@UserId", Value = UserId.ToString() },
+			new HPPlc.Models.SetParameters{ ParameterName = "@Culture", Value = "en-US" }
+	};
+	subscriptionDetails = _db.GetDataMultiple<HPPlc.Models.GetYourSubscriptionDetails>("usp_getdata", subscriptionDetails, sp);
+
+	HomeController home = new HomeController();
+	List<Subscriptions> subscriptionList = new List<Subscriptions>();
+	int maxRanking = 0;
+
+	try
+	{
+		maxRanking = int.Parse(home.GetMaxSubscriptionRanking());
+		subscriptionList = home.GetSubscriptionDetails();
+	}
+	catch { }
+	//Get Bonus Subscription Data
+
+	_db = new HPPlc.Models.dbProxy();
+	List<HPPlc.Models.GetBonusSubscriptionDetails> getBonusSubscriptionDetails = new List<HPPlc.Models.GetBonusSubscriptionDetails>();
+	List<HPPlc.Models.SetParameters> sp_bonus = new List<HPPlc.Models.SetParameters>()
+{
+			new HPPlc.Models.SetParameters{ ParameterName = "@QType", Value = "14" },
+			new HPPlc.Models.SetParameters{ ParameterName = "@UserId", Value = UserId.ToString() },
+			new HPPlc.Models.SetParameters{ ParameterName = "@Culture", Value = "en-US" }
+	};
+	getBonusSubscriptionDetails = _db.GetDataMultiple<HPPlc.Models.GetBonusSubscriptionDetails>("usp_getdata", getBonusSubscriptionDetails, sp_bonus);
+
+	//Get Bonus Subscription download Data
+	_db = new HPPlc.Models.dbProxy();
+	HPPlc.Models.GetBonusSubscriptionDownloadsDetails getBonusSubscriptionDownloadsDetails = new HPPlc.Models.GetBonusSubscriptionDownloadsDetails();
+	List<HPPlc.Models.SetParameters> sp_bonus_dwnld = new List<HPPlc.Models.SetParameters>()
+{
+			new HPPlc.Models.SetParameters{ ParameterName = "@QType", Value = "15" },
+			new HPPlc.Models.SetParameters{ ParameterName = "@UserId", Value = UserId.ToString() },
+			new HPPlc.Models.SetParameters{ ParameterName = "@Culture", Value = "en-US" }
+	};
+	getBonusSubscriptionDownloadsDetails = _db.GetData<HPPlc.Models.GetBonusSubscriptionDownloadsDetails>("usp_getdata", getBonusSubscriptionDownloadsDetails, sp_bonus_dwnld);
+
+
+	//Get Teachers Plan Data
+	_db = new HPPlc.Models.dbProxy();
+	List<HPPlc.Models.GetTeachersSubscriptionDetails> getTeachersSubscriptionDetails = new List<HPPlc.Models.GetTeachersSubscriptionDetails>();
+	List<HPPlc.Models.SetParameters> sp_teachers_dwnld = new List<HPPlc.Models.SetParameters>()
+{
+			new HPPlc.Models.SetParameters{ ParameterName = "@QType", Value = "17" },
+			new HPPlc.Models.SetParameters{ ParameterName = "@UserId", Value = UserId.ToString() },
+			new HPPlc.Models.SetParameters{ ParameterName = "@Culture", Value = "en-US" }
+	};
+	getTeachersSubscriptionDetails = _db.GetDataMultiple<HPPlc.Models.GetTeachersSubscriptionDetails>("usp_getdata", getTeachersSubscriptionDetails, sp_teachers_dwnld);
+
+}
+
+<div class="main-wrp">
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+	@Html.Partial("_Breadcrumb")
+
+	<div class="container-fluid ref-column1">
+		<div class="profile-wrp">
+			<div class="prf-lft-tb">
+				@if (Request.QueryString.Count > 0 && Request.QueryString.AllKeys.Contains("type"))
+				{
+					@Html.Partial("/Views/Partials/_MyAccountTabBonus.cshtml")
+				}
+				else
+				{
+					@Html.Partial("/Views/Partials/_MyAccountTab.cshtml")
+				}
+			</div>
+			<div class="prf-rgt-tb">
+				<div class="prf-rgt-pd">
+					<div class="prf-rgt-tit">
+						<h1 class="titleforhtag">@titleData.TitleOfPage</h1>
+					</div>
+					<div class="prf-rgt-tit">
+						<h2 class="titleforhtag" style="font-size: 18px;">Structured Weekly Curriculum</h2>
+					</div>
+					<div class="sub-main-cont">
+						<div class="subs-tab">
+
+							@try
+							{
+								if (subscriptionDetails != null && subscriptionDetails.Any())
+								{
+									if (myagegroup != null && myagegroup.Any())
+									{
+										string[] selectedAge = agegroup.ToString().TrimEnd(',').Split(',');
+										<ul>
+											@foreach (var items in subscriptionDetails)
+											{
+												string ValueExists = Array.Find(selectedAge, e => e == items?.AgeGroup);
+												if (!String.IsNullOrEmpty(ValueExists))
+												{
+													string age = items.AgeGroup + " Years";
+													<li><a href="#@items.AgeGroup">@age</a></li>
+												}
+											}
+										</ul>
+
+									}
+								}
+							}
+							catch { }
+						</div>
+
+						@try
+						{
+							if (subscriptionDetails != null && subscriptionDetails.Any())
+							{
+								if (myagegroup != null && myagegroup.Any())
+								{
+									string[] selectedAge = agegroup.ToString().TrimEnd(',').Split(',');
+									foreach (var ageItem in subscriptionDetails)
+									{
+										string ValueExists = Array.Find(selectedAge, e => e == ageItem?.AgeGroup);
+										if (!String.IsNullOrEmpty(ValueExists))
+										{
+											var worksheetAgeWiseCount = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+																.Children?.Where(x => x.ContentType.Alias == "worksheetNode")?.OfType<WorksheetNode>()?.FirstOrDefault()?
+																.Children?.Where(x => x.ContentType.Alias == "worksheetListingAgeWise").OfType<WorksheetListingAgeWise>()
+																.Where(x => x.AgeGroup?.Name == ageItem?.AgeGroup)?.FirstOrDefault()?.DescendantsOrSelf()?.Where(v => v.ContentType.Alias == "worksheetRoot")?.OfType<WorksheetRoot>()?
+																.Where(x => x.IsActive == true)?.Count() ?? 0;
+
+											var videoAgeWiseCount = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+																.Children?.Where(x => x.ContentType.Alias == "videos")?.OfType<Videos>()?.FirstOrDefault()?
+																.Children?.Where(x => x.ContentType.Alias == "videoListingAgeWise").OfType<VideoListingAgeWise>()
+																.FirstOrDefault()?.Children<Video>()?.Where(x => x.IsActive == true)
+																.Where(x => x.AgeTitle?.Name == ageItem?.AgeGroup)?.Count() ?? 0;
+
+											string age = ageItem?.AgeGroup + " Years";
+											<div class="tab-cont" id="@ageItem.AgeGroup">
+												<div class="tab-cont-clm">
+													<p>@titleData.Age</p>
+													<span>@age</span>
+												</div>
+												<div class="tab-cont-clm">
+													<p>@titleData.SubscriptionPlan</p>
+													<span>
+														₹ @ageItem.SubscriptionPrice <em><img src="/common/images/subs-icon.jpg" alt="" /></em>
+
+														@if (ageItem.Ranking != null)
+														{
+															if (ageItem.Ranking == "1")
+															{
+																<a href="@(cultureISO + "/lesson-subscription?subscptn=" + HPPlc.Models.clsCommon.Encrypt(maxRanking.ToString()) + "&age=" + HPPlc.Models.clsCommon.Encrypt(ageItem.AgeGroup))">Upgrade Plan</a>
+															}
+															else if (int.Parse(ageItem.Ranking) < maxRanking && ageItem.DaysRemaining > 15)
+															{
+																<a href="@(cultureISO + "/lesson-subscription?subscptn=" + HPPlc.Models.clsCommon.Encrypt(maxRanking.ToString()) + "&age=" + HPPlc.Models.clsCommon.Encrypt(ageItem.AgeGroup))">Upgrade Plan</a>
+															}
+															else if (int.Parse(ageItem.Ranking) == maxRanking && ageItem.DaysRemaining <= 15 && (subscriptionList.Where(a => a.Ranking == ageItem.Ranking && a.IsActive).Any()))
+															{
+																<a href="@(cultureISO + "/lesson-subscription/buy-now?subscriptionid=" + HPPlc.Models.clsCommon.Encrypt(ageItem.SubscriptionCMSId.ToString()) + "&age=" + HPPlc.Models.clsCommon.Encrypt(ageItem.AgeGroup))">Renew Plan</a>
+															}
+															else if (int.Parse(ageItem.Ranking) < maxRanking && ageItem.DaysRemaining <= 15)
+															{
+																if ((subscriptionList.Where(a => a.Ranking == ageItem.Ranking && a.IsActive).Any()))
+																{
+																	<a href="@(cultureISO + "/lesson-subscription?subscptn=" + HPPlc.Models.clsCommon.Encrypt(maxRanking.ToString()) + "&age=" + HPPlc.Models.clsCommon.Encrypt(ageItem.AgeGroup))">Upgrade Plan</a>
+																	<a href="@(cultureISO + "/lesson-subscription/buy-now?subscriptionid=" + HPPlc.Models.clsCommon.Encrypt(ageItem.SubscriptionCMSId.ToString()) + "&age=" + HPPlc.Models.clsCommon.Encrypt(ageItem.AgeGroup))">Renew Plan</a>
+																}
+																else
+																{
+																	<a href="@(cultureISO + "/lesson-subscription?subscptn=" + HPPlc.Models.clsCommon.Encrypt(maxRanking.ToString()) + "&age=" + HPPlc.Models.clsCommon.Encrypt(ageItem.AgeGroup))">Upgrade Plan</a>
+																}
+															}
+														}
+													</span>
+												</div>
+												<div class="tab-cont-clm">
+													<p>@titleData.LearningSetsDownloaded</p>
+													<span>
+														@ageItem.WorksheetDwnPrnCount of @(worksheetAgeWiseCount == null ? 0 : worksheetAgeWiseCount)
+														@if (ageItem.WorksheetDwnPrnCount > 0)
+														{
+
+															<a class="watchdoc" data-id="@ageItem.AgeGroup">@titleData.LearningSetsViewList</a>
+															<div class="overlay docpop" id="@ageItem.AgeGroup">
+																<div class="myvid-pop">
+																	<div class="mtvid-closebtn"><img src="/common/images/close-pop.png" alt="" /></div>
+																	<div class="myvid-tit"><b>My Worksheets</b>@*<a href="#">Explore more learning sets</a>*@</div>
+																	<div class="myviv-table">
+																		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+																			<tbody>
+																				<tr>
+																					<th align="left" valign="middle">Worksheets</th>
+																					<th align="left" valign="middle">&nbsp;</th>
+																					<th align="left" valign="middle">Downloaded On</th>
+																					<th align="left" valign="middle">&nbsp;</th>
+																				</tr>
+																				@if (ageItem.ListOfWorksheetDownloaded != null && ageItem.ListOfWorksheetDownloaded.Any())
+																				{
+																					string[] sheetData = ageItem.ListOfWorksheetDownloaded.ToString().Split(',');
+
+																					foreach (var sheet in sheetData)
+																					{
+																						string[] sheetWorksheetID = sheet.ToString().Split('-');
+																						if (sheetWorksheetID.Length == 2)
+																						{
+																							var sheetId = sheetWorksheetID[0];
+																							var downloadDate = sheetWorksheetID[1];
+																							var sheetDetails = Umbraco?.Content(sheetId)?.DescendantsOrSelf()?.OfType<WorksheetRoot>()?.FirstOrDefault();
+																							if (sheetDetails != null)
+																							{
+																								string weakName = sheetDetails?.SelectWeek?.Name.ToString();
+																								string category = sheetDetails?.SelectSubject?.Name;
+																								//string category = string.Join(",", sheetDetails.SelectSubject?.Select(x => x.Name).ToList());
+																								//string subCategory = string.Join(",", sheetDetails.SelectSubject?.Select(x => x.Name).ToList());
+																								string downloadUrl = "/umbraco/Surface/WorkSheet/DownloadData?WID=" + HPPlc.Models.clsCommon.encrypto(sheetDetails.Id.ToString()) + "&source=Worksheet";
+																								<tr>
+																									<td align="left" valign="middle" class="imgthb">
+																										@if (sheetDetails.UploadThumbnail != null)
+																										{
+																											string altText = sheetDetails.UploadThumbnail?.GetProperty("altText").Value<string>();
+																											<img class='b-lazy' alt='@altText' src='@sheetDetails.UploadThumbnail.Url()' style="width:44px;height:46px;" />
+																										}
+																									</td>
+																									<td align="left" valign="middle">
+																										<table width="100%" border="0" cellspacing="0" cellpadding="0" class="workshet-wrp">
+																											<tbody>
+																												<tr>
+																													<td align="left" valign="middle">@weakName</td>
+																												</tr>
+																												<tr>
+																													<td align="left" valign="middle">Topic: <span>@category</span> </td>
+																												</tr>
+																												@*<tr>
+																														<td align="left" valign="middle">Subtopic: <span>@(!string.IsNullOrWhiteSpace(subCategory) ? subCategory : "-") </span></td>
+																													</tr>*@
+																											</tbody>
+																										</table>
+																									</td>
+																									<td align="left" valign="middle">@downloadDate</td>
+																									<td align="left" valign="middle"><a href="@downloadUrl">Re-Download<em><img src="/common/images/doc-dwn.jpg" alt="" /></em></a></td>
+																								</tr>
+																							}
+																						}
+																					}
+																				}
+																			</tbody>
+																		</table>
+																	</div>
+																</div>
+															</div>
+														}
+													</span>
+												</div>
+												<div class="tab-cont-clm">
+													<p>@titleData.VideosWatched</p>
+													<span>
+														@ageItem.VideoWatchedCount of @(videoAgeWiseCount == null ? 0 : videoAgeWiseCount)
+														@if (ageItem.VideoWatchedCount > 0)
+														{
+															<a class="watchvid">@titleData.VideosViewList</a>
+															<div class="overlay videopop" id="@ageItem.AgeGroup">
+																<div class="myvid-pop">
+																	<div class="mtvid-closebtn"><img src="/common/images/close-pop.png" alt="" /></div>
+																	<div class="myvid-tit"><b>My Videos</b><a href="#">Explore more videos</a></div>
+																	<div class="myviv-table">
+																		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+																			<tbody>
+																				<tr>
+																					<th align="left" valign="middle">Videos</th>
+																					<th align="left" valign="middle">&nbsp;</th>
+																					<th align="left" valign="middle">Watched On</th>
+																					<th align="left" valign="middle">&nbsp;</th>
+																				</tr>
+																				@if (ageItem.ListOfVideoWatched != null && ageItem.ListOfVideoWatched.Any())
+																				{
+																					string[] videoData = ageItem.ListOfVideoWatched.ToString().Split(',');
+																					foreach (var video in videoData)
+																					{
+																						string[] videoID = video.ToString().Split('-');
+																						if (videoID.Length == 2)
+																						{
+																							var videoId = videoID[0];
+																							var downloadDate = videoID[1];
+																							var videoDetail = Umbraco?.Content(videoId)?.DescendantsOrSelf()?.OfType<Video>()?.FirstOrDefault();
+																							if (videoDetail != null)
+																							{
+																								string videoTitle = videoDetail.Title;
+																								string videoURL = cultureISO + "/videos/play-video?" + HttpUtility.UrlPathEncode("type=age&videoid=" + videoDetail.VideoYouTubeId + "&video=" + videoId + "&filterid=''&age=" + ageItem.AgeGroup + " Years" + "&name=" + videoDetail.Title);
+																								<tr>
+																									<td align="left" valign="middle" class="imgthb">
+																										@if (videoDetail.ThumbnailImage != null)
+																										{
+																											string altText = videoDetail.ThumbnailImage?.GetProperty("altText").Value<string>();
+																											<img alt='@altText' src='@videoDetail.ThumbnailImage.Url()' style="width:44px;height:46px;" />
+																										}
+																									</td>
+																									<td align="left" valign="middle">@videoTitle</td>
+																									<td align="left" valign="middle">@downloadDate</td>
+																									<td align="left" valign="middle"><a href="@videoURL" target="_blank">Watch again<em><img src="/common/images/whatch-video-icon.jpg" alt="" /></em></a></td>
+																								</tr>
+																							}
+																						}
+																					}
+
+																				}
+																			</tbody>
+																		</table>
+																	</div>
+																</div>
+															</div>
+														}
+													</span>
+												</div>
+												<div class="tab-cont-clm">
+													<p>@titleData.SubscriptionStartDate</p>
+													<span>@ageItem.SubscriptionStartDate</span>
+												</div>
+												<div class="tab-cont-clm">
+													<p>@titleData.SubscriptionEndDate</p>
+													<span>@ageItem.SubscriptionEndDate</span>
+												</div>
+											</div>
+										}
+									}
+								}
+							}
+						}
+						catch { }
+					</div>
+
+					<div class="dvdr" style="padding-bottom:10px;padding-top:30px;"></div>
+					@if (getBonusSubscriptionDetails != null && getBonusSubscriptionDetails.Count > 0)
+					{
+
+						<div class="prf-rgt-tit">
+							<h2 class="titleforhtag" style="font-size: 18px;">Worksheet Plan</h2>
+						</div>
+
+						<div class="sub-main-cont">
+							<div class="myviv-table scrlBox">
+								<table width="100%" border="0" cellspacing="0" cellpadding="0">
+									<tbody>
+										<tr>
+											<th align="left" valign="middle">Subscription Name</th>
+											<th align="left" valign="middle">Subscription Price</th>
+											<th align="left" valign="middle">Subscription Duration</th>
+											<th align="left" valign="middle">Validity From</th>
+											<th align="left" valign="middle">Validity Till</th>
+										</tr>
+										@foreach (var items in getBonusSubscriptionDetails)
+										{
+											<tr>
+												<td align="left" valign="middle">@items.SubscriptionName</td>
+												<td align="left" valign="middle">@items.SubscriptionPrice</td>
+												<td align="left" valign="middle">@(items.SubscriptionDuration.ToString() + " Months")</td>
+												<td align="left" valign="middle">@items.SubscriptionStartDate</td>
+												<td align="left" valign="middle">@items.SubscriptionEndDate</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+						if (getBonusSubscriptionDownloadsDetails != null)
+						{
+							<div class="sub-main-cont" style="margin-top:20px;">
+								<div class="myviv-table">
+
+									<table width="100%" border="0" cellspacing="0" cellpadding="0">
+										<tbody>
+											<tr>
+												<th align="left" valign="middle">Total Worksheet Eligible For Download</th>
+												<th align="left" valign="middle">Total Worksheet Downloaded</th>
+												<th align="left" valign="middle">Total Video Worksheet Eligible For Download</th>
+												<th align="left" valign="middle">Total Video Worksheet Downloaded</th>
+											</tr>
+											<tr>
+												<td align="left" valign="middle">@getBonusSubscriptionDownloadsDetails.TotalEligibleForDownloads</td>
+												<td align="left" valign="middle">@getBonusSubscriptionDownloadsDetails.TotalWorksheetDownloaded</td>
+												<td align="left" valign="middle">@getBonusSubscriptionDownloadsDetails.TotalVideoWkstEligibleForDownloads</td>
+												<td align="left" valign="middle">@getBonusSubscriptionDownloadsDetails.TotalVideoWorksheetDownloaded</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						}
+					}
+
+					<div class="dvdr" style="padding-bottom:10px;padding-top:30px;"></div>
+					@if (getTeachersSubscriptionDetails != null && getTeachersSubscriptionDetails.Count > 0)
+					{
+
+						<div class="prf-rgt-tit">
+							<h2 class="titleforhtag" style="font-size: 18px;">Teachers Plan</h2>
+						</div>
+
+						<div class="sub-main-cont">
+							<div class="myviv-table scrlBox">
+								<table width="100%" border="0" cellspacing="0" cellpadding="0">
+									<tbody>
+										<tr>
+											<th align="left" valign="middle">Class Name</th>
+											<th align="left" valign="middle">Subscription Name</th>
+											<th align="left" valign="middle">Subscription Price</th>
+											<th align="left" valign="middle">Subscription Duration</th>
+											<th align="left" valign="middle">Validity From</th>
+											<th align="left" valign="middle">Validity Till</th>
+											<th align="left" valign="middle">Days Remaining</th>
+											<th align="left" valign="middle">Total Worksheet Downloaded</th>
+										</tr>
+										@foreach (var items in getTeachersSubscriptionDetails)
+										{
+											<tr>
+												<td align="left" valign="middle">@items.ClassName</td>
+												<td align="left" valign="middle">@items.SubscriptionName</td>
+												<td align="left" valign="middle">@items.SubscriptionPrice</td>
+												<td align="left" valign="middle">@(items.SubscriptionDuration.ToString() + " Months")</td>
+												<td align="left" valign="middle">@items.SubscriptionStartDate</td>
+												<td align="left" valign="middle">@items.SubscriptionEndDate</td>
+												<td align="left" valign="middle">@items.DaysRemaining</td>
+												<td align="left" valign="middle">@items.TotalWorksheetDownloaded</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+					}
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section CustomJsFiles
+{
+	<script>
+		$(document).ready(function () {
+			$(".watchvid").click(function () {
+				$(".videopop").show();
+			});
+			$(".mtvid-closebtn").click(function () {
+				$(".videopop").hide();
+			});
+
+			$(".watchdoc").click(function () {
+				$(".docpop").show();
+			});
+			$(".mtvid-closebtn").click(function () {
+				$(".docpop").hide();
+			});
+
+			$(".subs-tab li:first").addClass("active");
+			$(".tab-cont").hide(); //Hide all content
+			$(".tab-cont:first").show(); //Show first tab content
+			$(".subs-tab li a").click(function () {
+				$(".subs-tab li").removeClass('active');
+				$(this).parent('li').addClass('active');
+				$(".tab-cont").hide();
+				var activeTab = $(this).attr('href');
+				$(activeTab).fadeIn();
+				return false;
+			});
+		});
+	</script>
+}

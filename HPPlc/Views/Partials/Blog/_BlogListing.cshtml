@@ -1,0 +1,49 @@
+﻿@model IEnumerable<Umbraco.Web.PublishedModels.BlogContent>
+@using Umbraco.Web
+@using Umbraco.Core.PropertyEditors.ValueConverters
+@{
+	var TotalCountOfBlogs = (int)ViewData["TotalCountOfBlogs"];
+	var blogTobeDisplay = (int)ViewData["blogTobeDisplay"];
+	var blogOlderPostTitle = (string)ViewData["blogOlderPostTitle"];
+}
+
+@if (Model != null)
+{
+	<div class="sm-iconwrp">
+
+		@foreach (var blog in Model)
+		{
+			<div class="sm-article">
+				<div class="sm-articleinr">
+					@if (blog.BlogMediaFile != null)
+					{
+						<div class="srticl-crd">
+							<div class="img-hover-zoom">
+								<a href="@blog.Url()" onclick="commonLayer('Blogs','@blog.BlogTitle');">
+									<div class="cardImgPlchldr2">
+										<img class="imgPlacing" src="@Url.GetCropUrl(imageCropperValue: blog.BlogMediaFile, width: 432,height: 200)" alt="Blog Image" />
+										@*<img src="@Url.GetCropUrl(imageCropperValue: blog.BlogMediaFile, cropAlias: "Small",htmlEncode: false)" />*@
+									</div>
+								</a>
+							</div>
+						</div>
+					}
+
+					<div class="srticl-txt">
+						@if (blog.BlogDate != null)
+						{
+							<em class="dt">@blog.BlogDate.ToString("MMMM d, yyyy")</em>
+						}
+						<p><a href="@blog.Url()" onclick="commonLayer('Blogs','@blog.BlogTitle');">@blog.BlogTitle</a></p>
+						<em class="autnm">@blog.AuthorName</em>
+					</div>
+				</div>
+			</div>
+		}
+
+		@if (TotalCountOfBlogs > blogTobeDisplay)
+		{
+			<div class="lnk-fr" id="BlogLoadmore"><a href="javascript:void(0);" onclick="commonLayer('Blogs','@blogOlderPostTitle');">@blogOlderPostTitle</a></div>
+		}
+	</div>
+}

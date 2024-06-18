@@ -1,0 +1,119 @@
+﻿@model HPPlc.Models.SubscriptionModel
+@using HPPlc.Controllers;
+
+@{
+	HomeController home = new HomeController();
+	int maxRanking = 0;
+	maxRanking = int.Parse(home.GetMaxSubscriptionRanking());
+
+	List<Subscriptions> subscriptionList = new List<Subscriptions>();
+	subscriptionList = home.GetSubscriptionDetails();
+
+	var subscriptionpopuptitle = subscriptionList?.FirstOrDefault()?.Parent?.Value<string>("subscriptionPopupTitle");
+}
+
+@*<div class="whtBx plnspp">
+	<span class="closepp" id="plnspp-close"><img src="/common/images/close-btn.png" alt="close"></span>*@
+<div class="whtBxin">
+	@if (Model.getYourSubscriptionDetails != null && Model.subscriptionDisplayContent != null)
+	{
+		<div class="pp-top">
+			@*<div class="txt1-pp">@Model.subscriptionDisplayContent.subscriptionPlanName</div>*@
+			<div class="txt1-pp">@subscriptionpopuptitle</div>
+			<div class="plan-cont">
+				@if (Model != null && Model.getYourSubscriptionDetails != null)
+				{
+					foreach (var items in Model.getYourSubscriptionDetails)
+					{
+						HomeController homeCntl = new HomeController();
+						var titleContent = homeCntl.GetSubscriptionDetailsWithRanking(items.Ranking); ;
+						<div class="plan-box">
+							<div class="pp-top">
+								<div class="txt2-pp">@titleContent.PlanTitle <span>@items.AgeGroup @titleContent.YearsTitle</span></div>
+								<div class="txt3-pp"><span>₹@items.SubscriptionPrice</span> | @titleContent.PlanPunchLine</div>
+							</div>
+							<div class="schdule-pp">
+								<ul>
+									<li>
+										<span>@titleContent.DurationTitle</span>
+										@if (subscriptionList != null)
+										{
+											var subscriptionname = subscriptionList.Where(x => x.Ranking == items.Ranking)?.FirstOrDefault()?.SubscriptionName;
+											
+											<strong>@subscriptionname.Name</strong>
+										}
+										else
+										{
+											<strong>@items.SubscriptionName</strong>
+										}
+									</li>
+									<li>
+										<span>@titleContent.DaysRemainingTitle</span>
+										@if (items.DaysRemaining == 0 && items.Ranking == "1")
+										{
+											<strong>@titleContent.NoLimitTitle</strong>
+										}
+										else
+										{
+											<strong>@items.DaysRemaining @titleContent.DaysTitle</strong>
+										}
+									</li>
+									<li><span>@titleContent.ActivatedOnTitle</span> <strong>@items.SubscriptionStartDate</strong></li>
+									<li>
+										<span>@titleContent.EndsOnTitle</span>
+										@if (items?.DaysRemaining == 0 && items?.Ranking == "1")
+										{
+											<strong>@titleContent.NoLimitTitle</strong>
+										}
+										else
+										{
+											<strong>@items.SubscriptionEndDate</strong>
+										}
+									</li>
+								</ul>
+							</div>
+
+							@if (items.Ranking == "1")
+							{
+								<div class="btn-row">
+									<a href="@(Model.subscriptionDisplayContent.Culture + "/subscription?subscptn=" + HPPlc.Models.clsCommon.Encrypt(maxRanking.ToString()) + "&age=" + HPPlc.Models.clsCommon.Encrypt(items.AgeGroup))" class="btn" onclick="commonLayer('Home','@titleContent.UpgradeNowButtonTitle');">@titleContent.UpgradeNowButtonTitle</a>
+								</div>
+							}
+							else if (int.Parse(items.Ranking) < maxRanking && items.DaysRemaining > 15)
+							{
+								<div class="btn-row">
+									<a href="@(Model.subscriptionDisplayContent.Culture + "/subscription?subscptn=" + HPPlc.Models.clsCommon.Encrypt(maxRanking.ToString()) +"&age=" + HPPlc.Models.clsCommon.Encrypt(items.AgeGroup))" class="btn" onclick="commonLayer('Home','@titleContent.UpgradeNowButtonTitle');">@titleContent.UpgradeNowButtonTitle</a>
+								</div>
+							}
+							else if (int.Parse(items.Ranking) == maxRanking && items.DaysRemaining <= 15 && (subscriptionList.Where(a => a.Ranking == items.Ranking && a.IsActive).Any()))
+							{
+								<div class="btn-row">
+									<a href="@(Model.subscriptionDisplayContent.Culture + "/subscription/buy-now?subscriptionid=" + HPPlc.Models.clsCommon.Encrypt(items.SubscriptionCMSId.ToString())+"&age=" + HPPlc.Models.clsCommon.Encrypt(items.AgeGroup))" class="btn scondry-btn" onclick="commonLayer('Home','@titleContent.RenewNowButtonTitle');">@titleContent.RenewNowButtonTitle</a>
+								</div>
+							}
+							else if (int.Parse(items.Ranking) < maxRanking && items.DaysRemaining <= 15)
+							{
+								<div class="btn-row">
+									@if ((subscriptionList.Where(a => a.Ranking == items.Ranking && a.IsActive).Any()))
+									{
+										<a href="@(Model.subscriptionDisplayContent.Culture + "/subscription/buy-now?subscriptionid=" + HPPlc.Models.clsCommon.Encrypt(items.SubscriptionCMSId.ToString()) + "&age=" + HPPlc.Models.clsCommon.Encrypt(items.AgeGroup))" class="btn scondry-btn" onclick="commonLayer('Home','@titleContent.RenewNowButtonTitle');">@titleContent.RenewNowButtonTitle</a>
+									}
+									<a href="@(Model.subscriptionDisplayContent.Culture + "/subscription?subscptn=" + HPPlc.Models.clsCommon.Encrypt(maxRanking.ToString()) + "&age=" + HPPlc.Models.clsCommon.Encrypt(items.AgeGroup))" class="btn scondry-btn" onclick="commonLayer('Home','@titleContent.UpgradeNowButtonTitle');">@titleContent.UpgradeNowButtonTitle</a>
+								</div>
+							}
+
+
+							@if (items.NextSubscriptionTAT != null && items.NextSubscriptionTAT != "NO")
+							{
+								<p>@items.NextSubscriptionTAT</p>
+							}
+
+						</div>
+					}
+				}
+			</div>
+		</div>
+	}
+</div>
+@*</div>*@
+

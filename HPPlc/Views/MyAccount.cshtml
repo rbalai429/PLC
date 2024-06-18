@@ -1,0 +1,403 @@
+﻿@inherits UmbracoViewPage
+@{
+	//if (Request.QueryString.Count > 0 && Request.QueryString.AllKeys.Contains("type"))
+	//{
+	//	Layout = "masterpage.cshtml";
+	//}
+	//else
+	//{
+	//	Layout = "masterpage.cshtml";
+	//}
+
+	Layout = "masterpage.cshtml";
+
+	//if user loggedin then redirecting on home page
+	bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	if (IsUserLoggedIn == false)
+	{
+		Response.Redirect("/", false);
+	}
+
+	var titleData = Model?.DescendantsOrSelf()?.OfType<AccountRoot>()?.FirstOrDefault();
+
+	var spPlan = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+						.FirstOrDefault()?.DescendantsOrSelf()?.OfType<SpecialPlanRoot>()?.FirstOrDefault();
+
+	var regData = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+						.FirstOrDefault()?.DescendantsOrSelf()?.OfType<Registration>()?.FirstOrDefault();
+
+	var ageGroup = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault().Children?
+.Where(x => x.ContentType.Alias == "masterRoot")?.FirstOrDefault().Children?
+.Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault().Children?.OfType<NameListItem>
+().Where(x => x.IsActice == true && x.Value<bool>("displayInLessonWorksheet") == true).ToList();
+
+	//get data from database
+	string name = String.Empty;
+	string mobileno = String.Empty;
+	string whatsappno = String.Empty;
+	string emailId = String.Empty;
+
+	HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+	HPPlc.Models.MyProfile myprofile = new HPPlc.Models.MyProfile();
+	myprofile = db.GetProfile();
+	if (myprofile != null)
+	{
+		if (!String.IsNullOrWhiteSpace(myprofile.Name))
+		{ name = HPPlc.Models.clsCommon.Decrypt(myprofile.Name); }
+
+		if (!String.IsNullOrWhiteSpace(myprofile.Email))
+		{ emailId = HPPlc.Models.clsCommon.Decrypt(myprofile.Email); }
+
+		if (!String.IsNullOrWhiteSpace(myprofile.Mobileno))
+		{ mobileno = HPPlc.Models.clsCommon.Decrypt(myprofile.Mobileno); }
+	}
+}
+
+
+<div class="main-wrp">
+	@Html.Partial("_Breadcrumb")
+	<div class="container-fluid ref-column1">
+		<div class="profile-wrp">
+			<div class="prf-lft-tb">
+				@if (Request.QueryString.Count > 0 && Request.QueryString.AllKeys.Contains("type"))
+				{
+					@Html.Partial("/Views/Partials/_MyAccountTabBonus.cshtml")
+				}
+				else
+				{
+					@Html.Partial("/Views/Partials/_MyAccountTab.cshtml")
+				}
+			</div>
+			<div class="prf-rgt-tb">
+				@if (myprofile != null && myprofile.Email != null && titleData != null)
+				{
+					<form method="POST" id="registrationForm">
+						@Html.AntiForgeryToken()
+
+						<div class="prf-rgt-pd">
+							<div class="prf-rgt-tit"><h1 class="titleforhtag">@titleData.TitleOfPage</h1></div>
+							<div class="prf-rgt-cont">
+								<div class="prfinp-min">
+									<div class="prfinp">
+										<label>@titleData.UniqueId</label>
+										<div class="prfinp-wrap">
+											<div class="prfinp-wrappd">
+												<input type="text" id="unique" name="unique" readonly="readonly" value="@myprofile.UserUniqueId" />
+											</div>
+										</div>
+									</div>
+
+									<div class="prfinp">
+										<label>@titleData.EmailTitle</label>
+										<div class="prfinp-wrap">
+											<div class="prfinp-wrappd">
+												<input type="text" id="email" name="email" readonly="readonly" value="@emailId" maxlength="250" autocomplete="no" oncopy="return false" onpaste="return false" />
+
+											</div>
+
+											@*<span class="error" id="emailRequired" style="display:none;">@titleData.EmailRequired</span>
+												<span class="error" id="emailFormat" style="display:none;">@titleData.EmailFormat</span>*@
+										</div>
+									</div>
+
+
+								</div>
+
+								<div class="prfinp-min">
+									@if (!String.IsNullOrEmpty(myprofile.ReferralCode))
+									{
+										<div class="sub-cmn" style="display:none">
+											<label>@titleData.ReferralCode</label>
+											<input type="text" id="ReferralCodeText" readonly="readonly" name="ReferralCode" value="@myprofile.ReferralCode" />
+										</div>
+									}
+								</div>
+							</div>
+							<div style="padding-top:20px;">
+								<div class="prf-rgt-cont">
+									<div class="prf-rgt-tit"><h2 class="prf-rgt-titHd">@titleData.TitleOfPageEdit</h2></div>
+
+									<div class="prfinp">
+										<label>@titleData.NameTitle<i><img src="/common/images/edit-button.png" /></i></label>
+										<div class="prfinp-wrap">
+											<div class="prfinp-wrappd">
+												<input type="text" id="name" name="name" value="@Html.Raw(name)" maxlength="200" tabindex="1" autocomplete="no" oncopy="return false" onpaste="return false" />
+											</div>
+										</div>
+
+										@*<span class="error" id="nameRequired" style="display:none;">@titleData.NameRequired</span>*@
+									</div>
+
+
+									<div class="prfinp">
+										<label>@titleData.MobileNoTitle<i><img src="/common/images/edit-button.png" /></i></label>
+										<div class="prfinp-wrap indtag">
+											<div class="prfinp-wrappd">
+												<input type="text" id="mobileno" name="mobileno" tabindex="2" maxlength="10" value="@mobileno" autocomplete="no" oncopy="return false" onpaste="return false" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+											</div>
+
+
+										</div>
+										@*<span class="error" id="whatsupFormat" style="display:none;">@titleData.WhatsappRequired</span>*@
+									</div>
+
+									<div class="prfinp agegroup">
+										<label>@titleData.AgeGroupTitle<i><sup class="mandatory">*</sup><img src="/common/images/edit-button.png" /></i></label>
+										<select multiple="multiple" class="multiple-select" id="ageGroup" name="ageGroup" style="width:160px;" tabindex="4">
+											@if (ageGroup != null && ageGroup.Any())
+											{
+												if (myprofile.SelectedAgeGroup != null)
+												{
+													foreach (var items in ageGroup.Where(x => x.IsActice))
+													{
+														string[] selectedAge = myprofile.SelectedAgeGroup.Split(',');
+														if (selectedAge != null)
+														{
+															string ValueExists = Array.Find(selectedAge, e => e == items?.ItemValue);
+															if (!String.IsNullOrEmpty(ValueExists))
+															{
+																<option selected disabled value="@items.Name">@items.ItemName</option>
+															}
+															else
+															{
+																<option value="@items.Name">@items.ItemName</option>
+															}
+														}
+													}
+												}
+											}
+										</select>
+										<span class="error" id="agegroupRequired" style="display:none;">@titleData.AgeGroupRequired</span>
+									</div>
+
+									<div class="prfinp agegroup">
+										<label>You are a?<i><sup class="mandatory">*</sup><img src="/common/images/edit-button.png" /></i></label>
+										@*<div class="subsaved-data">@myprofile.SelectedAgeGroup</div>*@
+										<select id="RuParentOrStudent" name="RuParentOrStudent" class="enterEvent multiple-select" tabindex="5">
+											<option value="0">Select Type </option>
+											@if (!String.IsNullOrEmpty(myprofile.AreYouStudentOrParent))
+											{
+												if (myprofile.AreYouStudentOrParent.ToLower() == "parent")
+												{
+													<option value="Parent" selected disabled>Parent </option>
+													<option value="Student">Teacher </option>
+												}
+												else if (myprofile.AreYouStudentOrParent.ToLower() == "teacher")
+												{
+													<option value="Parent">Parent </option>
+													<option value="Student" selected disabled>Teacher </option>
+												}
+												else
+												{
+													<option value="Parent">Parent </option>
+													<option value="Student">Teacher </option>
+												}
+											}
+											else
+											{
+												<option value="Parent">Parent </option>
+												<option value="Student">Teacher </option>
+											}
+										</select>
+										<span class="error" id="AreYouParentOrStudent" style="display:none;">@titleData.AreYouAparentOrStudentMessage</span>
+									</div>
+
+									@*Consent Start*@
+
+									<div class="lgn-fild-row ">
+										<span style="font-size: 14px; padding-bottom: 10px; color:#939393; display: block;">@Html.Raw(spPlan?.ConsentTitle)</span>
+
+										<div class="rdo-wrp">
+											@*<div class="rdo-collft">@regData.CommunicationWhatsAppTitle</div>*@
+											<div class="rdo-colrit">
+												<ul>
+													<li>
+														<label class="container-label">
+															@regData.CommunicationEmailTitle
+															<input type="checkbox" class="enterEvent" value="Yes"   @(myprofile.ComWithEmail == "Yes" ? "checked" : String.Empty) name="supportOnEmailFromHP" tabindex="6" />
+															<span class="checkmark-label"></span>
+														</label>
+
+													</li>
+													<li>
+														<label class="container-label">
+															@regData.CommunicationWhatsAppTitle
+															<input type="checkbox" class="enterEvent" value="Yes"  @(myprofile.ComWithWhatsApp == "Yes" ? "checked" : String.Empty) name="supportOnWhatsupFromHP" tabindex="7" />
+															<span class="checkmark-label"></span>
+														</label>
+													</li>
+
+													<li>
+														<label class="container-label">
+															@regData.CommunicationPhoneTitle
+															<input type="checkbox" class="enterEvent" value="Yes"  @(myprofile.ComWithPhone == "Yes" ? "checked" : String.Empty) name="supportOnPhoneFromHP" tabindex="8" />
+															<span class="checkmark-label"></span>
+														</label>
+													</li>
+
+													@*<li>
+
+																							<label class="rdo-box">
+																@regData.YesTitle
+																	<input type="radio" class="enterEvent" value="Yes" checked name="supportOnWhatsupFromHP" tabindex="7" />
+																	<span class="checkmark-subs"></span>
+																</label>
+														</li>*@
+													@*<li>
+															<label class="rdo-box">
+																@regData.NoTitle
+																<input type="radio" class="enterEvent" value="No" name="supportOnWhatsupFromHP" tabindex="8" />
+																<span class="checkmark-subs"></span>
+															</label>
+														</li>*@
+												</ul>
+											</div>
+										</div>
+
+
+										@*<div class="rdo-wrp">
+												<div class="rdo-collft">@regData.CommunicationEmailTitle</div>
+												<div class="rdo-colrit">
+													<ul>
+														<li>
+															<label class="rdo-box">
+																@regData.YesTitle
+																<input type="radio" class="enterEvent" value="Yes" checked name="supportOnEmailFromHP" tabindex="11" />
+																<span class="checkmark-subs"></span>
+															</label>
+														</li>
+														<li>
+															<label class="rdo-box">
+																@regData.NoTitle
+																<input type="radio" class="enterEvent" value="No" name="supportOnEmailFromHP" tabindex="12" />
+																<span class="checkmark-subs"></span>
+															</label>
+														</li>
+													</ul>
+												</div>
+
+											</div>
+
+											<div class="rdo-wrp">
+												<div class="rdo-collft">@regData.CommunicationPhoneTitle </div>
+												<div class="rdo-colrit">
+													<ul>
+														<li>
+															<label class="rdo-box">
+																@regData.YesTitle
+																<input type="radio" class="enterEvent" value="Yes" checked name="supportOnPhoneFromHP" tabindex="9" />
+																<span class="checkmark-subs"></span>
+															</label>
+														</li>
+														<li>
+															<label class="rdo-box">
+																@regData.NoTitle
+																<input type="radio" class="enterEvent" value="No" name="supportOnPhoneFromHP" tabindex="10" />
+																<span class="checkmark-subs"></span>
+															</label>
+														</li>
+													</ul>
+												</div>
+
+											</div>*@
+
+									</div>
+
+									@*@Html.Raw(titleData.CommunicationTitle)
+
+										<div class="rdo-wrp">
+											<div class="rdo-collft">@titleData.WhatsAppCommunicationTitle</div>
+											<div class="rdo-colrit">
+												<ul>
+													<li>
+														<label class="rdo-box">
+															@titleData.YesTitle
+															<input type="radio" class="enterEvent" value="Yes" name="supportOnWhatsupFromHP" tabindex="6" @(myprofile.ComWithWhatsApp == "Yes" ? "checked" : String.Empty) />
+															<span class="checkmark-subs"></span>
+														</label>
+													</li>
+													<li>
+														<label class="rdo-box">
+															@titleData.NoTitle
+															<input type="radio" class="enterEvent" value="No" name="supportOnWhatsupFromHP" tabindex="7" @(myprofile.ComWithWhatsApp == "No" ? "checked" : String.Empty) />
+															<span class="checkmark-subs"></span>
+														</label>
+													</li>
+												</ul>
+											</div>
+
+										</div>
+										<span id="ConsentWhatsAppMessage" class="error" style="display:none;">@titleData.CommunicationWhatsAppRequired</span>
+
+										<div class="rdo-wrp">
+											<div class="rdo-collft">@titleData.PhoneCommunicationTitle </div>
+											<div class="rdo-colrit">
+												<ul>
+													<li>
+														<label class="rdo-box">
+															@titleData.YesTitle
+															<input type="radio" class="enterEvent" value="Yes" name="supportOnPhoneFromHP" tabindex="8" @(myprofile.ComWithPhone == "Yes" ? "checked" : String.Empty) />
+															<span class="checkmark-subs"></span>
+														</label>
+													</li>
+													<li>
+														<label class="rdo-box">
+															@titleData.NoTitle
+															<input type="radio" class="enterEvent" value="No" name="supportOnPhoneFromHP" tabindex="9" @(myprofile.ComWithPhone == "No" ? "checked" : String.Empty) />
+															<span class="checkmark-subs"></span>
+														</label>
+													</li>
+												</ul>
+											</div>
+
+										</div>
+										<span id="ConsentMobileMessage" class="error" style="display:none;">@titleData.CommunicationPhoneRequired</span>
+
+										<div class="rdo-wrp">
+											<div class="rdo-collft">@titleData.EmailCommunicationTitle</div>
+											<div class="rdo-colrit">
+												<ul>
+													<li>
+														<label class="rdo-box">
+															@titleData.YesTitle
+															<input type="radio" class="enterEvent" value="Yes" name="supportOnEmailFromHP" tabindex="10" @(myprofile.ComWithEmail == "Yes" ? "checked" : String.Empty) />
+															<span class="checkmark-subs"></span>
+														</label>
+													</li>
+													<li>
+														<label class="rdo-box">
+															@titleData.NoTitle
+															<input type="radio" class="enterEvent" value="No" name="supportOnEmailFromHP" tabindex="11" @(myprofile.ComWithEmail == "No" ? "checked" : String.Empty) />
+															<span class="checkmark-subs"></span>
+														</label>
+													</li>
+												</ul>
+											</div>
+
+										</div>
+										<span id="ConsentEmailMessage" class="error" style="display:none;">@titleData.EmailRequired</span>*@
+
+									<div class="prfinp">
+										<button id="UpdateProfile" type="button" class="up-prf-btn" tabindex="9">@titleData.SaveButtonTitle</button>
+									</div>
+								</div>
+							</div>
+
+							<div>
+								<span id="Msg" class="error" style="display:none;"></span>
+							</div>
+						</div>
+
+					</form>
+				}
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+@section CustomJsFiles
+{
+	<script src="/MyScripts/UpdateProfile.js?v2"></script>
+}

@@ -1,0 +1,267 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.MyOffer>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpage.cshtml";
+	var data = Model?.DescendantsOrSelf()?.OfType<MyOffer>()?.FirstOrDefault();
+
+	HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.HpOfferRedirection, "yes");
+	HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.ExpertTalkId, data.Id);
+
+	bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	string title = data.Name;
+	string offerSubscriptionUrl = String.Empty;
+	string backgroundClass = String.Empty;
+
+	var spPlan = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+						.FirstOrDefault()?.DescendantsOrSelf()?.OfType<SpecialPlanRoot>()?.FirstOrDefault();
+
+	var OfferRank = Umbraco?.Content(data?.OfferOnSubscription?.Udi)?.DescendantsOrSelf()?.OfType<Subscriptions>()?.FirstOrDefault()?.Ranking;
+
+	//var offerData = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+	//	.DescendantsOrSelf()?.OfType<MyOffer>()?.FirstOrDefault();
+
+	var offerData = Model?.DescendantsOrSelf()?.OfType<MyOffer>()?.FirstOrDefault();
+
+	
+	if (!String.IsNullOrEmpty(offerData.CouponCode))
+	{
+		DateTime startDate = offerData.CouponValidityStartDate;
+		DateTime todayDate = Convert.ToDateTime(DateTime.Now.ToShortDateString());
+		DateTime endDate = offerData.CouponValidityEndDate;
+		if (todayDate.Date >= startDate.Date && todayDate.Date <= endDate.Date)
+		{
+			HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.ExpertTalkId,1);
+			HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.CouponCode,offerData.CouponCode);
+		}
+	}
+
+	if (Request.Path.Contains("ink-offer"))
+	{
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SplRedirection, "/subscription/buy-now/?subscriptionid=Bnkregl+jQGLmueMdUNWDw==");
+	}
+	else
+	{
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SplRedirection, "/subscription");
+	}
+
+	//if (OfferRank != null && OfferRank == "2") // 199
+	//{
+	//	offerSubscriptionUrl = System.Configuration.ConfigurationManager.AppSettings["OfferSubscriptionUrl"].ToString();
+	//}
+	//else if (OfferRank != null && OfferRank == "3") //599
+	//{
+	//	offerSubscriptionUrl = System.Configuration.ConfigurationManager.AppSettings["OfferSubscription599Url"].ToString();
+	//}
+	//else if (OfferRank != null && OfferRank == "4")//899
+	//{
+	//	offerSubscriptionUrl = System.Configuration.ConfigurationManager.AppSettings["bundlingRedirectUrl"].ToString();
+	//}
+	//else
+	//{
+	//	offerSubscriptionUrl = "/";
+	//}
+
+	//if (!String.IsNullOrWhiteSpace(offerSubscriptionUrl))
+	//{
+	//	HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.JoinNowUrl, offerSubscriptionUrl);
+	//	HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.CouponCode, data.CouponCode);
+	//}
+
+	if (!String.IsNullOrWhiteSpace(Model.Value("colorBackgroundCSS").ToString()))
+	{
+		backgroundClass = Model.Value("colorBackgroundCSS").ToString();
+	}
+	else if (!String.IsNullOrWhiteSpace(Model.Value("imageBackgroundCSS").ToString()))
+	{
+		backgroundClass = Model.Value("imageBackgroundCSS").ToString();
+	}
+}
+
+
+@section styles
+{
+	<style>
+		.main-wrp {
+			margin-top: 0px !important;
+		}
+	</style>
+}
+<input type="hidden" id="pageId" value="offer" />
+<input type="hidden" id="IsMyOfferUser" value="YES" />
+<input type="hidden" id="bundlingRedirectUrl" value="@offerSubscriptionUrl" />
+
+<div class="main-wrp holinomar yellow-theme">
+	<div class="container-fluid ContnPlc">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="holibanner">
+					<div class="items">
+						<div class="head-wrap">
+							<div class="head-rowtp">
+								<div class="head-rowpd">
+
+									@Html.Raw(data.Description)
+									@if (data?.HPlogo != null)
+									{
+										<span><img src="@(data?.HPlogo?.Url())" alt="@(data?.HPlogo?.Value<string>("altText"))" /></span>
+									}
+								</div>
+							</div>
+							@if (!String.IsNullOrEmpty(data.Title))
+							{
+								<div class="head-rowbtm">
+									<div class="head-rowpd">
+										<p>
+											@Html.Raw(data?.Title)
+										</p>
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+				<div class="container-fluid @backgroundClass">
+					<div class="container-box">
+						<div class="container-inr">
+
+							<div class="claim-frm-row">
+								<div class="claim-frm" id="tcf">
+									<div class="bts-tag">
+
+										@if (data?.OfferLogo != null)
+										{
+											<img class='b-lazy' src="@(data?.OfferLogo?.Url())" alt="@(data?.OfferLogo?.Value<string>("altText"))" />
+										}
+
+									</div>
+
+									@if (IsUserLoggedIn == false)
+									{
+										@*@Html.Partial("/Views/Partials/Login/_login.cshtml")*@
+										<div class="lgn-fild-row ">
+											<div class="lgn-fildbox">
+												<input type="text" class="input-lgn errorclean" id="PreLoginEmail" placeholder="@spPlan.MobileNoTitle" tabindex="1" maxlength="200" autocomplete="off" onkeyup="this.value=this.value.toLowerCase();" />
+											</div>
+											<span class="error" id="UserNameRequired" style="display:none;">Please enter valid Email/Mobile no.</span>
+										</div>
+										<div id="NextBtn" class="lgn-fild-row ">
+											<button type="button" id="PreSignInBtnFreeTrial" tabindex="2" class="btn blckBtn">@spPlan.ButtonTitle</button>
+										</div>
+
+										<span id="Msg" class="error dvdr" style="display:none"></span>
+									}
+									else
+									{
+										<div class="claim-fild">
+											<button class="claimbtn" onclick="ClaimNow('/subscription');">@data.ClaimNowTitle</button>
+										</div>
+									}
+
+								</div>
+								<div class="claim-poster">
+									<picture>
+										@if (data?.OfferDescMediaMobile != null)
+										{
+											<source data-srcset="@(data?.OfferDescMediaMobile?.Url())" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" />
+										}
+
+										@if (data?.OfferDescMediaMobileWebP != null)
+										{
+											<source data-srcset="@(data?.OfferDescMediaMobileWebP?.Url())" srcset="/common/images/banner_loader.jpg" media="(max-width: 680px)" type='image/webp' />
+										}
+
+										@if (data?.OfferDescMediaDesktopWebP != null)
+										{
+											<source data-srcset="@(data?.OfferDescMediaDesktopWebP?.Url())" srcset="/common/images/banner_loader.jpg" type='image/webp' />
+										}
+
+										@if (data?.OfferDescMediaDesktop != null)
+										{
+											<img class='b-lazy' data-src="@(data?.OfferDescMediaDesktop?.Url())" src='/common/images/banner_loader.jpg' alt="@(data?.OfferDescMediaDesktop?	.Value<string>("altText"))" />
+										}
+									</picture>
+								</div>
+							</div>
+							@*<div class="ofr-dic">*The free trial includes 100 worksheets, while the bonus content section on <a href="https://www.printlearncenter.com">www.printlearncenter.com</a> provides access to 2000+ additional worksheets.</div>*@
+						</div>
+					</div>
+				</div>
+
+
+				<div class="container-fluid holioffer-bg">
+					<div class="container-box">
+						<div class="container-inr">
+							<div class="holiwrper-offer">
+								<div class="holioffer-wrp">
+									@if (data?.OfferDetails != null)
+									{
+										foreach (var offer in data.OfferDetails)
+										{
+											if (offer != null)
+											{
+												<div class="holioffer-row">@offer.Title</div>
+												<div class="holioffer-row hr-bor">@Html.Raw(offer.Description)</div>
+												<div class="holioffer-row2">
+													@foreach (var offerDetails in offer?.NestedContent)
+													{
+														if (offerDetails != null)
+														{
+															<div class="holioffer-clm">
+																<span>
+																	@if (offerDetails.MediaFile != null)
+																	{
+																		<img src="@offerDetails.MediaFile.Url()" alt="@(offerDetails.MediaFile.Value<string>("altText"))" />
+																	}
+																</span>
+																@Html.Raw(offerDetails.Description)
+															</div>
+
+														}
+													}
+												</div>
+											}
+										}
+									}
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section CustomJsFiles
+{
+	@*<script src="/CustumJs/HPidAccount.js?v3"></script>*@
+
+	<script>
+		$(document).ready(function () {
+			$('#headerTag').hide();
+
+			//DefaultLogin();
+		})
+	</script>
+
+	<script>
+		function ClaimNow(claimto) {
+
+			try {
+				//var url = window.location.href;
+				commonLayer('Offer', '@title');
+
+				//Pixel code
+				OfferPageClaimNowButton();
+			}
+			catch (ex) {
+				 //console.log(ex);
+			}
+
+			window.location = claimto;
+		}
+	</script>
+
+
+}

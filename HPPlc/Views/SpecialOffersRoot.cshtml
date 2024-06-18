@@ -1,0 +1,126 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models
+@{
+	Layout = "masterpage.cshtml";
+	var CultureInfo = Model.GetCultureFromDomains();
+
+	var downloadText = Umbraco.GetDictionaryValue("Download Button");
+
+
+	//Check User LoggedIn Or Not
+	bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	if (IsUserLoggedIn == false)
+	{
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SplRedirection, Request.Path);
+	}
+	else
+	{
+		HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.SplRedirection);
+	}
+
+	string agegroup = String.Empty;
+	string qtype = "3-4";
+	string offername = Model?.DescendantsOrSelf()?.OfType<SpecialOffersRoot>()?.FirstOrDefault()?.OfferName;
+
+}
+
+@section metatags
+{
+	@Html.Partial("~/Views/Partials/_MetaDataBind.cshtml")
+}
+
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input id="hdnqtype" type="hidden" value="@qtype" />
+<input id="hdnoffername" type="hidden" value="@offername" />
+<input id="hdnDownloadText" type="hidden" value="@downloadText" />
+<input id="page" type="hidden" value="SpecialOffer" />
+<input id="filterType" type="hidden" value="list" />
+
+<div class="main-wrp">
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	@Html.Partial("_Breadcrumb")
+
+
+	<div class="container-fluid ContnPlc">
+		<div class="container-box">
+			<div class="container-inr">
+				@try
+				{
+					Html.Partial("/Views/Partials/_FilterSpecialOffer.cshtml", null, new ViewDataDictionary(this.ViewData) { { "OfferName", offername } });
+				}
+				catch { }
+				<div class="ContnPlcin">
+
+					<div class="descTitlePlc">
+						<h1 class="titleforhtag"><span id="titleOfClassName"></span></h1>
+					</div>
+
+					<div class="descContPlc">
+						<p><span id="descriptionOfClassName"></span></p>
+					</div>
+
+					<div class="dvdr"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="video-tutorials ListingMnPlc topSpace">
+
+		<div class="container-fluid">
+			<div class="container-box">
+				<div class="container-inr">
+
+					<div class="ritListingPlcTop">
+						
+						<div class="video-tutorials teachersSliderThum">
+
+							<div class="recommended-list">
+								<div class="thumListRow">
+									<div class="list-items fourItemBinding" id="WorksheetDetails">
+										<div class="lds-roller" id="worksheetDetailsLoading"></div>
+									</div>
+									<div id="pagediv" style="height:10px;"></div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+					<div id="faqbox">
+						@Html.CachedPartial("_footerSEOContent", Model, 3600)
+						@Html.Partial("_footerContentData")
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+
+</div>
+<div class="scrollto_top">
+	<div class="scrolltt_inr">
+		<span></span>
+	</div>
+</div>
+<div class="mob-fliter">Filter</div>
+@try
+{
+	Html.Partial("~/Views/Partials/Login/_payLogicSpecialOffer.cshtml");
+}
+catch { }
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="~/CustumJs/SpecialOffers/WorksheetSpecialOfferAgeWise.js"></script>
+}
+
+
+

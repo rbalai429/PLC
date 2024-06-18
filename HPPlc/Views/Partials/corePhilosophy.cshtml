@@ -1,0 +1,37 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.CorePhilosophy>
+@using ContentModels = Umbraco.Web.PublishedModels;
+
+<div class="container-fluid philoshyMn">
+    <div class="container-box">
+        <div class="container-inr">
+
+            <div class="top-texts">
+				<h3 class="title-plc">@Model.Title</h3>
+				@Html.Raw(Model.ContentDescription)
+			</div>
+			<div class="philoshyMnin">
+				@foreach (CorePhilosophyItems item in Model?.CorePhilosophyItems.Where(x => x.IsButtom))
+				{
+					<div class="phirBx @(item.IsButtom ? "bottomzero" : "")">
+						<div class="phirBxin">
+							<div class="lfticn"><img src="@(item.ParentImage?.Url())" alt=""></div>
+							<div class="ritTxt">
+								@item.Title
+							</div>
+						</div>
+						<div class="actvCrd">
+							<div class="actvCrdin">
+								@*<div class="lfticn"><img src="@(item.ChildImage?.Url())" alt=""></div>*@
+								<div class="ritTxt">
+									<h4>  @item.Title</h4>
+									<p> @item.Description</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+            @*<div><a href="@(Model.SubscribeNow?.Url)" class="sbcptn-btn">@(Model.SubscribeNow?.Name)</a></div>*@
+        </div>
+    </div>
+</div>

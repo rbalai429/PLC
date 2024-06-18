@@ -1,0 +1,39 @@
+﻿
+@inherits UmbracoViewPage
+@using Umbraco.Core.Services
+@using System.Globalization
+
+@{
+	var currentCulture = Model.GetCultureFromDomains();
+	ILocalizationService ls = Services.LocalizationService;
+	IEnumerable<ILanguage> languages = ls.GetAllLanguages();//.Where(x => x.IsoCode == "en-US" || x.IsoCode == "hi" || x.IsoCode == "mr");
+	
+
+	//var defaultselectedLang = Model?.LanguageName?.Where(x => x.DefaultLanguage && x.IsActive)?.FirstOrDefault();
+
+	//HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SelectedLanguage, defaultselectedLang?.LanguageName);
+	//HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SelectedLanguageCulture, defaultselectedLang?.CultureName);
+}
+
+<div id="LangSessionStore">
+	
+	<ul>
+		@if (languages != null && currentCulture != null)
+		{
+			foreach (ILanguage languageAll in languages)
+			{
+				// Get the .NET culture info
+				CultureInfo cultureInfo = languageAll.CultureInfo;
+
+				string[] words = languageAll.CultureName.Split(' ');
+				var lagunageText = words[0].ToString();
+
+				<li>
+					<a href="javascript:void(0);" onclick="changeVariant('@Model.Url(languageAll.IsoCode)','@languageAll.IsoCode','@lagunageText')" class="@(currentCulture.ToLower() == languageAll.IsoCode.ToLower() ? "active" : String.Empty)">
+						@lagunageText <span></span>
+					</a>
+				</li>
+			}
+		}
+	</ul>
+	</div>

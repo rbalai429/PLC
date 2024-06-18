@@ -1,0 +1,152 @@
+﻿
+@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models
+@{
+	Layout = "masterpage.cshtml";
+
+	var expertTalks = Model.DescendantsOrSelf().OfType<ExpertTalks>()?.FirstOrDefault();
+
+	var CultureInfo = Model.GetCultureFromDomains();
+
+	var Banner = Umbraco?.ContentAtRoot()?.FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "banner");
+
+	var SignUpSection = Umbraco?.ContentAtRoot()?.FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault()?.Children?
+		.Where(x => x.ContentType.Alias == "homePageSignUpSection");
+
+	//get download text
+	string UpgradetoPremium = Umbraco.GetDictionaryValue("Upgrade to Premium");
+	string SubscribefordownloadText = Umbraco.GetDictionaryValue("Subscribe to download");
+	string downloadText = Umbraco.GetDictionaryValue("Download Button");
+
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+	//Check User LoggedIn Or Not
+	//string UserLoggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn) ?? "";
+}
+
+@section metatags
+{
+	@Html.Partial("/Views/Partials/_MetaDataBind.cshtml")
+}
+
+@* the fun starts here *@
+<input id="hdnCurrentNode" type="hidden" value="@Model.Id" />
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input id="hdnAgeFilterReset" type="hidden" />
+<input id="hdnDownloadText" type="hidden" value="@downloadText" />
+<input id="hdnSubscribeforDownload" type="hidden" value="@SubscribefordownloadText" />
+<input id="hdExpertJoinNow" type="hidden" value="@expertTalks.VideoHeaderLabel" />
+<input id="hdnTabId" type="hidden" value="1" />
+<input id="hdRemainingMinutesInMeeting" value="@expertTalks.JoinNowAppearsTimeInMinutes" />
+<input id="hdnBuyNow" type="hidden" value="@UpgradetoPremium" />
+
+<div class="main-wrp">
+
+	@if (SignUpSection != null && UserLoggedInOrNot == false)
+	{
+		@Html.Partial("/Views/Partials/_TopSection.cshtml", SignUpSection?.First())
+	}
+
+	@if (Banner != null)
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml", Banner?.First())
+	}
+
+	@Html.Partial("_Breadcrumb")
+	@*@try
+		{
+			@Html.Partial("/Views/Partials/_TopTabs.cshtml", new ViewDataDictionary(this.ViewData)
+					{
+					{ "workSheetTab", Umbraco.GetDictionaryValue("Worksheet") },
+					{ "videoTab", Umbraco.GetDictionaryValue("VideoTutorials") },
+					{ "expertTalkTab", Umbraco.GetDictionaryValue("ExpertTalk") },
+					{ "festivalOffersTab", Umbraco.GetDictionaryValue("FestivalOffersName") },
+					{ "selectedIndex", 3 }
+					});
+		}
+		catch { }*@
+
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+
+
+				<form id="form1" method="POST">
+					@Html.AntiForgeryToken()
+					<div id="dvExpertYTalks">
+						<div class="video-tutorials">
+							@if (!String.IsNullOrWhiteSpace(expertTalks.Title))
+							{
+
+								<div class="descTitlePlc">
+
+									<h1 class="titleforhtag"> @expertTalks.Title</h1>
+
+								</div>
+							}
+							@if (expertTalks.Description != null)
+							{
+								//IHtmlString description = expertTalks.Description;
+
+								<div class="title-fltr-fix">
+									<div class="descTitle">
+										@Html.Raw(expertTalks.Description)
+										@*@Html.Raw("<p>" + description.ToHtmlString().Replace("<p>", "").Replace("</p>", "") + "</p>")*@
+									</div>
+								</div>
+							}
+							<div class="container-fluid">
+								<div class="container-box">
+									<div class="container-inr">
+
+										<div class="list-items dvExpertWiseContainer">
+										</div>
+
+									</div>
+								</div>
+							</div>
+
+
+
+							<div id="dvExpertTalkVideos">
+								<div class="container-fluid">
+									<div class="container-box">
+										<div class="container-inr" id="previouswebinar">
+											<div class="webin-hd previous">
+												<div class='fit-hd'>
+													<h2 class="hdtitl">@expertTalks.VideoHeaderLabel</h2>
+												</div>
+											</div>
+											<div class="list-items dvExpertTalkVideoContainer">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+
+			</div>
+		</div>
+	</div>
+
+
+
+</div>
+<div class="scrollto_top">
+	<div class="scrolltt_inr">
+		<span></span>
+	</div>
+</div>
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/ExpertTalk.js"></script>
+}
+
+
+

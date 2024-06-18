@@ -1,0 +1,252 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models
+@{
+	Layout = "masterpage.cshtml";
+	var CultureInfo = Model.GetCultureFromDomains();
+
+	var vrNoreId = Model.Id;
+	var CurrentPageDetails = Umbraco?.Content(vrNoreId);
+
+	int HomeContainerId = 0;
+	var Container = Umbraco?.Content(vrNoreId)?.Children?.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault();
+	if (Container != null)
+	{
+		HomeContainerId = Container.Id;
+	}
+	//var Banner = Umbraco?.Content(HomeContainerId)?.Children?.Where(x => x.ContentType.Alias == "banner").FirstOrDefault();
+	//var CategoryBanner = Umbraco?.Content(HomeContainerId)?.Children?.Where(x => x.ContentType.Alias == "categoryBanner").FirstOrDefault();
+	var SignUpSection = Umbraco?.Content(HomeContainerId)?.Children?.Where(x => x.ContentType.Alias == "homePageSignUpSection").FirstOrDefault();
+
+	//var vrAgrGroupe = Model?.Children?.Where(x => x.ContentType.Alias == "masterRoot")?.
+	//	FirstOrDefault()?.Children?.Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault()?.Children?.OfType<NameListItem>()?.Where(x => x.IsActice);
+
+	//var vrCategory = Model?.Children?.Where(x => x.ContentType.Alias == "masterRoot")?.
+	//	FirstOrDefault()?.Children?.Where(x => x.ContentType.Alias == "categoryMaster")?.FirstOrDefault()?.Children?.OfType<NameListItem>()?.Where(x => x.IsActice);
+
+	var WorkSheetNode = Umbraco?.Content(vrNoreId)?
+		.Children?.Where(x => x.ContentType.Alias == "worksheetNode")?.OfType<WorksheetNode>().FirstOrDefault();
+	//var Worksheet = Umbraco?.Content(WorkSheetNode?.Id);
+
+	//var VideoNode = Umbraco?.Content(vrNoreId).Children.Where(x => x.ContentType.Alias == "videos").FirstOrDefault();
+	//var Videos = Umbraco?.Content(VideoNode.Id);
+
+	//var ExpertNode = Umbraco?.Content(vrNoreId).Children.Where(x => x.ContentType.Alias == "zoomMeeting").FirstOrDefault();
+	//var Experts = Umbraco?.Content(ExpertNode.Id);
+	//var RemainingMinutesInMeeting = Experts.Value<string>("joinNowAppearsTimeInMunites");
+
+	//Session["USERID"] = "1";
+	//string vUserId = Session["USERID"].ToString();
+	//string vSubscriptionName = "FREE";
+
+
+	//Check User LoggedIn Or Not
+	//var UserLoggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+	//string SubscriptionValidationText = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.SubscriptionValidationText);
+
+	//get download text
+	var downloadText = Umbraco.GetDictionaryValue("Download Button");
+	var SubscribefordownloadText = Umbraco.GetDictionaryValue("Subscribe to download");
+	var seeMore = Umbraco.GetDictionaryValue("See More");
+	var buyNow = Umbraco.GetDictionaryValue("Upgrade to Premium");
+	var BuyNewSubscription = Umbraco.GetDictionaryValue("BuyNewSubscription");
+
+	//var Button1 = SignUpSection.Value<Link>("button1");
+	//var Button2 = SignUpSection.Value<Link>("button2");
+	//string Url = Request.Url.Host;
+
+	var totalNoOfAgrGroupe = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+					   .Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault()?.Children?.OfType<NameListItem>().ToList().Where(c => c.IsActice).Count();
+
+	var toBeDisplayAgeGroupe = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+													.Where(x => x.ContentType.Alias == "worksheetNode")?.OfType<WorksheetNode>().FirstOrDefault()?.NoOfDisplayAgeGroupeWorksheet;
+
+	int HpBundlePopupOpenCount = HPPlc.Models.SessionManagement.GetCurrentSession<int>(HPPlc.Models.SessionType.HpBundlePopupOpenCount);
+
+	if (Request.QueryString.Count > 0)
+	{
+		string qs = Request.QueryString.Get(0).ToString();
+		if (!String.IsNullOrWhiteSpace(qs))
+		{
+			string redirectURL = String.Empty;
+			string decQS = HPPlc.Models.clsCommon.DecryptWithBase64Code(qs);
+			if (!String.IsNullOrWhiteSpace(decQS) && decQS.Contains("plan"))
+			{
+				string planValue = decQS.Replace("plan=","");
+				if (!String.IsNullOrWhiteSpace(planValue) && planValue == "buy199")
+				{
+					redirectURL = System.Configuration.ConfigurationManager.AppSettings["OfferSubscriptionUrl"].ToString();
+					HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.BannerSpecificTag, "2");
+				}
+				else if (!String.IsNullOrWhiteSpace(planValue) && planValue == "buy899")
+				{
+					redirectURL = System.Configuration.ConfigurationManager.AppSettings["bundlingRedirectUrl"].ToString();
+					HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.BannerSpecificTag, "4");
+				}
+
+				HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.JoinNowUrl, redirectURL);
+			}
+		}
+	}
+}
+
+@section metatags
+{
+	@Html.Partial("/Views/Partials/_MetaDataBind.cshtml")
+
+	<script>
+		gtag('event', 'conversion', { 'send_to': 'AW-315026447/OFckCPnPu44YEI_Ym5YB' });
+	</script>
+}
+
+
+@* the fun starts here *@
+<input id="hdnFilter" type="hidden" />
+<input id="hdnHpBundlePopupOpenCount" type="hidden" value="@HpBundlePopupOpenCount" />
+<input id="hdnCurrentNode" type="hidden" value="@Model.Id" />
+<input id="hdnSeeMore" type="hidden" value="@seeMore" />
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input id="hdnBuyNewSubscription" type="hidden" value="@BuyNewSubscription" />
+<input id="hdnBuyNow" type="hidden" value="@buyNow" />
+<input id="hdnDownloadText" type="hidden" value="@downloadText" />
+<input id="hdnSubscribeforDownload" type="hidden" value="@SubscribefordownloadText" />
+
+<input id="IsCurrentHomePage" type="hidden" value="yes" />
+<input id="hdTobeDisplayWorksheet" type="hidden" value="0" />
+<input id="hdTotalNoOfDisplayWorksheet" type="hidden" value="@totalNoOfAgrGroupe" />
+<input id="hdAlreadyDisplayedWorksheet" type="hidden" value="@toBeDisplayAgeGroupe" />
+@*<input id="hdWhatsAppNotDwnld" value="@downloadPDF" type="hidden" />*@
+
+<div class="main-wrp">
+
+	@try
+	{
+		if (SignUpSection != null)
+		{
+			@Html.Partial("/Views/Partials/_TopSection.cshtml", SignUpSection)
+		}
+	}
+	catch (Exception ex) { }
+
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+
+	@if (WorkSheetNode != null)
+	{
+
+		<div class="container-fluid ContnPlc">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="ContnPlcin">
+						@if (Model.HasProperty("formattedTitle"))
+						{
+							<div class="descTitlePlc">
+								<h1 class="descHd">@Html.Raw(Model.Value("formattedTitle"))</h1>
+							</div>
+						}
+
+						@*@if (Model.HasProperty("description"))
+							{
+								<div class="descContPlc">
+									@Html.Raw(Model.Value("description"))
+								</div>
+							}*@
+
+						<div class="dvdr"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="video-tutorials ListingMnPlc">
+
+			<div class="container-fluid">
+				<div class="container-box">
+					<div class="container-inr">
+						<div class="ListingMnPlcin">
+							<div class="fltrMnPlc">
+
+								@Html.Partial("_Filter")
+
+								<div class="ritListingPlc">
+									<div class="ritListingPlcTop">
+										<div id="WorksheetList">
+
+										</div>
+										<div class="lds-roller" id="worksheetLoading"></div>
+
+									</div>
+
+									<div id="faqbox">
+										@Html.CachedPartial("_footerSEOContent", Model, 3600)
+										@Html.Partial("_footerContentData")
+									</div>
+
+								</div>
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+
+
+	}
+</div>
+
+<div class="scrollto_top">
+
+	<div class="scrolltt_inr">
+
+		<span></span>
+
+	</div>
+</div>
+
+<div class="mob-fliter">Filter</div>
+@*<div class="mob-fliter-2">Filter by Category</div>*@
+@*<div class="mob-fliter-3">Filter by Weeks</div>*@
+<div class="fltr-overlay"></div>
+@*<a href="https://api.whatsapp.com/send?phone=+918800330330&text=Please%20send%20me%2030%20days%20learning%20package" target="_blank" class="floater-whatsapp"></a>*@
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/Filter.min.js"></script>
+	<script type="text/javascript" src="/CustumJs/Worksheet.min.js"></script>
+
+	@*<script type="text/javascript" src="/common/js/select2.full.min.js"></script>*@
+
+	<script>
+		$(document).ready(function () {
+		
+			var hdnHpBundlePopupOpenCount = $("#hdnHpBundlePopupOpenCount").val();
+			if (hdnHpBundlePopupOpenCount == "0") {
+				IsBundlingUser();
+			}
+		});
+	</script>
+	<script>
+		function WorksheetFilter(filtrType) {
+			BindWorkSheet(filtrType);
+		}
+	</script>
+
+	@*<script>
+		$(document).ready(function () {
+			var hdWhatsAppNotDwnld = $('#hdWhatsAppNotDwnld').val();
+			
+			if (hdWhatsAppNotDwnld) {
+				location.href = hdWhatsAppNotDwnld;
+			}
+		});
+	</script>*@
+}
+
+
+

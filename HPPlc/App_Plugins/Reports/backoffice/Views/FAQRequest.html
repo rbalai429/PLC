@@ -1,0 +1,190 @@
+﻿<div ng-controller="FAQRequestController" ng-init="init()">
+    <div class="umb-panel umb-editor-wrapper ">
+        <div data-element="editor-header" class="umb-editor-header flex items-center">
+            <h1 class="umb-panel-header-name ">{{Title}}</h1>
+        </div>
+    </div>
+    <div data-element="editor-container" class="umb-editor-container umb-panel-body umb-scrollable row-fluid ">
+        <div class="umb-pane">
+            <div class="umb-editor-sub-header__content-right">
+                <div class="form-search -no-margin-bottom custom-form-search">
+                    <div class="inner-addon left-addon">
+                        <i class="icon icon-search"></i>
+                        <input class="form-control search-input" type="text" placeholder="Search for Full Name and Mobile No." ng-model="search" ng-change="GetRequestList(currentPage,false)" prevent-enter-submit="" no-dirty-check="" aria-invalid="false">
+                    </div>
+                    <div class="inner-addon left-addon">
+                        <label>Start Date</label>
+                        <input class="form-control search-input" type="date" placeholder="Start Date"  ng-model="startDate" ng-change="GetRequestList(currentPage,false)">
+                    </div>
+                    <div class="inner-addon left-addon">
+                        <label>End Date</label>
+                        <input class="form-control search-input" type="date" placeholder="End Date" ng-model="endDate" ng-change="GetRequestList(currentPage=1,false)" >
+                    </div>
+                    <div style="width:15%" class="inner-addon left-addon">
+                        <label>Status</label>
+                        <select class="form-control search-input" ng-model="status" ng-change="GetRequestList(currentPage=1,false)">
+                            <option value="">All</option>
+                            <option ng-repeat="item in StatusList" value="{{item.Status}}" ng-if="CheckIsValidStatus(item.Status)">{{item.Status}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="umb-pane">
+            <div ng-if="!RequestListLoad">
+                <div class="text-right pb-5">
+
+                    <ng-form id="FAQRequestForm" enctype="multipart/form-data" method="POST" name="clinicAddForm" class="ng-pristine ng-valid ng-valid-required" val-form-manager>
+
+                        <input type="file" ng-disabled="FileUploaded" id="fileupload" name="fileupload" multiple onchange="angular.element(this).scope().FileSelected(this)" accept=".xlsx, .xls, .csv" />
+
+                        <button mat-button color="warn" type="button" data-hotkey="ctrl+s" ng-disabled="FileUploaded" class="btn umb-button__button btn-success umb-button-- umb-outline float-right" ng-click="FileUpload()">
+                            <span ng-if="!FileUploaded">Upload File</span>
+                            <span ng-if="FileUploaded"> Upload..</span>
+                            <ul ng-if="FileUploaded" class="umb-load-indicator animated -half-second">
+                                <li class="umb-load-indicator__bubble"></li>
+                                <li class="umb-load-indicator__bubble"></li>
+                                <li class="umb-load-indicator__bubble"></li>
+                            </ul>
+                        </button>
+                    </ng-form>
+                    <button ng-if="RequestList.length>0" class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="ExportToExcel()">
+                        <span ng-if="!RequestDownload"> Export To Excel</span>
+                        <span ng-if="RequestDownload"> Exporting..</span>
+                    </button>
+                    <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="ResetSearch()">
+                        <span> Reset Search</span>
+                    </button>
+                    
+                </div>
+                <div class="umb-table" id="export">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Mobile No.</th>
+                                <th>Select Date</th>
+                                <th>Select Time</th>
+                                <th>Status</th>
+                                <th>View Details</th>
+
+                            </tr>
+                        </thead>
+                        <tbody ng-if="RequestList.length>0">
+                            <tr ng-repeat="item in RequestList">
+                                <td>{{item.FullName}}</td>
+                                <td>{{item.Mobile}}</td>
+                                <td>{{item.SelectDate}}</td>
+                                <td>{{item.SelectTime}}</td>
+                                <td>
+                                    <div ng-if="item.Status!=null" class="flex justify-center">
+                                        <div class="history-item__badge umb-badge umb- umb-badge--xs" ng-class="GetStatus(item.Status)"><span>{{item.Status}}</span> </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button ng-if="item.Status!=null" ng-click="GetFollowUpList(item)" class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button">
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                        <tfoot ng-show="totalPages > 1">
+                            <tr>
+                                <th colspan="6">
+
+                                    <div class="pagination pagination-right" page-number="currentPage" total-pages="totalPages">
+                                        <ul>
+                                            <li ng-class="{disabled: currentPage == 1}" ng-click="currentPage == 1 || GetRequestList(currentPage -1,true)">
+                                                <a href="javascript:void(0)">Prev Page</a>
+                                            </li>
+                                            <li ng-repeat="i in rangeCreator(currentStart,totalPages)" ng-class="{disabled: currentPage == i}" ng-click="currentPage == i || GetRequestList(i,true)"><a href="javascript:void(0)">{{i}}</a></li>
+
+                                            <li ng-class="{disabled: currentPage == totalPages}" ng-click="currentPage == totalPages || GetRequestList(currentPage + 1,true)">
+                                                <a href="javascript:void(0)">Next Page</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </th>
+                            </tr>
+                        </tfoot>
+                        <tbody ng-if="RequestList.length==0">
+                            <tr>
+                                <td colspan="4"> <localize key="content_listViewNoItems"></localize></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <ul class="umb-load-indicator animated -half-second" ng-if="RequestListLoad">
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+            </ul>
+        </div>
+    </div>
+    <div class="umb-editors" ng-if="model.show">
+        <div class="umb-editor   umb-editor--small umb-editor--infiniteMode umb-editor--n1 umb-editor--level1">
+            <div class="umb-panel umb-editor-wrapper">
+                <div class="umb-editor-header  ">
+
+                    <div class="flex items-center" style="height: 100%;" aria-hidden="false">
+                        <h1 class="umb-panel-header-name  ">
+                            Follow Up Details-{{model.name}}
+                        </h1>
+                    </div>
+                    <div class="umb-loader-wrapper" ng-if="model.showing">
+                        <div class="umb-loader"></div>
+                    </div>
+                </div>
+                <div class="umb-pane custom-umb-pan" ng-if="!model.showing">
+                    <div>
+                        <div class="umb-box ">
+                            <div class="umb-box-content ">
+                                <div class="history" ng-if="FollowUpList!=null && FollowUpList.length>0">
+                                    <div ng-repeat="item in FollowUpList">
+                                        <div class="history-line">
+                                        </div>
+                                        <div class="history-item ">
+                                            <div class="history-item__break">
+                                                <div class="history-item__avatar">
+                                                    <div color="secondary">
+                                                        <div  title="{{item.Status}}" class="history-item__badge umb-badge umb- umb-badge--xs" ng-class="GetStatus(item.Status)"><span>{{item.Status}}</span> </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="">
+                                                        {{item.FollowUpBy}}
+
+                                                        <!--<span class="history-item__badge umb-badge umb-badge--success umb-badge--xs"  color="success"> <localize key="auditTrails_smallPublishVariant">Publish</localize> </span>-->
+                                                    </div> <div class="history-item__date ">{{item.CreatedDate}}</div>
+                                                </div>
+                                            </div>
+                                            <div class="history-item__description">
+                                                
+                                                <p> {{item.FollowUp}}</p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <localize ng-if="FollowUpList==null || FollowUpList.length==0" key="content_listViewNoItems"></localize>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+                <div class="umb-editor-footer ">
+                    <div class="umb-editor-footer-content">
+                        <div class="umb-editor-footer-content__right-side ">
+                            <button ng-click="model.show=!model.show" class="btn umb-button__button btn-info umb-button-- umb-outline">  Close  </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

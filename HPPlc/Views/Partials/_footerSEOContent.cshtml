@@ -1,0 +1,57 @@
+﻿@inherits UmbracoViewPage
+@using Umbraco.Web.Models
+
+@{
+	var model = Model;
+	bool showOnPage = false;
+	int faqCount = 0;
+	if (model.HasProperty("showOnPage"))
+	{
+		showOnPage = Convert.ToBoolean(model.GetProperty("showOnPage").Value<bool>());
+	}
+
+	if (showOnPage)
+	{
+		var footerSEOItems = model.GetProperty("sEOFAQs").Value<IEnumerable<FAqitems>>().ToList();
+
+		<div class="container-fluid">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="faqbox-row">
+						@if (model.HasProperty("footTitle"))
+						{
+							var faqTitle = model.Value<string>("footTitle");
+							if (!String.IsNullOrWhiteSpace(faqTitle))
+							{
+								<div class="faqTtitle">
+									@faqTitle
+								</div>
+							}
+						}
+						<div class="faqbox">
+							@if (footerSEOItems != null && footerSEOItems.Any())
+							{
+								foreach (var faqItem in footerSEOItems)
+								{
+									faqCount++;
+									var fAQTitle = faqItem.Value<string>("title");
+									var fAQDescription = faqItem.Value<string>("description");
+									if (!String.IsNullOrWhiteSpace(fAQTitle))
+									{
+										<h5 class=@(faqCount == 1 ? "acc-active" : "")>@Html.Raw(fAQTitle)</h5>
+									}
+									<div class="faq-ans" style=@(faqCount == 1 ? "display:block" : "display:none")>
+										@Html.Raw(fAQDescription)
+									</div>
+								}
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	}
+}
+
+

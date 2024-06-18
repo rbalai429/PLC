@@ -1,0 +1,125 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<HPPlc.Models.WorkSheet.WorkSheetModel>
+@using HPPlc.Models.WorkSheet;
+@using System.Globalization;
+
+@{
+	var model = Model;
+	string pageName = HPPlc.Models.GetPageName.pagename();
+
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	List<HPPlc.Models.GetSpecialPlanData> getSpecialPlanData = new List<HPPlc.Models.GetSpecialPlanData>();
+
+	if (UserLoggedInOrNot == true)
+	{
+		HPPlc.Models.dbAccessClass dbAccessClass = new HPPlc.Models.dbAccessClass();
+		getSpecialPlanData = dbAccessClass.SpecialPlanNotification();
+	}
+}
+
+
+@if (Model != null && Model.WorkSheets != null)
+{
+	try
+	{
+		string culture = HPPlc.Models.CultureName.GetCultureName().Replace("/", "");
+		if (String.IsNullOrWhiteSpace(culture))
+		{ culture = "en-US"; }
+
+		System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
+
+		string downloadbtn = Umbraco.GetDictionaryValue("Download Button");
+
+
+		foreach (var items in Model.WorkSheets)
+		{
+			<div class="video-tutorials">
+				@if (!String.IsNullOrWhiteSpace(items.Title))
+				{
+					<div class="rowPlc rowPlcfull">
+						<div class="fit-hd">
+							<h2 class="hdtitl"> @items.Title</h2>
+						</div>
+					</div>
+				}
+
+				@if (items.NestedItems != null)
+				{
+
+					<div class="recommended-list">
+						<div class="list-items dvWorksheetDetailsContainer">
+							@foreach (NestedItems nested in items?.NestedItems)
+							{
+								var detailData = string.Empty;
+								//var detailDataDownload = string.Empty;
+								//detailData = nested.Title;Topic is day
+								detailData = "3 to 6 - " + nested.Topic + " - " + nested.Title + " - Print";
+								//detailDataDownload = "3 to 6 - " + nested.Topic + " - " + nested.Title + " - Download";
+
+								<div class='item-col'>
+									<div class='card-box'>
+										<div class='card-img'>
+											<picture>
+												@if (!String.IsNullOrWhiteSpace(nested.MobileImagesSrc))
+												{
+													<source class='b-lazy' alt="@nested.MobileAltText" data-src="@nested.MobileImagesSrc" src="/common/images/img-loader.gif" media="(max-width: 680px)" />
+												}
+
+												@if (!String.IsNullOrWhiteSpace(nested.MobileNextGenImage))
+												{
+													<source data-srcset="@nested.MobileNextGenImage" srcset="/common/images/img-loader.gif" type='image/webp' media="(max-width: 680px)" />
+												}
+
+												@if (!String.IsNullOrWhiteSpace(nested.NextGenImage))
+												{
+													<source data-srcset="@nested.NextGenImage" srcset="/common/images/img-loader.gif" type='image/webp' />
+												}
+
+												@if (!String.IsNullOrWhiteSpace(nested.ImagesSrc))
+												{
+													<img class='b-lazy' alt="@nested.AltText" src='/common/images/img-loader.gif' data-src='@nested.ImagesSrc' />
+												}
+											</picture>
+
+											@if (!String.IsNullOrWhiteSpace(nested.PreviewPdf))
+											{
+												<a href="@nested.PreviewPdf" class="prevOverlyBx openpdf desktoppdf" onclick="commonLayer('learn-365','@detailData');">
+													<span><img src="/common/images/icon-pdf.png" width="1" height="1" alt=""> Click to see worksheets</span>
+												</a>
+
+												<a href="@nested.PreviewPdf" target="_blank" class="prevOverlyBx mobilepdf" onclick="commonLayer('learn-365','@detailData');">
+													<span><img src="/common/images/icon-pdf.png" width="1" height="1" alt=""> Click to see worksheets</span>
+												</a>
+											}
+										</div>
+										<div class='card-cont'>
+											<div class="card-dscptn">
+												@if (!String.IsNullOrWhiteSpace(nested.Title))
+												{
+													<div class="card-title">@nested.Title</div>
+												}
+
+												@Html.Raw(nested.Description)
+											</div>
+											<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@nested.WorksheetDetailsUrl</span><span style='display:none'>@detailData</span><span style='display:none'>Plan 365 Print</span></a></div>
+										</div>
+
+
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				}
+				else
+				{
+					<div><b>No any downloaded data found!!!</b></div>
+				}
+			</div>
+		}
+	}
+	catch { }
+}
+else
+{
+	<div><b>No any downloaded data found!!!</b></div>
+}

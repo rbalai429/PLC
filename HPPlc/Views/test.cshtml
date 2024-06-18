@@ -1,0 +1,575 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+
+@{
+	Layout = null;
+
+	//Response.Redirect("/site-under-construction", false);
+	var currentCulture = Model.GetCultureFromDomains();
+	string culture = HPPlc.Models.CultureName.GetCultureName();
+	HPPlc.Models.SubscriptionModel subs = new HPPlc.Models.SubscriptionModel();
+	string manipulatedCulture = String.Empty;
+
+	if (currentCulture == null || currentCulture == "en-US")
+	{ manipulatedCulture = "/en"; }
+
+	string IsOpenCouponCodeWindow = String.Empty;
+	string UserId = String.Empty;
+	string pageName = this.Request?.Url?.Segments?.Last() == "/" ? "Home" : this.Request?.Url?.Segments?.Last();
+	pageName = pageName.Replace("/", "");
+
+	string IsLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn().ToString().ToLower();
+
+	// Post pay script tracker
+	HPPlc.Models.SubscriptionSuccessParam payResponse = new HPPlc.Models.SubscriptionSuccessParam();
+	string IsEnableTrackerCode = System.Configuration.ConfigurationManager.AppSettings["IsEnableTrackerCode"].ToString();
+
+	if (IsLoggedIn == "true")
+	{
+		UserId = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserUniqueId).ToString();
+
+		//Coupon code banner
+		if (pageName != null && pageName.ToLower() == "home")
+		{
+			var couponOffer = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+					.Where(x => x.ContentType.Alias == "couponOffer")?.OfType<CouponOffer>()?.Where(c => c.IsActive == true)?.FirstOrDefault();
+
+			if (couponOffer != null)
+			{
+				string CouponCode = couponOffer?.CouponCode;
+				if (!String.IsNullOrEmpty(CouponCode))
+				{
+					HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.CouponCode, CouponCode);
+
+					HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+					HPPlc.Models.CouponCodeofferWindow couponCodeofferWindow = new HPPlc.Models.CouponCodeofferWindow();
+					couponCodeofferWindow = db.CouponCodeWindowAuth(CouponCode);
+
+					if (couponCodeofferWindow != null && couponCodeofferWindow.IsvalidForWindowAppering > 0)
+					{
+						IsOpenCouponCodeWindow = couponCodeofferWindow.IsvalidForWindowAppering.ToString();
+					}
+				}
+			}
+		}
+	}
+
+	if (IsEnableTrackerCode == "Y")
+	{
+		payResponse = HPPlc.Models.SessionManagement.GetCurrentSession<HPPlc.Models.SubscriptionSuccessParam>(HPPlc.Models.SessionType.PayResponseTracker);
+
+		HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.PayResponseTracker);
+	}
+
+	string IsBundleUser = string.Empty;
+	string IsOfferUser = string.Empty;
+	//Bundle User Check
+	HttpCookie reqCookies = Request.Cookies["IsBundleUser"];
+	if (reqCookies != null)
+	{
+		IsBundleUser = reqCookies.Value;
+	}
+
+	//Offer User Check
+	HttpCookie offerCookies = Request.Cookies["IsOfferUser"];
+	if (offerCookies != null)
+	{
+		IsOfferUser = offerCookies.Value;
+	}
+
+	//BreadCrum Data
+	string _breadCrm = String.Empty;
+	List<HPPlc.Models.BreadCrumbSchema> breadCrum = new List<HPPlc.Models.BreadCrumbSchema>();
+	breadCrum = HPPlc.Models.SessionManagement.GetCurrentSession<List<HPPlc.Models.BreadCrumbSchema>>(HPPlc.Models.SessionType.IsBotRequest);
+	//if (breadCrum != null)
+	//{
+	//	foreach (var item in breadCrum)
+	//	{
+	//		_breadCrm += "{"@@type": "ListItem","position":" + counter + ","item": '" + content.Url() + "','name': '" + content.Name + "'},";
+	//		"@@type" : "ListItem",
+	//		"position" : item.position,
+	//		"item" : item.item,
+	//		"name":item.name
+	//	}
+	//}
+
+
+}
+
+
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html lang="@currentCulture">
+<!--<![endif]-->
+<head id="head">
+	<meta name="target_country" content="IN" />
+	<meta name="web_section_id" content="" />
+	@if (currentCulture != "en-US" && currentCulture != "hi")
+	{
+		<meta name="robots" content="noindex" />
+	}
+
+	@*<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"/>*@
+	<link rel="dns-prefetch" href="https://connect.facebook.net" />
+
+	@*<script src="https://www.hp.com/cma/ng/lib/exceptions/privacy-banner.js" async></script>*@
+
+	@*<script>
+			(function (w, d, s, l, i) { w[l] = w[l] || []; w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' }); var f = d.getElementsByTagName(s)[0], j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src = '//www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f); })(window, document, 'script', 'dataLayer', 'GTM-MZXB4R4');
+		</script>*@
+	@*<script>
+		//UDL Analytics - GTM tag
+		(function (w, d, s, l, i) {
+			w[l] = w[l] || []; w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+			var f = d.getElementsByTagName(s)[0], j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src = '//www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+		})(window, document,
+			'script', 'dataLayer', 'GTM-MZXB4R4');
+	</script>*@
+
+
+	@*@if (payResponse != null && payResponse.InvoiceData != null && IsEnableTrackerCode == "Y")
+	{
+
+		<script>
+
+		var isTrueSet = ('@IsLoggedIn' === 'true');
+		//UDL Analytics - data layer
+		dataLayer.push({
+					event: 'e_pageView', //Indicates page view (required)
+					loginStatus: isTrueSet, //Set to true if user is logged in (required if true)
+					pageNameL5: '@pageName', //page name hierarchy level 5 (recommended)
+					userID:'@UserId',
+					pageNameL6: '', //page name hierarchy level 6 (optional)
+					pageNameL7: '', //page name hierarchy level 7 (optional)
+					pageNameL8: '', //page name hierarchy level 8 (optional)
+					ecommerce: {
+					currencyCode: 'INR',// pass the currency code Exm: INR
+					purchase: {
+						actionField: {
+							id: '@(payResponse?.InvoiceData?.TransactionId)',                             // Pass the Transaction ID Exm: TYU8978970J
+							affiliation: 'HP Online',
+							revenue: '@(payResponse?.TotalAmount)',                   // Pass the Revenue Exm : 899
+							purchasePaymentMethod: '', // Pass the Payment Method Exm: Credit Card/Debit Card/UPI
+							tax: '@(payResponse?.InvoiceData?.Tax)',                                       // Pass the Tax Value Exm: 299
+							shipping: '',                            // Pass the Shipping Value as blank
+							purchaseShippingMethod: 'Online', // Pass the Shipping method as Online
+							coupon: '@(payResponse?.InvoiceData?.CouponSource + "-" + payResponse?.InvoiceData?.Coupon + "-" + payResponse?.InvoiceData?.CouponDiscountAmt)',                                  // Pass the coupon value if any
+							discountAmount: '@(payResponse?.InvoiceData?.CouponDiscountAmt)',                   // Pass the discount value if any
+							EUdiscountAmount:'@(payResponse?.InvoiceData?.Discount)'
+						},
+						products: @Html.Raw(Json.Encode(payResponse?.ProductList)),
+					}
+				}
+		});
+
+			dataLayer.push({
+				event: 'e_linkClick',
+				linkPlacement: '@pageName',
+				linkID: 'Purchase Successfull'
+			});
+
+		</script>
+
+
+	}
+	else
+	{
+
+		<script>
+				var isTrueSet = ('@IsLoggedIn' === 'true');
+				dataLayer.push({
+					event: 'e_pageView', //Indicates page view (required)
+					loginStatus: isTrueSet, //Set to true if user is logged in (required if true)
+					pageNameL5: '@pageName', //page name hierarchy level 5 (recommended)
+					userID:'@UserId',
+					pageNameL6: '', //page name hierarchy level 6 (optional)
+					pageNameL7: '', //page name hierarchy level 7 (optional)
+					pageNameL8: '' //page name hierarchy level 8 (optional)
+				});
+
+
+		</script>
+	}*@
+	<!-- Google Tag Manager -->
+	<script>
+		(function (w, d, s, l, i) {
+			w[l] = w[l] || []; w[l].push({
+				'gtm.start':
+					new Date().getTime(), event: 'gtm.js'
+			}); var f = d.getElementsByTagName(s)[0],
+				j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+					'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+		})(window, document, 'script', 'dataLayer', 'GTM-PF6VVFW');</script>
+	<!-- End Google Tag Manager -->
+	<!-- Google Tag Manager -->
+	<script>
+		(function (w, d, s, l, i) {
+			w[l] = w[l] || []; w[l].push({
+				'gtm.start':
+					new Date().getTime(), event: 'gtm.js'
+			}); var f = d.getElementsByTagName(s)[0],
+				j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+					'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+		})(window, document, 'script', 'dataLayer', 'GTM-PDHM2PK');
+	</script>
+	<!-- Basic Page Needs
+	  ================================================== -->
+	<meta charset="utf-8" />
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+
+	<link rel="shortcut icon" href="/common/images/favicon.ico" mce_href="/common/images/favicon.ico" type="image/x-icon" />
+	@if (Request.Url.AbsolutePath == "/worksheets/")
+	{
+		<link rel="canonical" href="https://www.printlearncenter.com" />
+		<meta name="robots" content="noindex, nofollow">
+	}
+	else if (Request.Url.AbsolutePath.Contains("free-content"))
+	{
+		<link rel="canonical" href="https://www.printlearncenter.com/free-downloads/" />
+	}
+	else
+	{
+		<link rel="canonical" href="https://www.printlearncenter.com@(Request.Url.AbsolutePath)" />
+	}
+
+	<meta name="og:type" content="website" />
+
+	@if (Request.Url.Query.Length > 0)
+	{
+		<meta name="og:url" content="@Request.Url.AbsoluteUri.Replace(Request.Url.Query, "")" />
+	}
+	@*Meta tags*@
+
+	@try
+	{
+		if (Model != null)
+		{
+			if (Model.HasProperty("pageName"))
+			{
+				<title>@(Model.Value("pageName").ToString() == "" ? Model.Name : Model.Value("pageName"))</title>
+			}
+			else
+			{
+				<title>@Model.Name</title>
+			}
+
+			if (Model.HasProperty("metaName"))
+			{
+				<meta name="title" content="@Model.Value("metaName")" />
+			}
+
+			if (Model.HasProperty("metaDescription"))
+			{
+				<meta name="Description" content="@Model.Value("metaDescription")" />
+			}
+
+			if (Model.HasProperty("metaKeywords"))
+			{
+				if (Model.Value("metaKeywords") != null)
+				{
+					string keywords = String.Empty;
+					foreach (var items in Model.Value<string[]>("metaKeywords"))
+					{
+						keywords += items + ", ";
+					}
+					keywords = keywords.TrimEnd(",");
+					<meta name="Keywords" content="@keywords" />
+				}
+			}
+		}
+	}
+	catch { }
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+
+	@Styles.Render("~/bundle/common.css")
+	<link rel="stylesheet" href="/common/css/VideoPreview.min.css" />
+
+	@RenderSection("styles", required: false)
+
+
+	<script type="application/ld+json">
+		{
+			"@@context": "https://schema.org",
+			"@@type": "Organization",
+			"name": "Print Learn Center",
+			"url": "https://www.printlearncenter.com/",
+			"logo": "https://d1o0e2ejzaj3cn.cloudfront.net/media/gxwflqpa/plc-logo.png",
+			"sameAs": "https://www.printlearncenter.com/"
+		}
+	</script>
+
+
+
+	@*BreadCrumb Data*@
+	@if (breadCrum != null)
+	{
+		<script type="application/ld+json">
+			{
+			"@@context": "https://schema.org/",
+			"@@type": "BreadcrumbList",
+			"itemListElement": [
+				@Html.Raw(Json.Encode(breadCrum))
+			]
+			}
+		</script>
+	}
+
+
+	@*<script async src="https://www.googletagmanager.com/gtag/js?id=AW-315026447"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag() { dataLayer.push(arguments); }
+		gtag('js', new Date());
+		gtag('config', 'AW-315026447');
+	</script>
+
+	<noscript>
+		<img height="1" width="1" style="display:none"
+			 src="https://www.facebook.com/tr?id=1524986591042566&ev=PageView&noscript=1" />
+	</noscript>*@
+
+	<script src="/CustumJs/TrackingCode_GF.js"></script>
+	@*<script type="text/javascript" async defer src="https://www.hp.com/content/dam/sites/worldwide/dems/measurement/brandmktg_measure.js"></script>*@
+
+	@*Menu loader*@
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			var secsroll = document.querySelectorAll(".navigation");
+			for (var i = 0; i < secsroll.length; i++) {
+				secsroll[i].style.display = "none";
+			}
+		});
+	</script>
+
+	@RenderSection("metatags", required: false)
+</head>
+<body class="@culture.Replace("/","")">
+
+	<input type="hidden" id="cultureSessionName" value="@culture" />
+	<input type="hidden" id="currentCultureName" value="@currentCulture" />
+	<input type="hidden" id="IsBundleUser" value="@IsBundleUser" />
+	<input type="hidden" id="IsOfferUser" value="@IsOfferUser" />
+	<input type="hidden" id="pageName" value="@pageName" />
+	<input type="hidden" id="IsCouponBannerEnable" value="N" />
+
+	<input id="hdnClickedWorksheetMode" type="hidden" />
+	<input id="hdnClickedWorksheetDownloadUrl" type="hidden" />
+	<input id="hdnClickedWorksheetIsPaid" type="hidden" />
+	<input id="hdnClickedWorksheetTracked" type="hidden" />
+	<input id="hdnClickedSource" type="hidden" />
+	<input id="hdnDownloadNodeIdSource" type="hidden" />
+
+
+	<div class="wrapper">
+
+		<!--Header html start-->
+		@Html.CachedPartial("_header", null, 3600)
+
+		@*@Html.Partial("_header")*@
+		<!--Header html start-->
+
+		@RenderBody()
+
+		<!--Upper Footer html start-->
+		@*@Html.Partial("_footerSEOContent", Model);*@
+
+
+		<!--Footer html start-->
+		@*@Html.Partial("_footer")*@
+		@Html.CachedPartial("_footer", null, 3600)
+		<!--Footer html end-->
+	</div>
+	<div class="ovrlyScin" id="plnspp-Mnpp" style="display: none;">
+		<div class="whtBx plnspp" style="min-height:200px">
+			<span class="closepp" id="plnspp-close"><img src="/common/images/close-btn.png" alt="close"></span>
+			<div id="plnspp-Mnpp-data">
+				<div class="lds-roller" id="loaderpop"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="lds-roller-overlay" style="display:none" id="loader">
+		<div class="lds-roller-middle"></div>
+	</div>
+
+	<!--Popup bundling-->
+	@if (pageName != "offer")
+	{
+		<div id="bundlingPopup" style="display:none;">
+			<div class="ovrlyScin" id="congratulations">
+				<div class="whtBx congpopup">
+					<span class="closepp roundcls" id="congrats-close">
+						<img src="~/common/images/CloseIcon.svg" alt="close" />
+					</span>
+					<div id="bundlingDataBind">
+
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+
+	@if (!String.IsNullOrWhiteSpace(IsOpenCouponCodeWindow) && IsOpenCouponCodeWindow == "1")
+	{
+		<div class="overlayBanner">
+			<div class="bannerPopup">
+				<div class="bannerPopupCont">
+
+					@Html.Partial("/Views/Partials/Offer/_CouponWindow.cshtml")
+
+				</div>
+			</div>
+		</div>
+	}
+
+	@if (IsBundleUser != null && IsBundleUser.Equals("YES") && pageName != "buy-now" && pageName != "registration" && pageName != "offer")
+	{
+		<div class="claimoferbtn">
+			<a href="javascript:void(0);" onclick="IsBundlingUser('click');">
+				<img src="/common/images/claim-offer.svg" />
+			</a>
+		</div>
+	}
+
+	<div class="overlayLogin" id="overlayLoginDiv" style="display:none">
+		@Html.Partial("/Views/Partials/Login/_loginSnd.cshtml")
+	</div>
+	@*@Html.Partial("/Views/Partials/Login/_payLogic.cshtml")*@
+
+	@Scripts.Render("~/bundles/all.js")
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script src="https://player.vimeo.com/api/player.js"></script>
+
+	<script>
+		$(document).ready(function () {
+			setTimeout(function () {
+				$(".topband").hide();
+				$('.wrapper').removeClass('topbandspec');
+			}, 80000);
+		});
+	</script>
+
+	<script>
+		$(document).ready(function () {
+			$('#plnspp-close').click(function () {
+				$('.ovrlyScin').hide();
+			});
+		});
+	</script>
+	
+	@RenderSection("CustomJsFiles", false)
+
+
+	<div id="fb-root"></div>
+	@*<script type="text/javascript" src="https://connect.facebook.net/en_US/sdk.js"></script>*@
+	<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+
+	<script type="text/javascript">
+		window.fbAsyncInit = function () {
+			FB.init({
+				appId: '541980950753397',
+				autoLogAppEvents: true,
+				xfbml: true,
+				version: 'v13.0'
+			});
+		};
+		//FB.init({
+		//	appId: '541980950753397',
+		//	version: 'v13.0',
+		//	status: true, // check login status
+		//	cookie: true, // enable cookies to allow the server to access the session
+		//	xfbml: true  // parse XFBML
+		//});
+		//FB.Canvas.setAutoGrow(100);
+
+		function publish(item) {
+			//alert(item);
+			FB.ui(
+				{
+					method: 'share',
+					href: 'https://www.printlearncenter.com/',
+					quote: item,
+				},
+				function (response) {
+					/*alert(response.error_message);*/
+				}
+			);
+		}
+
+		function publishFeed() {
+
+			FB.ui(
+				{
+					method: 'feed',
+					link: location.href
+				},
+				function (response) {
+					if (response && response.post_id) {
+						// alert('Post was published.');
+					} else {
+						// alert('Post was not published.');
+					}
+				}
+			);
+		}
+		$(".faqbox h5:first").addClass("acc-active");
+		$(".faqbox:first").show();
+		$(".faqbox h5").click(function () {
+			$(this).next(".faq-ans").slideDown("slow").siblings(".faq-ans:visible").slideUp("slow");
+			$(this).addClass("acc-active");
+			$(this).siblings("h5").removeClass("acc-active");
+		});
+
+
+		$(".NavPlc ul ul").find("ul").parent("li").addClass("ChiledLavls");
+	</script>
+
+	@*Menu loader*@
+	<script>
+		setTimeout(function () {
+
+			//window.addEventListener("load", function () {
+			//	var secsroll = document.querySelectorAll(".navigation");
+			//	for (var i = 0; i < secsroll.length; i++) {
+			//		secsroll[i].style.display = "";
+			//	}
+			//});
+		}, 250);
+
+	</script>
+
+	<script>
+		function VideoBanner(videoid, playdivid) {
+			debugger
+
+			var playId = 'HpPlcvidBanner' + playdivid;
+			var divHide = '.playvideobanner' + playdivid;
+			var divShow = '#HpPlcvidBanner' + playdivid;
+
+			$(divHide).hide();
+			$(divShow).show();
+
+			//$('.VideoBanner').show();
+			var options01 = {
+				url: 'https://player.vimeo.com/video/' + videoid,
+				width: 1920,
+				height: 1080
+				//responsive:true
+			};
+
+			var video01Player = new Vimeo.Player(playId, options01);
+
+			video01Player.setVolume(0);
+			video01Player.on('play', function () { console.log('Played the first video'); });
+		}
+	</script>
+
+	<script type="text/javascript" src="/CustumJs/NewLogin/Login.js"></script>
+
+</body>
+
+</html>

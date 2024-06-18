@@ -1,0 +1,37 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<List<Umbraco.Web.PublishedModels.Subjects>>
+@{
+    var subjects = Model;
+}
+
+@if (subjects != null && subjects.Any())
+{
+    int row = 0;
+    foreach (var subject in subjects)
+    {
+        <div class="chkBxItem chkBxItemWht">
+            <div class="cstm-chckbx">
+                <label for="@(" subjects_" + row)">
+                    <input type="checkbox"
+                           name="subjects"
+                           value="@subject.SubjectValue"
+                           id="@(" subjects_" + row)"
+                           title="@subject.SubjectName"
+                           class="checbx chkFilterSubCategory subjects" />
+                    <strong class="chkInf"></strong>
+                    <span>@subject.SubjectName</span>
+                </label>
+            </div>
+        </div>
+        row++;
+    }
+}
+else
+{
+    <div class="chkBxItem chkBxItemWht">
+        <div class="cstm-chckbx">
+            <label>
+                <span>No Subjects Found</span>
+            </label>
+        </div>
+    </div>
+}

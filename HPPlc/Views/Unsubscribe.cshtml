@@ -1,0 +1,64 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.Unsubscribe>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpage.cshtml";
+}
+
+
+<div class="main-wrp">
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				@Html.AntiForgeryToken()
+				<!--Form html start-->
+				<div class="unscrbe-form-row">
+					<div class="unscrbe-form-inr">
+						<div class="unscrbe-form-cont" id="unsubscribeTab">
+							<h1>@Model.Title</h1>
+							@Html.Raw(Model.Description)
+							@if (Model.OptionsForUnsubscribe != null)
+							{
+								foreach (var item in Model.OptionsForUnsubscribe)
+								{
+									<div class="unscrbe-fild-row">
+										<label class="chkbox">
+											@item
+											<input type="radio" name="UnSubOption" value="@item">
+											<span class="checkmark"></span>
+										</label>
+									</div>
+								}
+							}
+
+							<div class="unscrbe-fild-row">
+								<input type="text" id="txtUnSubscribeOther" maxlength="200" class="unscrbe-textfildbox" />
+							</div>
+							<div class="unscrbe-btn-row">
+
+								<button type="button" id="btnUnSubscribe" class="unscrbe-btn">@Model.ButtonText</button>
+							</div>
+							
+							<div>
+								<span class="error" id="errorMsg" style="display:none">@Model.RequiredOption</span>
+							</div>
+						</div>
+						<div id="unsubscribeMsgTab" style="display:none">
+							<span style="font-size: 23px; padding: 70px 0px; text-align: center; display:block">@Model.UnsubscribeSuccessfullyMsg</span>
+						</div>
+						<span id="Msg" style="display:none;" class="error">
+							
+						</span>
+					</div>
+				</div>
+				<!--Form html end-->
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="~/CustumJs/UnSubscribe.js"></script>
+}

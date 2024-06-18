@@ -1,0 +1,28 @@
+﻿<div class="ovrlyScin" id="otpPop">
+	<div class="ovltyinr">
+		<div class="otp-cont">
+			<span class="closepp" id="plnspp-close"><img src="/common/images/close-btn.png" alt="close"></span>
+			<div class="whtBxin">
+				<div class="otp-box">
+					<p>One Time Password has been shared to your <br /> mobile number ending with <span id="spMobMasking"></span>  and <br />email id ending with <span id="spMailMasking"></span></p>
+					<div class="otp-filed" id="Otp">
+						<input type="text" id="Otpdigit1" data-next="Otpdigit2" name="Otpdigit1" maxlength="1" class="otp-inputs otpmob" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+						<input type="text" id="Otpdigit2" data-next="Otpdigit3" data-previous="Otpdigit1" name="Otpdigit1" maxlength="1" class="otp-inputs otpmob" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+						<input type="text" id="Otpdigit3" data-next="Otpdigit4" data-previous="Otpdigit2" name="Otpdigit1" maxlength="1" class="otp-inputs otpmob" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+						<input type="text" id="Otpdigit4" data-next="Otpdigit5" data-previous="Otpdigit3" name="Otpdigit1" maxlength="1" class="otp-inputs otpmob" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+						<input type="text" id="Otpdigit5" data-next="Otpdigit6" data-previous="Otpdigit4" name="Otpdigit1" maxlength="1" class="otp-inputs otpmob" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+						<input type="text" id="Otpdigit6" data-next="Otpdigit2" data-previous="Otpdigit5" name="Otpdigit1" maxlength="1" class="otp-inputs otpmob" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+					</div>
+					<div class="resend-otp"><span><a href="javascript:void(0);" id="resendotp">Resend OTP </a></span> <span id="timer"></span></div>
+
+				</div>
+				<div class="btn-row-otp">
+					<button id="btnRegistrationOtp" class="btn primary-btn disabled">Submit OTP Now</button>
+
+				</div>
+				<span id="eMsg" class="error" style="display:none;">Otp sent on your mobile and emailid.</span>
+				<span id="eOtpMsg" class="error" style="display:none;">Otp not matched, Please try again.</span>
+			</div>
+		</div>
+	</div>
+</div>

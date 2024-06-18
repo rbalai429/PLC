@@ -1,0 +1,172 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+
+	var SubcriptionList = Model.DescendantsOrSelf()?.Where(x => x.IsVisible())?.OfType<BonusSubscriptionList>().SingleOrDefault();
+
+
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.SubscriptionTempDtls);
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponTempDtls);
+
+	string loggedInOrNot = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+	string qstring = String.Empty;
+	string selectedAgegroup = String.Empty;
+	string selectedAgeDecrypted = String.Empty;
+	string WID = String.Empty;
+	if (Request.QueryString.Count > 0 && Request.QueryString.AllKeys.Contains("subscptn"))
+	{
+		qstring = Request.QueryString.Get("subscptn").ToString();
+		if (Request.QueryString.AllKeys.Contains("age"))
+		{
+			selectedAgegroup = Request.QueryString.Get("age").ToString();
+			selectedAgeDecrypted = HPPlc.Models.clsCommon.Decrypt(selectedAgegroup);
+		}
+
+		try
+		{
+			if (Request.QueryString.AllKeys.Contains("WID"))
+			{
+				WID = Request.QueryString.Get("WID").ToString();
+				WID = HPPlc.Models.clsCommon.Decrypto(WID);
+
+				if (!String.IsNullOrEmpty(WID))
+				{
+					var worksheetDtls = Umbraco?.Content(WID)?.DescendantsOrSelf().OfType<WorksheetRoot>()?.FirstOrDefault();
+					var subscriptionRank = Umbraco.Content(worksheetDtls.Subscription.Select(x => x.Udi)).ToList().OfType<Subscriptions>();
+					if (subscriptionRank != null)
+					{
+						if (subscriptionRank.Any(x => x.Ranking == "1"))
+						{
+							HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.UserClickedOnWorksheet, "1");
+						}
+					}
+				}
+			}
+		}
+		catch { }
+	}
+
+	//Coupon popup offer here
+	//if (Request.QueryString.Count > 0 && Request.QueryString.AllKeys.Contains("o"))
+	//{
+	//	if (Request.QueryString.Get("o") != "f")
+	//	{
+	//		HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponCode);
+	//	}
+	//}
+	//else
+	//{
+	//	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponCode);
+	//}
+}
+
+
+<div class="main-wrp">
+
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	@Html.Partial("_Breadcrumb")
+
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="sbcptnBox">
+					@*<div class="spcofr-bnr">
+
+						</div>*@
+
+					<div class="sbcptnHdBox">
+						@if (SubcriptionList != null)
+						{
+							if (!String.IsNullOrEmpty(SubcriptionList.Title))
+							{
+								<h2>@SubcriptionList.Title</h2>
+							}
+							if (!String.IsNullOrEmpty(SubcriptionList.SubTitle))
+							{
+								<p>@SubcriptionList.SubTitle</p>
+							}
+						}
+					</div>
+					<div class="sbcptnPlan">
+						<h3> @SubcriptionList.SubscriptionPlanTitle @SubcriptionList.SubcriptionPlanSubTitle</h3>
+
+						@Html.Partial("/Views/Partials/_SubscriptionlistStructurePrm.cshtml",
+							new ViewDataDictionary(this.ViewData)
+							  {
+								{ "qstring",qstring },
+								{ "selectedAgegroup", selectedAgegroup},
+								{ "selectedAgeDecrypted", selectedAgeDecrypted}
+							  })
+					</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		@*<div class="container-fluid">
+					<div class="container-box">
+						<div class="container-inr">
+							<div class="signupMn tblAlignment">
+
+								@try
+								{
+									<div class="sgnup-hd">
+										@if (SubcriptionList != null)
+										{
+											if (!String.IsNullOrEmpty(SubcriptionList.Title))
+											{
+												<h1 class="titleforhtag">@SubcriptionList.Title</h1>
+											}
+											if (!String.IsNullOrEmpty(SubcriptionList.SubTitle))
+											{
+												<h2 class="sgnup-hdin">@SubcriptionList.SubTitle</h2>
+											}
+										}
+									</div>
+									<div class="reasons-point">
+										@if (SubcriptionList != null && SubcriptionList.SubscriptionPointers.Any())
+										{
+											int row = 1;
+											<div class="point-col">
+												<ul>
+													@foreach (var items in SubcriptionList?.SubscriptionPointers)
+													{
+														<li><i></i><span>@Html.Raw(items)</span></li>
+														row++;
+													}
+												</ul>
+											</div>
+										}
+									</div>
+								}
+								catch { }
+
+
+								@Html.Partial("/Views/Partials/_SubscriptionlistStructurePrm.cshtml",
+								  new ViewDataDictionary(this.ViewData)
+									{
+									  { "qstring",qstring },
+									  { "selectedAgegroup", selectedAgegroup},
+									  { "selectedAgeDecrypted", selectedAgeDecrypted}
+									})
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>*@
+	</div>
+
+
+	@section CustomJsFiles
+{
+		<script type="text/javascript">
+			$("#buynowbutton").click(function () {
+				var selectedpackage = $(".subscriptionradio:checked").map(function () { return this.value }).get().join(", ");
+				window.location.href = selectedpackage;
+			});
+		</script>
+	}

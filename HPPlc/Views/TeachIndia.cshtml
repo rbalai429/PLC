@@ -1,0 +1,102 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.TeachIndia>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@using System.Configuration;
+@{
+	Layout = "masterpage.cshtml";
+
+	Response.Cookies["IsOfferUser"].Expires = DateTime.Now.AddMinutes(-1);
+	Response.Cookies["IsOfferUser"].Value = "YES";
+	Response.Cookies["IsOfferUser"].Expires = DateTime.Now.AddMinutes(30);
+
+	HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.HpOfferRedirection, "yes");
+	string bundlingRedirectUrl = ConfigurationManager.AppSettings["bundlingRedirectUrl"].ToString();
+}
+
+
+
+<div class="main-wrp">
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch { }
+
+	@Html.Partial("_Breadcrumb")
+	<div class="container-fluid educatn-pnl">
+		<div class="container-box">
+			<div class="container-inr">
+
+				<div class="flstp-wrap">
+
+					<div class="flstp-row"><strong>@Model.Title</strong></div>
+					<div class="flstp-row2">
+
+
+						<div class="flstpmid">
+							@if (Model.Process != null)
+							{
+								int Cnt = 0;
+								foreach (var item in Model.Process)
+								{
+									<div class="flstp-mid-lft @(Cnt > 0 ? "no-bdr" : "")">
+										<div class="flpd">
+											<div class="imgfl">
+												@if (item.MediaFile != null)
+												{
+													<img src="@item.MediaFile.Url()" alt="" />
+												}
+											</div>
+											<div class="textfl">
+												<strong>@item.Title</strong>
+												@Html.Raw(item.Description)
+
+											</div>
+										</div>
+									</div>
+									Cnt++;
+								}
+							}
+
+
+						</div>
+						@if (Model.ArrowMedia != null)
+						{
+							<div class="flrgt"><img src="@Model.ArrowMedia.Url()" alt="" /></div>
+						}
+					</div>
+
+
+
+
+					<div class="flstp-row">
+						@if (!String.IsNullOrEmpty(Model.ButtonTitle))
+						{
+							<a href="@bundlingRedirectUrl" onclick="commonLayer('TeachIndia', '@Model.ButtonTitle');">@Model.ButtonTitle</a>
+						}
+					</div>
+
+
+				</div>
+
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+@section CustomJsFiles
+{
+	<script>
+		$(document).ready(function () {
+			try {
+				/*HP Coupon Offer Tracker*/
+				commonLayer("TeachIndia", "HP TeachIndia Landing");
+			}
+			catch {
+				//console.log("");
+			}
+		});
+	</script>
+}

@@ -1,0 +1,72 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.BlogFaqs>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpage.cshtml";
+}
+
+
+<div class="main-wrp">
+	<div class="banner banner2">
+		@try
+		{
+			@Html.Partial("/Views/Partials/_Banner.cshtml");
+		}
+		catch { }
+
+		@Html.Partial("_Breadcrumb")
+
+		@*<div class="caption-bnr">
+			<div class="caption-bnrin">
+				<h2>What is Print Learn Center?</h2>
+				<p>Print Learn Center is an expanding library of rich learning pathways, scientifically designed by India’s leading educationalists, for children between 3 to 12 years of age. </p>
+
+				<p>We understand the importance of early childhood education, and how a holistic and real learning program can benefit your child. With the firm belief that you are your child’s best teacher, our platform aims to help you coach your child better.</p>
+			</div>
+		</div>*@
+	</div>
+	<div class="container-fluid educatn-pnl">
+		<div class="container-box">
+			<div class="container-inr">
+
+				<div class="faq-wrp">
+					@Html.Partial("/Views/Partials/Blog/_BlogMenu.cshtml")
+
+					<div class="faq-cont">
+						@if (Model.HasProperty("title"))
+						{
+							<div class="descTitlePlc">
+								<h1 class="titleforhtag">@Model.Value("title")</h1>
+							</div>
+						}
+						<ul>
+							@if (Model != null)
+							{
+								foreach (var item in Model.BlogItems)
+								{
+									<li>
+										<span>@item.Title</span>
+										@Html.Raw(item.Description)
+									</li>
+								}
+							}
+
+						</ul>
+
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+</div>
+
+
+
+

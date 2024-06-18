@@ -1,0 +1,210 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+
+@{
+	var classValue = (string)ViewData["classvalue"];
+	var subjectvalue = (string)ViewData["subjectvalue"];
+	var mode = (string)ViewData["mode"];
+
+	List<WorksheetCategory> subjects = new List<WorksheetCategory>();
+	List<TopicsName> topics = new List<TopicsName>();
+	List<TopicsName> topicsSubjectWise = new List<TopicsName>();
+
+	var title = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+				.FirstOrDefault()?.DescendantsOrSelf()?
+				.Where(x => x.ContentType.Alias == "contentMenu")
+				.OfType<ContentMenu>().FirstOrDefault();
+
+	if (mode != null && (mode == "subject" || mode == "clas"))
+	{
+		subjects = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+								.FirstOrDefault()?.DescendantsOrSelf()?
+								.Where(x => x.ContentType.Alias == "worksheetListingAgeWise")?.OfType<WorksheetListingAgeWise>()?
+								.Where(x => Umbraco?.Content(x.AgeGroup.Udi)?.DescendantsOrSelf()?.OfType<NameListItem>()?.FirstOrDefault()?.ItemValue == classValue)?.FirstOrDefault()?
+								.Children?.OfType<WorksheetCategory>().ToList();
+	}
+
+	if (mode != null && mode == "topic")
+	{
+		subjects = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+								.FirstOrDefault()?.DescendantsOrSelf()?
+								.Where(x => x.ContentType.Alias == "worksheetListingAgeWise")?.OfType<WorksheetListingAgeWise>()?
+								.Where(x => Umbraco?.Content(x.AgeGroup.Udi)?.DescendantsOrSelf()?.OfType<NameListItem>()?.FirstOrDefault()?.ItemValue == classValue)?.FirstOrDefault()?
+								.Children?.OfType<WorksheetCategory>()?.Where(x => Umbraco?.Content(x?.CategoryName?.Udi)?.DescendantsOrSelf()?.OfType<Subjects>()?.FirstOrDefault()?.SubjectValue.ToString() == subjectvalue)?.ToList();
+
+	}
+
+	var pageName = UmbracoContext.PublishedRequest.PublishedContent.Name;
+
+
+}
+
+<input type="hidden" id="pageName" value="@pageName" />
+<div class="leftFltr">
+	<div class="mob-fliter">@title.FilterText</div>
+	<div class="fltrBx">
+		<div class="fltrInr">
+			<div class="vwAll">
+				<div class="fltrTxt">@title.FiltersText</div>
+				@*<label for="all">
+						<a class="aFilterReset" onclick="WorksheetReset();"><span>@title.ResetButton</span></a>
+
+					</label>*@
+			</div>
+
+			<div class="fltrBxin">
+				<div class="acrd">
+					<div class="acrdHd">
+						@if (mode != null && mode == "topic")
+						{
+							@title.SelectTopic
+						}
+						else
+						{
+							@title.SelectCategory
+						}
+					</div>
+					<div class="chchlist">
+						<div class="chchlistin">
+							@if ((subjects != null && subjects.Any()))
+							{
+								int row = 0;
+								foreach (var subject in subjects)
+								{
+									if (mode != null && mode == "subject")
+									{
+										<div class="chkBxItem chkBxItemWht">
+											<div class="cstm-chckbx">
+												<a href="@subject.Url()" onclick="commonLayer('@pageName','@subject.Name')">@subject.Name</a>
+											</div>
+										</div>
+									}
+									else if (mode != null && mode == "topic")
+									{
+										topics = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+														.FirstOrDefault()?.DescendantsOrSelf()?
+														.Where(x => x.ContentType.Alias == "worksheetListingAgeWise")?.OfType<WorksheetListingAgeWise>()?
+														.Where(x => Umbraco?.Content(x?.AgeGroup?.Udi)?.DescendantsOrSelf()?.OfType<NameListItem>()?.FirstOrDefault()?.ItemValue.ToString() == classValue)?.FirstOrDefault()?
+														.Children?.OfType<WorksheetCategory>().Where(x => Umbraco?.Content(x?.CategoryName?.Udi)?.DescendantsOrSelf()?.OfType<Subjects>()?.FirstOrDefault()?.SubjectValue.ToString() == subjectvalue)?.FirstOrDefault()?.DescendantsOrSelf()?
+														.Where(x => x.ContentType.Alias == "topicsName")?.OfType<TopicsName>()?
+														.ToList();
+
+										if (topics != null)
+										{
+											foreach (var topic in topics)
+											{
+												<div class="chkBxItem chkBxItemWht">
+													<div class="cstm-chckbx">
+														<a href="@topic.Url()" onclick="commonLayer('@pageName','@topic.Name')">@topic.Name</a>
+													</div>
+												</div>
+											}
+										}
+									}
+									else if (mode != null && mode == "clas")
+									{
+										var subjectDtls = Umbraco?.Content(subject?.CategoryName?.Udi)?
+															.DescendantsOrSelf()?.OfType<Subjects>()?.FirstOrDefault();
+
+										if (subjectDtls != null)
+										{
+											<div class="chkBxItem chkBxItemWht">
+												<div class="cstm-chckbx">
+													<label for="@("subjects_" + row)">
+														<input type="checkbox"
+															   name="subjects"
+															   value="@subjectDtls.SubjectValue"
+															   id="@("subjects_" + row)"
+															   title="@subjectDtls.SubjectName"
+															   class="checbx chkFilterSubCategory subjects" />
+														<strong class="chkInf"></strong>
+														<span>@subjectDtls.SubjectName</span>
+													</label>
+												</div>
+											</div>
+										}
+
+										topics = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+																		.FirstOrDefault()?.DescendantsOrSelf()?
+																		.Where(x => x.ContentType.Alias == "worksheetListingAgeWise")?.OfType<WorksheetListingAgeWise>()?
+																		.Where(x => Umbraco?.Content(x?.AgeGroup?.Udi)?.DescendantsOrSelf()?.OfType<NameListItem>()?.FirstOrDefault()?.ItemValue.ToString() == classValue)?.FirstOrDefault()?
+																		.Children?.OfType<WorksheetCategory>()?.Where(x => Umbraco?.Content(x?.CategoryName?.Udi)?.DescendantsOrSelf()?.OfType<Subjects>()?.FirstOrDefault()?.SubjectValue == subjectDtls?.SubjectValue)?.FirstOrDefault()?.DescendantsOrSelf()?
+																		.Where(x => x.ContentType.Alias == "topicsName")?.OfType<TopicsName>()?
+																		.ToList();
+
+										if (topics != null)
+										{
+											topicsSubjectWise.AddRange(topics);
+										}
+									}
+
+									row++;
+								}
+							}
+
+							@if (mode != null && mode == "clas")
+							{
+								<div class="doneBtn">
+									<a href="javascript:void(0);" class="btn">@title.DoneTitle</a>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+			@if (mode != null && mode == "clas")
+			{
+				if (topicsSubjectWise != null)
+				{
+					int _row = 0;
+					List<Topics> tpics = new List<Topics>();
+					//var tpics = null;
+					//var tpics = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?
+					//			.FirstOrDefault()?.DescendantsOrSelf()?
+					//			.Where(x => x.ContentType.Alias == "topics")?.OfType<Topics>()?
+					//			.Where(x => x.IsActive == true && topicsSubjectWise.Any(c => Umbraco?.Content(c.TopicMapping?.Udi)?.DescendantsOrSelf()?.OfType<Topics>()?.FirstOrDefault()?.TopicValue == x.TopicValue)).ToList();
+
+					if (tpics != null && tpics.Count > 0)
+					{
+						<div class="fltrBxin">
+							<div class="acrd">
+								<div class="acrdHd">@title.SelectTopic</div>
+								<div class="chchlist">
+									<div class="chchlistin">
+										@foreach (var topic in tpics)
+										{
+											<div class="chkBxItem chkBxItemWht">
+												<div class="cstm-chckbx">
+													<label for="@("topics_" + _row)">
+														<input type="checkbox"
+															   name="topics"
+															   value="@topic.TopicValue"
+															   id="@("topics_" + _row)"
+															   title="@topic.Name"
+															   class="checbx chkFilterSubCategory topics" />
+														<strong class="chkInf"></strong>
+														<span>@topic.Name</span>
+													</label>
+												</div>
+											</div>
+
+											_row++;
+										}
+									</div>
+								</div>
+							</div>
+						</div>
+					}
+				}
+
+				<div class="filtrActn">
+					<button type="button" id="filterApply" class="btn btnblue applyBtn">@title.ApplyButtonText</button>
+				</div>
+				<div>
+					<span class="error" id="validation" style="display:none;">@title.ValidationContent</span>
+				</div>
+			}
+		</div>
+
+
+	</div>
+</div>

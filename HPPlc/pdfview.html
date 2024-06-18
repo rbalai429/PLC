@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style>
+        .overlayPdf {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            left: 0px;
+            top: 0px;
+        }
+
+        .pdfViewBox {
+            width: 100%;
+            height: 500px;
+        }
+
+        .pdfPopupCont {
+            width: 90%;
+            height: 510px;
+            margin: 50px auto;
+            position: relative;
+        }
+
+            .pdfPopupCont iframe {
+                width: 100%;
+                height: 500px;
+            }
+    </style>
+</head>
+<body>
+
+    <div id="viewer" class="pdfViewBox"></div>
+    
+    <script src="/lib/webviewer.min.js" type="text/javascript"></script>
+
+    <script>
+      
+        var pdfValue = window.location.href;
+        var pdfValue1 = pdfValue.split("?")[1];
+        //var hdf = $("#hdf").val();
+        //var hdf = document.getElementById("hdf");
+        //alert(pdfValue1);
+        WebViewer({
+            path: 'lib', // path to the PDF.js Express'lib' folder on your server
+            licenseKey: 'TnHM48Ax1AP5nVgJkq1N',
+            //initialDoc: 'https://pdfjs-express.s3-us-west-2.amazonaws.com/docs/choosing-a-pdf-viewer.pdf',
+            initialDoc: pdfValue1,
+            disabledElements: [
+                'viewControlsButton',
+                'viewControlsOverlay',
+                'leftPanelButton',
+                'print'
+            ]
+            // initialDoc: '/path/to/my/file.pdf',  // You can also use documents on your server
+        }, document.getElementById('viewer'))
+            .then(instance => {
+                // now you can access APIs through the WebViewer instance
+                const { Core, UI } = instance;
+                instance.UI.disableElements(['leftPanel', 'leftPanelButton']);
+                instance.UI.disableElements(['leftPanel', 'menuButton']);
+
+                instance.UI.disableElements(['leftPanel', 'searchButton']);
+
+				
+
+                // adding an event listener for when a document is loaded
+                Core.documentViewer.addEventListener('documentLoaded', () => {
+                    console.log('document loaded');
+                });
+
+                // adding an event listener for when the page number has changed
+                Core.documentViewer.addEventListener('pageNumberUpdated', (pageNumber) => {
+                    console.log(`Page number is: ${pageNumber}`);
+                });
+            });
+    </script>
+
+</body>
+</html>

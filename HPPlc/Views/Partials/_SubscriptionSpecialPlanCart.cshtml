@@ -1,0 +1,41 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+
+
+	var buyNowPage = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+						.DescendantsOrSelf()?.Where(x => x.ContentType.Alias == "specialPlanRoot")?
+						.FirstOrDefault()?.Children.Where(c => c.ContentType.Alias == "buyNow")?.OfType<BuyNow>()?
+						.FirstOrDefault();
+}
+<div class="sbcpn-dtls">
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tbody>
+			<tr>
+				<th>@buyNowPage.AgeTitle</th>
+				<th>@buyNowPage.PlanTitle</th>
+			</tr>
+			@if (buyNowPage != null)
+			{
+				var buyNowPlan = buyNowPage.SpecialPlanPrice;
+				if (buyNowPlan != null)
+				{
+					foreach (var items in buyNowPlan)
+					{
+						<tr>
+							<td>@items.AgeGroup.Name @buyNowPage.YearsTitle</td>
+
+
+							@if (items.Price > 0)
+							{
+								<td>
+									₹ @items.Price
+								</td>
+							}
+						</tr>
+					}
+				}
+			}
+		</tbody>
+	</table>
+
+</div>

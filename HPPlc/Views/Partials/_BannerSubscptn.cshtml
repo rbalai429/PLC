@@ -1,0 +1,133 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using HPPlc.Models;
+@using System.Configuration;
+
+@{
+	string PlanType = String.Empty;
+
+	try
+	{
+		PlanType = ViewData["PlanType"]?.ToString() ?? "";
+	}
+	catch { }
+
+
+	List<BannerElement> lstBanner = new List<BannerElement>();
+	bool IsUserLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+	var banners = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+				.Where(x => x.ContentType.Alias == "homeContainer")?.FirstOrDefault()?.Children?
+				.Where(x => x.ContentType.Alias == "banner")?.OfType<Banner>().FirstOrDefault()?
+				.BannerItems.OfType<BannerElement>().Where(x => x.Activated == true && x.IsSubscriptionPageBannerOnly == true).ToList();
+	// && x.SubscriptionTabSelection.Any(c => c.Name.ToLower().Contains(PlanType))
+
+
+	if (banners != null)
+	{
+		lstBanner = banners?.Where(x => x.SubscriptionTabSelection.Any(c => Umbraco.Content(c.Udi).ContentType.Alias == PlanType)).ToList();
+	}
+
+
+	if (lstBanner != null && lstBanner.Any())
+	{
+		string vBannerURL = "javascript:void(0)";
+		string vTarget = "";
+		string bannerUrl = "";
+		int i = 1;
+
+
+		<div class="slider-banner">
+			@foreach (var BannerItem in lstBanner)
+			{
+				try
+				{
+					if (BannerItem.PageToDisplayBanner.Count() == 0 || (BannerItem.PageToDisplayBanner.Count() > 0))
+					{
+						var IsVideo = BannerItem.IsVideo;
+						if (IsVideo == "No")
+						{
+
+							var DesktopImage = BannerItem.DesktopImage;
+							var desktopNextGenImage = BannerItem.DesktopNextGenImage;
+
+							var MobileImage = BannerItem.MobileImage;
+							var mobileNextGenImage = BannerItem.MobileNextGenImage;
+
+
+							var BannerLink = BannerItem.Value<Umbraco.Web.Models.Link>("bannerURL");
+							var BannerLinkAfterLogin = BannerItem.Value<Umbraco.Web.Models.Link>("bannerURLAfterLogin");
+							var bannerUrlAppend = BannerItem.Heading;
+
+
+							if (BannerLink != null)
+							{
+								if (IsUserLoggedIn == true)
+								{
+									vBannerURL = BannerLinkAfterLogin?.Url;
+								}
+								else
+								{
+									vBannerURL = BannerLink.Url;
+
+									vTarget = BannerLink.Target;
+								}
+
+								if (!String.IsNullOrWhiteSpace(bannerUrlAppend))
+								{ vBannerURL += bannerUrlAppend; }
+							}
+
+							//check banner display or not
+							if (DesktopImage != null)
+							{
+								<div class="items">
+
+									<a href="@vBannerURL">
+										<div class="bannerWrap">
+											@if (MobileImage != null || mobileNextGenImage != null || desktopNextGenImage != null)
+											{
+												<picture>
+													@if (MobileImage != null)
+													{
+														<source srcset="@MobileImage.Url()" media="(max-width: 680px)" />
+													}
+
+													@if (mobileNextGenImage != null)
+													{
+														<source srcset="@mobileNextGenImage.Url()" media="(max-width: 680px)" type='image/webp' />
+													}
+
+													@if (desktopNextGenImage != null)
+													{
+														<source srcset="@desktopNextGenImage.Url()" type='image/webp' />
+													}
+
+													@if (DesktopImage != null)
+													{
+														<img class='b-lazy imgPlacing' src="@DesktopImage.Url()" alt="@(DesktopImage.Value<string>("altText"))" />
+													}
+												</picture>
+											}
+											else
+											{
+												if (DesktopImage != null)
+												{
+													<img class='b-lazy imgPlacing' src="@DesktopImage.Url()" alt="@(DesktopImage.Value<string>("altText"))" />
+												}
+											}
+										</div>
+									</a>
+								</div>
+							}
+						}
+
+					}
+				}
+				catch { }
+
+				i++;
+			}
+		</div>
+
+	}
+}
+

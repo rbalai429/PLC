@@ -1,0 +1,165 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<HPPlc.Models.WorkSheet.WorkSheetModel>
+@using HPPlc.Models.WorkSheet;
+
+@if (Model != null)
+{
+	try
+	{
+		<div class="list-items dvWorksheetDetailsContainer" id="sliding">
+			<div class="video-tutorials">
+
+				<div class="title-fltr-fix">
+					<div>
+						<h1 class="titleforhtag"> @Model.Title</h1>
+					</div>
+				</div>
+				@if (Model.Description != null)
+				{
+					//IHtmlString description = Model.Description;
+			
+					<div class="title-fltr-fix">
+						<div class="descTitle">
+							@Html.Raw(Model.Description)
+							@*@Html.Raw("<p>" + description.ToHtmlString().Replace("<p>", "").Replace("</p>", "") + "</p>")*@
+						</div>
+					</div>
+				}
+				@foreach (var item in Model.WorkSheets)
+				{
+					if (item.NestedItems != null && item.NestedItems.Any())
+					{
+						string downloadButton = Umbraco.GetDictionaryValue("Download Button");
+						string subscribeToDownloadButton = Umbraco.GetDictionaryValue("Subscribe to download");
+						string loggedInOrNot = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+						string loginUrl = "/my-account/login";
+
+						<div class="recommended-list">
+							<div class="list-items">
+								@foreach (NestedItems nested in item?.NestedItems)
+								{
+									var detailData = string.Empty;
+									detailData = nested.Title;
+									//if (!string.IsNullOrEmpty(nested.Title))
+									//{
+									//	detailData = nested.Title;
+									//}
+									<div class='item-col'>
+										<div class='card-box'>
+											<div class='card-img'>
+												<picture>
+													@if (nested.NextGenImage != null)
+													{
+														<source srcset="@nested.NextGenImage" type='image/webp' />
+													}
+													@if (nested.ImagesSrc != null)
+													{
+														<img class='b-lazy' alt='@nested.AltText' src='/common/images/img-loader.gif' data-src='@nested.ImagesSrc' />
+													}
+												</picture>
+											</div>
+											<div class='card-cont'>
+												<div class="card-dscptn">
+													@if (!String.IsNullOrWhiteSpace(nested.Title))
+													{
+														<div class="card-title">@nested.Title</div>
+													}
+
+													@Html.Raw(nested.Description)
+
+
+												</div>
+												<div class='card-social-icon'>
+													@if (nested.socialItems != null && (nested.socialItems.FBShare != null || nested.socialItems.EmailShare != null || nested.socialItems.WhatAppShare != null))
+													{
+														var detailShareData = string.Empty;
+														if (!string.IsNullOrEmpty(item.Title))
+														{
+															detailShareData = item.Title;
+														}
+														if (!string.IsNullOrEmpty(nested.Volume))
+														{
+															detailShareData = detailShareData + "-" + nested.Volume;
+														}
+														if (!string.IsNullOrEmpty(nested.Description.ToString()))
+														{
+															System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex("<[^>]*>");
+															string dtls = rx.Replace(nested.Description.ToString(), "").Replace("\n", "");
+
+															detailShareData = detailShareData + "-" + dtls;
+														}
+														<div class='share-icon'>
+															<div class='share-box'>
+																<ul>
+																	@if (nested.socialItems.FBShare != null)
+																	{
+																		<li><a href='javascript:void(0)' class='fb-icon aFBShare' onclick="commonShareLayer('Share_facebook','@detailShareData');"><span style='display:none'>@nested.socialItems.FBShare</span></a></li>
+																	}
+																	@if (nested.socialItems.WhatAppShare != null)
+																	{
+																		<li>
+																			<a href='javascript:void(0)' class='whatsapp-icon aWHTAppSH' onclick="commonShareLayer('Share_whatsapp','@detailShareData');">
+																				<span style='display:none'>
+																					@nested.socialItems.WhatAppShare
+																				</span>
+																			</a>
+																		</li>
+																	}
+																	@if (nested.socialItems.EmailShare != null)
+																	{
+																		<li>
+																			<a href='javascript:void(0)' class='mail-icon aMailSh' onclick="commonShareLayer('Share_mail','@detailShareData');">
+																				<span style='display:none'>
+																					@nested.socialItems.EmailShare
+																				</span>
+																			</a>
+																		</li>
+																	}
+																</ul>
+															</div>
+														</div>
+													}
+												</div>
+											</div>
+											<div class='card-btn-print'>
+												@if ((nested.IsAppliedforLoggedInUserOnly == true && loggedInOrNot == "Y"))
+												{
+													<div class='btn-col btn-ful'>
+														<a href="@(nested.subscriptionStatus?.DownloadUrl)" class='btn downllink' onclick="return addDownloadDataLayer('@detailData','@downloadButton','Festival Offer');">@downloadButton <span class='download-icon'></span></a>
+													</div>
+													<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@(nested.subscriptionStatus?.DownloadString)</span><span style='display:none'>@detailData</span></a></div>
+												}
+												else if (nested.IsAppliedforLoggedInUserOnly == true && String.IsNullOrEmpty(loggedInOrNot))
+												{
+													<div class='btn-col btn-ful'>
+														<a href="@loginUrl" class='btn subs-downllink dvdatalayer' onclick="return addDownloadDataLayer('@detailData','@subscribeToDownloadButton','Festival Offer');">@subscribeToDownloadButton <span class='download-icon'></span></a>
+													</div>
+												}
+												else if (nested.IsAppliedforLoggedInUserOnly == false)
+												{
+													<div class='btn-col btn-ful'>
+														<a href="@(nested.subscriptionStatus?.DownloadUrl)" class='btn downllink' onclick="return addSubscribeDataLayer('@detailData','@downloadButton','Festival Offer');">@downloadButton <span class='download-icon'></span></a>
+													</div>
+													<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@(nested.subscriptionStatus?.DownloadString)</span><span style='display:none'>@detailData</span></a></div>
+												}
+											</div>
+										</div>
+									</div>
+								}
+							</div>
+						</div>
+
+					}
+				}
+			</div>
+			<input type="hidden" name="DisplayCount" id="DisplayCount" value="@Model.LoadMore" />
+			@if (Model.LoadMore > 0)
+			{
+				<div class="load-more" id="worksSheetByIdLoadMore"><a href="javascript:void(0);"></a></div>
+			}
+		</div>
+	}
+	catch (Exception ex)
+	{
+
+	}
+}

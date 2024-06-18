@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "Print Learn Center",
+  "short_name": "PLC",
+  "icons": [
+    {
+      "src": "common/Icons/mstile-35x35.png",
+      "sizes": "35x35",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "common/Icons/mstile-70x70.png",
+      "sizes": "70x70",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "common/Icons/mstile-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "common/Icons/mstile-150x150.png",
+      "sizes": "150x150",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "common/Icons/mstile-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "common/Icons/mstile-310x310.png",
+      "sizes": "310x150",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "common/Icons/mstile-310x310.png",
+      "sizes": "310x310",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "common/Icons/mstile-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "lang": "en-US",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "black",
+  "theme_color": "black"
+} 

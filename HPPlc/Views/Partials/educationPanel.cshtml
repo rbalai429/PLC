@@ -1,0 +1,76 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.EducationPanel>
+@using ContentModels = Umbraco.Web.PublishedModels;
+
+
+<div class="container-fluid educatn-pnl">
+	<div class="container-box">
+		<div class="container-inr">
+			<div class="educatn-pnl-in">
+				<div class="top-texts">
+					<h2 class="title-plc">@Model.Title</h2>
+					<p class="sbtitle-plc">@Model.Description</p>
+				</div>
+				<div class="cardsMn">
+					<div class="cardsMnin slider4item">
+						@foreach (OurEducationPanelItems item in Model?.EducationGridItem)
+						{
+							<div class="sldItm">
+								<div class="cardPlc">
+									<div class="cardPlcin">
+										<div class="card-image">
+											<div class="abtCard-image">
+												<img class="imgPlacing" src="@(item.ProfileImage?.Url())" alt="">
+												</div>
+											</div>
+											<div class="card-cont-plc">
+												<h4>@item.FullName</h4>
+												<p>@item.ShortDescription </p>
+												<a href="#@item.Id" class="readmr-link" onclick="commonLayer('About us','ReadMore#@item.Id');">@item.ReadMoreButtonTitle</a>
+											</div>
+										</div>
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+				@*<div><a href="@(Model.SubscribeNow?.Url)" class="sbcptn-btn">@(Model.SubscribeNow?.Name)</a></div>*@
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="eductnl-prson-pp">
+	@foreach (OurEducationPanelItems item in Model?.EducationGridItem)
+	{
+		<div class="whiteBxpp" id="@item.Id">
+			<div class="whiteBxppin">
+				<a href="#" class="closePrsonpp">x</a>
+				<div class="lft-img">
+					<div class="abtCard-image">
+						<img class="imgPlacing" src="@(item.ProfileImage?.Url())" alt="" />
+					</div>
+				</div>
+				<div class="ritCont">
+					<div class="ritContin">
+						<div class="hding">@item.FullName</div>
+						<p>@item.LongDescription</p>
+
+						<ul>
+							@if (!String.IsNullOrWhiteSpace(item.InstagramLink?.Url))
+							{
+								<li><a href="@(item.InstagramLink?.Url)"><img src="/common/images/icon-instagram.png" alt=""></a></li>
+							}
+							@if (!String.IsNullOrWhiteSpace(item.LinkedInLink?.Url))
+							{
+								<li><a href="@(item.LinkedInLink?.Url)"><img src="/common/images/icon-linkedin.png" alt=""></a></li>
+							}
+							@*<li><a href="#"><img src="/common/images/arrow-right.png" alt="">@item.ReadMoreButtonTitle</a></li>
+								<li><a href="#"><img src="/common/images/arrow-right.png" alt="">@item.ScheduleAmeeting</a></li>*@
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+</div>

@@ -1,0 +1,64 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpagespecialoffer.cshtml";
+
+	var CultureInfo = Model.GetCultureFromDomains();
+}
+
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input type="hidden" id="pageId" value="Plan365login" />
+
+<div class="addinclassfxd">
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	@Html.Partial("_BreadcrumbSpecialPlan")
+	<div class="container-fluid">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="ContnPlcin">
+					@if (Model.HasProperty("title"))
+					{
+						<div class="descTitlePlc">
+							<h1 class="titleforhtag">@Html.Raw(Model.GetProperty("title").Value<string>().ToString())</h1>
+						</div>
+					}
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="video-tutorials">
+
+		<div class="container-fluid">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="ListingMnPlcin">
+
+						<div id="SpecialPlanWorksheet">
+							<div class="lds-roller col50-box" id="worksheetDetailsLoading"></div>
+						</div>
+
+						<div id="faqbox">
+							@Html.CachedPartial("_footerSEOContent", Model, 3600)
+							@Html.Partial("_footerContentData")
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+
+@section CustomJsFiles
+{
+	<script src="/CustumJs/SpecialPlan/ExploreWorksheet.js?v1"></script>
+}

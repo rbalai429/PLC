@@ -1,0 +1,73 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using System.Data;
+@{
+	HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+	List<HPPlc.Models.EncryptionDecryption> myprofile = new List<HPPlc.Models.EncryptionDecryption>();
+	myprofile = db.decryptandencrypt();
+
+	if (myprofile != null)
+	{   
+		DataTable dt = new DataTable();
+		dt.Columns.Add("UserId", typeof(System.Int32));
+		dt.Columns.Add("U_Name", typeof(System.String));
+		dt.Columns.Add("U_Email", typeof(System.String));
+		dt.Columns.Add("U_WhatsAppNo", typeof(System.String));
+		foreach (var item in myprofile)
+		{
+			if (item.UserId > 0)
+			{
+				var row = dt.NewRow();
+				row["UserId"] = item.UserId;
+				if (!String.IsNullOrWhiteSpace(item.U_Name))
+				{
+					row["U_Name"] = HPPlc.Models.clsCommon.Encrypt(HPPlc.Models.clsCommon.Decrypt_old(item.U_Name));
+				}
+				else
+				{
+					row["U_Name"] = null;
+				}
+				if (!String.IsNullOrWhiteSpace(item.U_Email))
+				{
+					row["U_Email"] = HPPlc.Models.clsCommon.Encrypt(HPPlc.Models.clsCommon.Decrypt_old(item.U_Email));
+				}
+				else
+				{
+					row["U_Email"] = null;
+				}
+				if (!String.IsNullOrWhiteSpace(item.U_WhatsAppNo))
+				{
+					row["U_WhatsAppNo"] = HPPlc.Models.clsCommon.Encrypt(HPPlc.Models.clsCommon.Decrypt_old(item.U_WhatsAppNo));
+				}
+				else
+				{
+					row["U_WhatsAppNo"] = null;
+				}
+
+				dt.Rows.Add(row);
+			}
+		}
+
+		if (dt != null && dt.Rows.Count > 0)
+		{
+			DataSet ds = new DataSet();
+			ds.Tables.Add(dt);
+			string XmlParameter = ds.GetXml();
+
+			List<HPPlc.Models.SetParameters> sp = new List<HPPlc.Models.SetParameters>()
+	{
+				new HPPlc.Models.SetParameters { ParameterName = "@XMLParameter", Value = XmlParameter }
+			};
+
+			HPPlc.Models.dbProxy _db = new HPPlc.Models.dbProxy();
+			_db.StoreData("tobedelete", sp);
+		}
+	}
+}
+<html>
+<head>
+	<title>Check</title>   
+</head>
+<body>
+
+</body>
+</html>

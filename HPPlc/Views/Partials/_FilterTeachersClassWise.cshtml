@@ -1,0 +1,35 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+
+	var ageGroups = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?
+	.DescendantsOrSelf()?.Where(x => x.ContentType.Alias == "teacherRoot")?.FirstOrDefault()?
+	.DescendantsOrSelf()?.Where(x => x.ContentType.Alias == "worksheetListingAgeWise")?.OfType<WorksheetListingAgeWise>()?.ToList();
+
+}
+
+@if (ageGroups != null && ageGroups.Count > 0)
+{
+
+	<div class="fltrTab">
+		<ul>
+			@foreach (var ageItem in ageGroups)
+			{
+				int row = 0;
+				var ageMasterData = Umbraco?.Content(ageItem?.AgeGroup?.Udi)?.DescendantsOrSelf()?
+									.OfType<NameListItem>()?.FirstOrDefault();
+
+				if (ageMasterData != null)
+				{
+
+					<li>
+						<a href="@ageItem.Url()" class="classSeletedVal classname" data-val="@ageMasterData.ItemValue">@ageMasterData.AlternateClassName</a>
+					</li>
+
+				}
+
+				row++;
+			}
+		</ul>
+	</div>
+}
+

@@ -1,0 +1,218 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models
+@{
+	Layout = "masterpage.cshtml";
+
+
+	string culture = HPPlc.Models.CultureName.GetCultureName().Replace("/", "");
+	string selectedAgegroup = String.Empty;
+	string decryptedAgegroup = String.Empty;
+	string subscriptionId = String.Empty;
+	string ranking = String.Empty;
+	string discountMode = String.Empty;
+	string IsBotRequest = String.Empty;
+
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.OfferCodeCouponValidate);
+
+	var titleData = Model?.DescendantsOrSelf()?.OfType<TeachersBuyNow>()?.FirstOrDefault();
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+	if (UserLoggedInOrNot == false)
+	{
+		if (Request.QueryString.AllKeys.Contains("o"))
+		{
+			if (Request.QueryString.Get("o") != null)
+			{
+				string qs = Request.QueryString.Get("o").ToString();
+				if (!String.IsNullOrEmpty(qs) && qs == "n")
+				{
+					HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SplRedirection, Request.RawUrl);
+					HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.OfferCodeCouponValidate, "Yes");
+				}
+			}
+		}
+
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SplRedirection, Request.RawUrl);
+
+		Response.Redirect("/my-account/login");
+	}
+	else
+	{
+
+		if (Request.QueryString.Get("subscriptionid") != null && Request.QueryString.Get("o") == "n")
+		{
+			HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.OfferCodeCouponValidate, "Yes");
+			HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.quizWorksheetId, Request.QueryString.Get("subscriptionid"));
+		}
+
+		if (Request.QueryString.Count > 0)
+		{
+			if (Request.QueryString.AllKeys.Contains("subscriptionid"))
+			{
+				if (Request.QueryString.Get("subscriptionid") != null)
+				{
+					subscriptionId = Request.QueryString.Get("subscriptionid");
+					subscriptionId = HPPlc.Models.clsCommon.Decrypt(subscriptionId);
+
+					if (!String.IsNullOrWhiteSpace(subscriptionId) && Convert.ToInt32(subscriptionId) > 0)
+					{
+						ranking = Umbraco?.Content(subscriptionId)?.DescendantsOrSelf()?.OfType<TeachersAddSubscriptions>()?.FirstOrDefault()?.Ranking;
+
+					}
+				}
+			}
+			if (Request.QueryString.AllKeys.Contains("age"))
+			{
+				if (Request.QueryString.Get("age") != null)
+				{
+					selectedAgegroup = Request.QueryString.Get("age").ToString();
+
+					decryptedAgegroup = HPPlc.Models.clsCommon.Decrypt(selectedAgegroup);
+				}
+			}
+
+			if (Request.QueryString.AllKeys.Contains("mode"))
+			{
+				if (Request.QueryString.Get("mode") != null)
+				{
+					discountMode = Request.QueryString.Get("mode").ToString();
+
+					discountMode = HPPlc.Models.clsCommon.Decrypt(discountMode);
+				}
+			}
+			else
+			{
+				HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.SubscriptionDiscount);
+			}
+
+
+
+			//manage session before redirection on login page
+			HPPlc.Models.ManageSessionForSubscription manageSessionForSubscription = new HPPlc.Models.ManageSessionForSubscription();
+			manageSessionForSubscription.SetSessionForSubs(Model.Url(), Request.QueryString[0].ToString(), selectedAgegroup, "teacher");
+		}
+
+		//Check user is loggedIn or not
+		//HPPlc.Models.SessionExpireAttribute.CheckUserLoggedIn("Subsptn");
+
+		//HPPlc.Models.SubscriptionDetails subscriptionDetails = new HPPlc.Models.SubscriptionDetails();
+		//HPPlc.Models.LoggedIn loggedIn = new HPPlc.Models.LoggedIn();
+
+		//Get User Details
+		//loggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<HPPlc.Models.LoggedIn>(HPPlc.Models.SessionType.LoggedInDtls);
+
+		//Get Session Subscription Details
+		//subscriptionDetails = HPPlc.Models.SessionManagement.GetCurrentSession<HPPlc.Models.SubscriptionDetails>(HPPlc.Models.SessionType.SubscriptionDtls);
+
+		string _CouponCode = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.CouponCode);
+	}
+
+}
+
+<input type="hidden" id="SubscriptionPlanId" />
+<input type="hidden" id="ranking" value="@ranking" />
+<input type="hidden" id="culture" value="@culture" />
+<input type="hidden" id="agegroup" value="@decryptedAgegroup" />
+<input type="hidden" id="IsBotRequest" value="@IsBotRequest" />
+<input type="hidden" id="DeleteTitle" value="@titleData.DeleteTitle" />
+<input type="hidden" id="DeleteDetailsMessage" value="@titleData.DeleteDetailsMessage" />
+<input type="hidden" id="DeleteConfirmButtonText" value="@titleData.DeleteConfirmButtonText" />
+<input type="hidden" id="DeleteCancelButtonText" value="@titleData.DeleteCancelButtonText" />
+
+
+<form method="POST" name="paymentForm" id="paymentForm" action="">
+	@Html.AntiForgeryToken()
+
+	<div class="main-wrp">
+		@Html.Partial("_Breadcrumb")
+		<div class="container-grey">
+			<div class="container-box">
+				<div class="container-inr">
+
+					<div class="subscription-block">
+						<div class="subinr nopadding">
+
+							<div class="subleft">
+
+								@if (!String.IsNullOrEmpty(titleData.Headline))
+								{
+									<h1 class="subscrpHead">@Html.Raw(titleData.Headline)</h1>
+								}
+
+								<div id="dvSubscriptionCart">
+									@Html.Partial("/Views/Partials/_SubscriptionCartTeachersPrm.cshtml")
+								</div>
+
+								<div id="dvSubscriptionAddAgeGroup">
+									@Html.Partial("/Views/Partials/_SubscriptionlistTeachersPrm.cshtml")
+								</div>
+
+								@*<div class="subs-details">
+									@if (loggedIn != null)
+									{
+										if (!String.IsNullOrEmpty(loggedIn.u_name))
+										{
+											<div class="sub-cmn">
+												<label>@titleData.NameTitle</label>
+												<div class="subsaved-data">@HPPlc.Models.clsCommon.Decrypt(loggedIn.u_name)</div>
+											</div>
+										}
+										if (!String.IsNullOrEmpty(loggedIn.u_email))
+										{
+											<div class="sub-cmn">
+												<label>@titleData.EmailTitle</label>
+												<div class="subsaved-data">@HPPlc.Models.clsCommon.Decrypt(loggedIn.u_email)</div>
+											</div>
+										}
+										if (!String.IsNullOrEmpty(loggedIn.u_whatsappno))
+										{
+											<div class="sub-cmn">
+												<label>@titleData.WhatsAppTitle</label>
+												<div class="subsaved-data">@HPPlc.Models.clsCommon.Decrypt(loggedIn.u_whatsappno)</div>
+											</div>
+										}
+									}
+								</div>*@
+							</div>
+
+							<div class="subright" id="SubscriptionPay">
+								@Html.Partial("/Views/Partials/_SubscriptionPayTeachersPrm.cshtml")
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="chng-planbox" id="subscriptionplanlist">
+
+		<div class="mob-hd">
+			@*<h5>Change Subscription Plan</h5>
+				<p>5- 6 yrs</p>
+				<a href="#" class="close-plan"></a>*@
+		</div>
+
+
+		@*@Html.Partial("/Views/Partials/_Subscriptionlist.cshtml",
+			new ViewDataDictionary(this.ViewData)
+			{
+				{ "qstring","addincart" },
+				{ "selectedAgegroup", ""},
+				{ "selectedAgeDecrypted", ""},
+				{ "UserExistingAndElibigleForDiscount",UserExistingAndElibigleForDiscount},
+				{ "UserAgeGroupEnrolledOrNot",UserAgeGroupEnrolledOrNot}
+			})*@
+
+
+
+
+	</div>
+
+</form>
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="~/CustumJs/Teachers/TeachersBuyNow.js?v4"></script>
+}

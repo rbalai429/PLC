@@ -1,0 +1,304 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using Umbraco.Web.Models;
+
+@{
+	string qstring = string.Empty, selectedAgegroup = string.Empty, selectedAgeDecrypted = string.Empty, UserExistingAndElibigleForDiscount = string.Empty, UserAgeGroupEnrolledOrNot = string.Empty;
+	if (ViewData["qstring"] != null)
+	{
+		qstring = ViewData["qstring"].ToString();
+	}
+	if (ViewData["selectedAgegroup"] != null)
+	{
+		selectedAgegroup = ViewData["selectedAgegroup"].ToString();
+	}
+	if (ViewData["selectedAgeDecrypted"] != null)
+	{
+		selectedAgeDecrypted = ViewData["selectedAgeDecrypted"].ToString();
+	}
+	if (ViewData["UserExistingAndElibigleForDiscount"] != null)
+	{
+		UserExistingAndElibigleForDiscount = ViewData["UserExistingAndElibigleForDiscount"].ToString();
+	}
+	if (ViewData["UserAgeGroupEnrolledOrNot"] != null)
+	{
+		UserAgeGroupEnrolledOrNot = ViewData["UserAgeGroupEnrolledOrNot"].ToString();
+	}
+
+	HPPlc.Models.GetUserCurrentSubscription selectedAgeSubscription = new HPPlc.Models.GetUserCurrentSubscription();
+
+	var SubcriptionList = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "subscriptionTypeRoot")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "subscriptionList")?.OfType<SubscriptionList>().SingleOrDefault();
+
+	var SubscriptionBenefits = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "masterRoot")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "subscriptionBenefitsMaster")?.FirstOrDefault()?.Children.OfType<NameListItem>();
+
+	string cultureISO = HPPlc.Models.CultureName.GetCultureName().Replace("/", "");
+	string addAgeGroupUrl = string.Empty;
+
+	//get data from database
+	HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+	HPPlc.Models.MyProfile myprofile = new HPPlc.Models.MyProfile();
+	myprofile = db.GetProfile();
+	if (myprofile != null && myprofile.UserUniqueId != null)
+	{
+		if (!String.IsNullOrWhiteSpace(myprofile.SelectedAgeGroup.ToString()))
+		{
+			string[] selectedAge = myprofile.SelectedAgeGroup.Split(',');
+			if (selectedAge != null)
+			{
+				string ValueExists = Array.Find(selectedAge, e => e == selectedAgeDecrypted);
+				if (!String.IsNullOrEmpty(ValueExists))
+				{
+					addAgeGroupUrl = cultureISO + "/lesson-plan";
+				}
+				else
+				{
+					addAgeGroupUrl = cultureISO + "/subscription/add-age-group/";
+				}
+			}
+		}
+	}
+
+	try
+	{
+		if (!String.IsNullOrEmpty(selectedAgeDecrypted))
+		{
+			//Get loggedInUser all Subscriptions
+			List<HPPlc.Models.GetUserCurrentSubscription> CurrentSubscriptions = new List<HPPlc.Models.GetUserCurrentSubscription>();
+			CurrentSubscriptions = HPPlc.Models.SessionManagement.GetCurrentSession<List<HPPlc.Models.GetUserCurrentSubscription>>(HPPlc.Models.SessionType.SubscriptionInDtls);
+
+			if (CurrentSubscriptions != null && CurrentSubscriptions.Any())
+			{
+				selectedAgeSubscription = CurrentSubscriptions?.Where(x => x.AgeGroup == selectedAgeDecrypted).FirstOrDefault();
+			}
+		}
+	}
+	catch { }
+
+	bool IsLoggedIn = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+	var pageName = UmbracoContext.PublishedRequest.PublishedContent.Name;
+}
+
+@if (!String.IsNullOrEmpty(qstring) && qstring.Equals("addincart"))
+{
+	<a class="close-plan" onclick="closePlan()"></a>
+}
+
+<div class="chosplan">
+	<div>
+		@if (!String.IsNullOrEmpty(SubcriptionList.SubscriptionPlanTitle))
+		{
+		<div class="descTitlePlc plan-bonus">
+			<h1 class="titleforhtag">
+				@SubcriptionList.SubscriptionPlanTitle @SubcriptionList.SubcriptionPlanSubTitle
+			</h1>
+
+			@if (SubcriptionList.IsOfferEnable)
+			{
+				<span class="bonus-band">@Html.Raw(SubcriptionList?.OfferContent)</span>
+			}
+		</div>
+		}
+	</div>
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tbody>
+
+			@if (SubcriptionList != null && SubscriptionBenefits != null)
+			{
+				//Header
+				<tr>
+					@if (!String.IsNullOrEmpty(SubcriptionList.SubscriptionPlanTitle))
+					{
+						List<Subscriptions> subscpt;
+						if (qstring.Equals("addincart"))//pay now page binding - remove free subscription
+						{
+							subscpt = SubcriptionList?.Children()?.OfType<Subscriptions>()?.Where(x => x.IsActive && x.Ranking != "1").OrderBy(y => y.Ranking).ToList();
+						}
+						else
+						{
+							subscpt = SubcriptionList?.Children()?.OfType<Subscriptions>()?.Where(x => x.IsActive).OrderBy(y => y.Ranking).ToList();
+						}
+
+						<td class="first-td">
+							<span class="blu-box" style="text-align:center;"><strong>@Html.Raw(SubcriptionList?.SubscriptionPlanDetails)</strong></span>
+						</td>
+
+						if (subscpt != null && subscpt.Any())
+						{
+							foreach (var child in subscpt)
+							{
+								if (child.SubscriptionName != null)
+								{
+									var subscription = Umbraco?.Content(child?.SubscriptionName?.Udi)?.DescendantsOrSelf()?.OfType<SubscriptionItem>().SingleOrDefault();
+									if (subscription != null)
+									{
+										if (child?.Ranking == "1")
+										{
+											<td class="first-td"><span class="blu-box"><strong>@subscription.SubscriptionName</strong></span></td>
+										}
+										else
+										{
+											//Existing user header which no any transacton
+											if (!String.IsNullOrEmpty(UserExistingAndElibigleForDiscount) && UserExistingAndElibigleForDiscount == "yes")
+											{
+												<td class="first-td"><span class="blu-box"><i>@subscription.SubscriptionName</i>  <strong>₹ <span class='@(child.IsAppliedForExistingUser == true ? "linthr" : String.Empty)'>@subscription.Amount</span> @(child.IsAppliedForExistingUser == true ? (subscription.Amount - child.DiscountAmount).ToString() : String.Empty)</strong><span class='@(child.IsRecommended == true ? "tag-puplr" : String.Empty)'>@(child.IsRecommended == true ? child.RecommendedTitle : String.Empty)</span> </span></td>
+											}
+											else
+											{
+												<td class="first-td"><span class="blu-box"><i>@subscription.SubscriptionName</i> <strong> ₹ @subscription.Amount</strong><span class='@(child.IsRecommended == true ? "tag-puplr" : String.Empty)'>@(child.IsRecommended == true ? child.RecommendedTitle : String.Empty)</span></span></td>
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				</tr>
+
+				//Subscription and Benefits Binding
+				foreach (var benefits in SubscriptionBenefits.Where(x => x.IsActice))
+				{
+					List<Subscriptions> subscpt;
+					<tr>
+						<td>@benefits.ItemName</td>
+						@if (qstring.Equals("addincart"))//pay now page binding
+						{
+							subscpt = SubcriptionList?.Children()?.OfType<Subscriptions>()?.Where(x => x.IsActive && x.Ranking != "1").OrderBy(y => y.Ranking).ToList();
+						}
+						else
+						{
+							subscpt = SubcriptionList?.Children()?.OfType<Subscriptions>()?.Where(x => x.IsActive).OrderBy(y => y.Ranking).ToList();
+						}
+
+						@if (subscpt != null && subscpt.Any())
+						{
+							foreach (var child in subscpt)
+							{
+								//var befitItem = child?.SubscriptionBenefits?.Where(x => x.IsActive && child.SubscriptionBenefits.ToList().Any(c => c.BenefitsTitle.Name == benefits.Name))?.SingleOrDefault();
+								var befitItem = child?.SubscriptionBenefits?.Where(x => x.IsActive && x.BenefitsTitle.Name == benefits.Name)?.SingleOrDefault();
+								<td>
+									@if (befitItem != null && !String.IsNullOrEmpty(befitItem.EnterTitleAny.ToString().Trim()))
+									{
+										@befitItem.EnterTitleAny
+									}
+									else
+									{
+										if (befitItem != null && befitItem.ChooseTick == "Yes")
+										{
+											<img src="/common/images/right.png" alt="" />
+										}
+										else if (befitItem != null && befitItem.ChooseTick == "No")
+										{
+											<img src="/common/images/wrong.png" alt="" />
+										}
+									}
+								</td>
+							}
+						}
+					</tr>
+				}
+
+				//Button Binding
+		<tr class="last-bdr">
+			<td></td>
+			@if (qstring.Equals("addincart"))//pay now page binding
+			{
+				foreach (var btnchild in SubcriptionList?.Children()?.OfType<Subscriptions>()?.Where(x => x.IsActive && x.Ranking != "1").OrderBy(y => y.Ranking))
+				{
+					<td><a href="javascript:void(0)" class="btn" onclick="subscriptionMapping(@btnchild.Ranking,'')">@btnchild.BuyNowButton.Name</a></td>
+				}
+			}
+			else
+			{
+				foreach (var btnchild in SubcriptionList?.Children()?.OfType<Subscriptions>()?.Where(x => x.IsActive).OrderBy(y => y.Ranking))
+				{
+					if (btnchild.Ranking == "1")
+					{
+						if (IsLoggedIn)
+						{
+							<td><a href="javascript:void(0);" class="btn" id="getstarted" onclick="commonLayer('@pageName','Get started button (@btnchild.Name)');">@btnchild.SubscriptionAvailedText</a></td>
+							@*if (String.IsNullOrEmpty(selectedAgeDecrypted))
+						{
+							<td><a href="/lesson-plan" class="btn" onclick="commonLayer('@pageName','Get started button (@btnchild.Name)');">@btnchild.SubscriptionAvailedText</a></td>
+						}
+						else
+						{
+							<td><a href="/lesson-plan" class="btn" onclick="commonLayer('@pageName','Get started button (@btnchild.Name)');">@btnchild.SubscriptionAvailedText</a></td>
+						}*@
+						}
+						else
+						{
+							if (String.IsNullOrEmpty(cultureISO))
+							{
+								<td><a href="/my-account/login" style="cursor:pointer;" class="btn" onclick="commonLayer('@pageName','Get started button (@btnchild.Name)');">@btnchild.BuyNowButton.Name</a></td>
+							}
+							else
+							{
+								<td><a href="/@cultureISO/my-account/login" style="cursor:pointer;" class="btn" onclick="commonLayer('@pageName','Get started button (@btnchild.Name)');">@btnchild.BuyNowButton.Name</a></td>
+							}
+						}
+					}
+					else
+					{
+						if (!String.IsNullOrEmpty(qstring))
+						{
+							string queryStringRank = HPPlc.Models.clsCommon.Decrypt(HttpUtility.UrlDecode(qstring));
+							//User did not buy subscription for this age group
+							if (String.IsNullOrEmpty(selectedAgegroup) && selectedAgeSubscription != null && selectedAgeSubscription.Ranking != "1")
+							{
+								//if user registered from different source and agegroup not enrolled
+								if (!String.IsNullOrEmpty(UserExistingAndElibigleForDiscount) && UserExistingAndElibigleForDiscount == "yes" && !String.IsNullOrEmpty(UserAgeGroupEnrolledOrNot) && UserAgeGroupEnrolledOrNot.ToLower() == "no")
+								{
+									<td><a href="@addAgeGroupUrl?subscriptionid=@(HPPlc.Models.clsCommon.Encrypt(btnchild.Id.ToString()))" class="btn" onclick="commonLayer('@pageName','Buy Now button (@btnchild.Name)');">@btnchild.BuyNowButton.Name</a></td>
+								}
+								else
+								{
+									<td><a href="@btnchild.BuyNowButton.Url?subscriptionid=@(HPPlc.Models.clsCommon.Encrypt(btnchild.Id.ToString()))" class="btn" onclick="commonLayer('@pageName','Buy Now button (@btnchild.Name)');">@btnchild.BuyNowButton.Name</a></td>
+								}
+							}
+							else
+							{
+								//User already buyed subscription for this age group
+								if (selectedAgeSubscription != null && selectedAgeSubscription.AgeGroup == selectedAgeDecrypted && Convert.ToInt32(selectedAgeSubscription.Ranking) >= Convert.ToInt32(btnchild.Ranking) && selectedAgeSubscription.DaysRemaining > 15)
+								{
+									<td><a href="javascript:void(0)" style="cursor:default" class="btn">@btnchild.SubscriptionAvailedText</a></td>
+								}
+								else
+								{
+									if (!String.IsNullOrEmpty(UserExistingAndElibigleForDiscount) && UserExistingAndElibigleForDiscount == "yes" && !String.IsNullOrEmpty(UserAgeGroupEnrolledOrNot) && UserAgeGroupEnrolledOrNot.ToLower() == "no")
+									{
+										<td><a href="@addAgeGroupUrl?subscriptionid=@(HPPlc.Models.clsCommon.Encrypt(btnchild.Id.ToString()))&age=@selectedAgegroup" class="btn" onclick="commonLayer('@pageName','Buy Now button (@btnchild.Name)');">@btnchild.BuyNowButton.Name</a></td>
+									}
+									else
+									{
+										<td><a href="@btnchild.BuyNowButton.Url?subscriptionid=@(HPPlc.Models.clsCommon.Encrypt(btnchild.Id.ToString()))&age=@selectedAgegroup" class="btn" onclick="commonLayer('@pageName','Buy Now button (@btnchild.Name)');">@btnchild.BuyNowButton.Name</a></td>
+									}
+								}
+							}
+						}
+						else if (String.IsNullOrEmpty(qstring))
+						{
+							if (btnchild.BuyNowButton != null)
+							{
+								if (!String.IsNullOrEmpty(UserExistingAndElibigleForDiscount) && UserExistingAndElibigleForDiscount == "yes" && !String.IsNullOrEmpty(UserAgeGroupEnrolledOrNot) && UserAgeGroupEnrolledOrNot.ToLower() == "no")
+								{
+									<td><a href="@addAgeGroupUrl?subscriptionid=@(HPPlc.Models.clsCommon.Encrypt(btnchild.Id.ToString()))" class="btn" onclick="commonLayer('@pageName','Buy Now button (@btnchild.Name)');">@btnchild.BuyNowButton.Name</a></td>
+								}
+								else
+								{
+									<td><a href="@btnchild.BuyNowButton.Url?subscriptionid=@(HPPlc.Models.clsCommon.Encrypt(btnchild.Id.ToString()))" class="btn" onclick="commonLayer('@pageName','Buy Now button (@btnchild.Name)');">@btnchild.BuyNowButton.Name</a></td>
+								}
+							}
+						}
+					}
+				}
+			}
+		</tr>
+			}
+		</tbody>
+	</table>
+</div>
+

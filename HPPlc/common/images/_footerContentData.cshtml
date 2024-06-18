@@ -1,0 +1,35 @@
+﻿@inherits UmbracoViewPage
+@using Umbraco.Web.Models
+
+@{
+    var model = Model;
+    bool activeOnPage = false;
+    if (model.HasProperty("activeOnPage"))
+    {
+        activeOnPage = Convert.ToBoolean(model.GetProperty("activeOnPage").Value<bool>());
+    }
+
+    if (activeOnPage)
+    {
+        <div class="container-fluid">
+            <div class="container-box">
+                <div class="container-inr">
+                    <div class="faqbox-row">
+                        <div class="faqbox">
+                            @{
+                                var title = model.Value<string>("pageTitle");
+                                var description = model.Value<string>("pageDesc");
+                                <h5 class="acc-active" style="background: #f1f1f1 !important">@Html.Raw(title)</h5>
+                                <div class="faq-ans" style="display:block">
+                                    @Html.Raw(description)
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+

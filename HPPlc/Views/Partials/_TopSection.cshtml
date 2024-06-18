@@ -1,0 +1,40 @@
+﻿@model Umbraco.Web.PublishedModels.HomePageSignUpSection
+
+@{
+	var UserLoggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+	var subscriptionButton = Model.Button1;
+	var referralButton = Model.ReferralButton;
+}
+
+<div class="container-fluid sbcptn-row">
+	<div class="container-box">
+		<div class="container-inr">
+			<div class="start-sbcptn">
+				<h2>
+					<p>
+						@Html.Raw(Model.Title)
+						
+					</p>
+				</h2>
+				<div>
+					@if (subscriptionButton != null && String.IsNullOrEmpty(UserLoggedIn))
+					{
+						if (!String.IsNullOrEmpty(subscriptionButton.Url))
+						{
+							<a href="@subscriptionButton.Url" data-id="4" target="@subscriptionButton.Target" class="loginMsg @Model.CSs1" onclick="commonLayer('Home','@subscriptionButton.Name.ToString()');">@subscriptionButton.Name</a>
+						}
+					}
+					else
+					{
+						if (referralButton != null && !String.IsNullOrEmpty(referralButton.Url))
+						{
+							<a href="@referralButton.Url" data-id="4" target="@referralButton.Target" class="loginMsg @Model.CSs1" onclick="commonLayer('Home','@referralButton.Name.ToString()');">@referralButton.Name</a>
+						}
+					}
+					@*<span class="clsBtn"></span>*@
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+

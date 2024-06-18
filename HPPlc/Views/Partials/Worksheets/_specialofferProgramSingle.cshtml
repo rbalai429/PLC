@@ -1,0 +1,192 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<HPPlc.Models.WorkSheet.WorkSheetItems>
+@using HPPlc.Models.WorkSheet;
+@using System.Globalization;
+
+@{
+	var model = Model;
+	string pageName = HPPlc.Models.GetPageName.pagename();
+
+	string classForQuiz = string.Empty;
+
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+	string Paid = Umbraco.GetDictionaryValue("Paid");
+	string Free = Umbraco.GetDictionaryValue("Free");
+}
+@if (model != null && Model.NestedItems != null && Model.NestedItems.Any() && Model.NestedItems.Count() > 0)
+{
+	string downloadButton = String.Empty;
+	string colorOfButton = String.Empty;
+	if (UserLoggedInOrNot == true)
+	{
+		downloadButton = Umbraco.GetDictionaryValue("Download Button");
+		colorOfButton = "downllink";
+	}
+	else
+	{
+		downloadButton = Umbraco.GetDictionaryValue("Subscribe to download");
+		colorOfButton = "subs-downllink";
+	}
+
+	foreach (var nested in Model?.NestedItems)
+	{
+
+		var detailData = string.Empty;
+		if (!string.IsNullOrEmpty(nested?.Title))
+		{
+			detailData = nested.Title;
+		}
+		if (nested?.Age != null)
+		{
+			detailData = detailData + " - " + string.Join(",", nested.Age);
+		}
+		if (nested?.SelectedSubjects != null)
+		{
+			detailData = detailData + " - " + string.Join(",", nested.Subject);
+		}
+		if (nested?.SelectedTopics != null)
+		{
+			detailData = detailData + " - " + string.Join(",", nested.Topic);
+		}
+
+		<div class="dtls-lft">
+			<div class="dtls-thum">
+
+				<div class="card-img">
+
+					<div id="viewer" class="pdfViewBox"></div>
+
+				</div>
+			</div>
+		</div>
+
+		<div class="dtls-rit">
+			<div class="dtls-cont dtlsNew">
+
+				<h3>@nested.Title</h3>
+				<p>@nested.SubTitle</p>
+				
+				@Html.Raw(nested.Description)
+
+				@*<div class="sheetTag">
+					<ul>
+
+						<li>@nested.NoOfDaysName</li>
+
+					</ul>
+				</div>*@
+
+				<div class="dtls-btn">
+					@{
+						string culture = HPPlc.Models.CultureName.GetCultureName().Replace("/", "");
+						if (String.IsNullOrWhiteSpace(culture))
+						{ culture = "en-US"; }
+
+						System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
+						
+						//string subscribeToDownload = Umbraco.GetDictionaryValue("Subscribe to download");
+						//string upgradeToPremium = Umbraco.GetDictionaryValue("Upgrade to Premium");
+						//string buyNewSubscription = Umbraco.GetDictionaryValue("BuyNewSubscription");
+
+						//string asf = HPPlc.Models.clsCommon.GetDictionaryValueForLanguage("Download Button",null,null);
+
+						//var detailData = item.Title + "-" + nested.Volume + "-" + nested.Category;
+
+						if (UserLoggedInOrNot == true)
+						{
+							<a href="javascript:void(0);"  onclick="SpecialOffersDownload('dwnld','@nested.subscriptionStatus.DownloadUrl');" class="btn @colorOfButton">@downloadButton</a>
+						}
+						else
+						{
+							<a href="javascript:void(0);"  onclick="LoginForSpecialOffers('dwnld','@nested.subscriptionStatus.DownloadUrl')" class="btn @colorOfButton">@downloadButton</a>
+						}
+					}
+
+
+				<div class="dtls-printshare">
+					<div class='print-col'>
+						@if (UserLoggedInOrNot == true)
+						{
+							<a href="javascript:void(0);" class='clsPrintDoc' onclick="SpecialOffersDownload('print','@nested.subscriptionStatus.DownloadString');"><span style='display:none;'>@downloadButton</span><span style='display:none'>@detailData</span>Print</a>
+						}
+						else
+						{
+							<a href="javascript:void(0);" class='clsPrintDoc' onclick="LoginForSpecialOffers('print','@nested.subscriptionStatus.DownloadUrl')"><span style='display:none;'>@downloadButton</span><span style='display:none'>@detailData</span>Print</a>
+						}
+					</div>
+					@if (nested.socialItems != null && (nested.socialItems.FBShare != null || nested.socialItems.EmailShare != null || nested.socialItems.WhatAppShare != null))
+					{
+
+						var detailShareData = string.Empty;
+						try
+						{
+							if (!string.IsNullOrEmpty(nested.Title))
+							{
+								detailShareData = nested.Title;
+							}
+							if (!string.IsNullOrEmpty(nested.Volume))
+							{
+								detailShareData += detailShareData + "-" + nested.Volume;
+							}
+							if (!string.IsNullOrEmpty(nested.Description.ToString()))
+							{
+								System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex("<[^>]*>");
+								string dtls = rx.Replace(nested.Description.ToString(), "").Replace("\n", "");
+
+								detailShareData += detailShareData + "-" + dtls;
+							}
+						}
+						catch { }
+
+						<div class="card-social-icon">
+							<div class="share-icon">
+								<em>Share</em>
+								<div class="share-box">
+
+									<ul>
+										@if (nested.socialItems.FBShare != null)
+										{
+											<li><a href='javascript:void(0)' class='fb-icon aFBShare' onclick="commonShareLayer('Share_facebook','@detailShareData');"><span style='display:none'>@nested.socialItems.FBShare</span></a></li>
+										}
+										@if (nested.socialItems.WhatAppShare != null)
+										{
+											<li>
+												<a href='javascript:void(0)' class='whatsapp-icon aWHTAppSH' onclick="commonShareLayer('Share_whatsapp','@detailShareData');">
+													<span style='display:none'>
+														@nested.socialItems.WhatAppShare
+													</span>
+												</a>
+											</li>
+										}
+										@if (nested.socialItems.EmailShare != null)
+										{
+											<li>
+												<a href='javascript:void(0)' class='mail-icon aMailSh' onclick="commonShareLayer('Share_mail','@detailShareData');">
+													<span style='display:none'>
+														@nested.socialItems.EmailShare
+													</span>
+												</a>
+											</li>
+										}
+
+									</ul>
+								</div>
+							</div>
+						</div>
+					}
+
+
+				</div>
+
+				</div>
+
+			</div>
+		</div>
+		if (!String.IsNullOrWhiteSpace(nested.PreviewPdf))
+		{
+			<input type="hidden" id="PreviewPdf" value="@nested.PreviewPdf" />
+		}
+
+	}
+
+}

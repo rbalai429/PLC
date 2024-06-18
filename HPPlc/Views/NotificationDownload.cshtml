@@ -1,0 +1,44 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+}
+
+
+<div class="main-wrp">
+
+	<div class="container-grey">
+		<div class="container-box">
+
+			<div class="container-inr">
+				<div class="subscription-block-set">
+
+					<div class="subinr subinrfulw nopadding">
+						
+						@Html.AntiForgeryToken()
+						
+						<div class="lds-roller" id="worksheetLoading"></div>
+						<div class="descTitlePlc" style="display: none;padding-top:100px;">
+							<center class="pagecenter">
+								<h2 class="titleforhtag">@Model.Value("notValid")</h2>
+							</center>
+						</div>
+
+						<div id="successmsg" style="display:none;padding-top:100px;">
+							<center class="pagecenter">
+								<h2 class="titleforhtag">@Model.Value("thankYou") <br /><br /> @Model.Value("goToMessage") <a href="/" style="color: #1b8ed4; text-decoration: underline">@Model.Value("homeLinkText")</a></h2>
+							</center>
+						</div>
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/Notification/downloadnotification.js"></script>
+}

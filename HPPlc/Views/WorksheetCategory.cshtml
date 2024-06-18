@@ -1,0 +1,115 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.WorksheetCategory>
+@using ContentModels = Umbraco.Web.PublishedModels;
+
+@{
+	Layout = "masterpage.cshtml";
+
+	var CultureInfo = Model.GetCultureFromDomains();
+	if (!String.IsNullOrWhiteSpace(CultureInfo) && CultureInfo == "en-US")
+	{ CultureInfo = null; }
+
+	var ageGroup = Model?.Parent?.AncestorsOrSelf()?
+		.OfType<WorksheetListingAgeWise>()?.FirstOrDefault()?.AgeGroup?.Udi;
+
+	string classValue = String.Empty;
+	if (ageGroup != null)
+	{
+		classValue = Umbraco.Content(ageGroup)?
+			.DescendantsOrSelf()?.OfType<NameListItem>()?.FirstOrDefault()?.ItemValue;
+	}
+
+	var subject = Model?.CategoryName?.Udi;
+}
+
+<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+<input id="hdnAgeGroup" type="hidden" value="@ageGroup" />
+<input id="hdnSubject" type="hidden" value="@subject" />
+
+<div class="main-wrp">
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	@Html.Partial("_Breadcrumb")
+	<div class="container-fluid ContnPlc">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="ContnPlcin">
+					@if (Model.HasProperty("title"))
+					{
+						<div class="descTitlePlc">
+							<h1 class="titleforhtag">@Html.Raw(Model.GetProperty("title").Value<string>().ToString())</h1>
+						</div>
+					}
+
+
+					@if (Model.HasProperty("description"))
+					{
+						IHtmlString description = Model.Value<IHtmlString>("description");
+
+						string descp = System.Text.RegularExpressions.Regex.Replace(description.ToString(), "<.*?>", String.Empty).Replace("\n", "");
+						if (!String.IsNullOrWhiteSpace(descp))
+						{
+							<div class="descContPlc">
+								@Html.Raw("<p>" + description.ToHtmlString().Replace("<p>", "").Replace("</p>", "") + "  <a href='javascript: void(0);' onclick='gotobottomfaq();'>" + Model?.Parent?.Value<string>("readMore") + "</a>" + "</p>")
+							</div>
+						}
+					}
+					<div class="dvdr"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="video-tutorials ListingMnPlc topSpace">
+
+		<div class="container-fluid">
+			<div class="container-box">
+				<div class="container-inr">
+					<div class="ListingMnPlcin">
+						<div class="fltrMnPlc">
+
+							@Html.Partial("_FilterClassSubject", new ViewDataDictionary(this.ViewData)
+								{
+									{ "classvalue", classValue },
+									{ "subjectvalue", "" },
+									{ "mode", "subject" },
+								})
+
+							<div class="ritListingPlc">
+								<div class="ritListingPlcTop">
+									<div id="WorksheetDetails">
+										<div class="lds-roller" id="worksheetDetailsLoading"></div>
+									</div>
+								</div>
+
+								<div id="faqbox">
+									@Html.CachedPartial("_footerSEOContent", Model, 3600)
+									@Html.Partial("_footerContentData")
+								</div>
+
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+</div>
+<div class="scrollto_top">
+	<div class="scrolltt_inr">
+		<span></span>
+	</div>
+</div>
+<div class="mob-fliter">Filter</div>
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/filter.js"></script>
+	<script type="text/javascript" src="~/CustumJs/WorksheetAgeSubjects.js"></script>
+}

@@ -1,0 +1,173 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<HPPlc.Models.WorkSheet.WorkSheetModel>
+@using HPPlc.Models.WorkSheet;
+
+@{
+	var model = Model;
+	string pageName = HPPlc.Models.GetPageName.pagename();
+
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+	string domain = System.Configuration.ConfigurationManager.AppSettings["SiteUrl"].ToString();
+}
+
+
+@if (Model != null && Model.WorkSheets != null)
+{
+
+	try
+	{
+		foreach (var items in Model.WorkSheets)
+		{
+			<div class="video-tutorials">
+				@if (!String.IsNullOrWhiteSpace(items.Title))
+				{
+					<div class="rowPlc rowPlcfull">
+						<div class="fit-hd">
+							<h2 class="hdtitl"> @items.Title</h2>
+						</div>
+					</div>
+				}
+
+				@if (items.NestedItems != null)
+				{
+
+					string downloadButton = Umbraco.GetDictionaryValue("Download Button");
+					var freeDownloadButton = Umbraco.GetDictionaryValue("FreeDownload");
+					string subscribeToDownloadButton = Umbraco.GetDictionaryValue("Subscribe to download");
+					string loggedInOrNot = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.IsLoggedIn);
+					//string loginUrl = "/my-account/login";
+
+					<div class="recommended-list">
+						<div class="list-items dvWorksheetDetailsContainer">
+							@foreach (NestedItems nested in items?.NestedItems.Take(4))
+							{
+								var detailData = string.Empty;
+								//detailData = nested.Title;Topic is day
+								detailData = "3 to 6 - " + nested.Topic + " - " + nested.Title + " - PreviewPDF";
+
+								if (nested.IsWorksheetLocked == true && UserLoggedInOrNot == false)
+								{
+									<div class='item-col'>
+										<div class='card-box'>
+											<div class='card-img'>
+												<picture>
+													@if (!String.IsNullOrWhiteSpace(nested.LockedMobileImage))
+													{
+														<source class='b-lazy' data-src="@nested.LockedMobileImage" src="/common/images/img-loader.gif" media="(max-width: 680px)" />
+													}
+
+													@if (!String.IsNullOrWhiteSpace(nested.LockedNextGenMobileImage))
+													{
+														<source data-srcset="@nested.LockedNextGenMobileImage" srcset="/common/images/img-loader.gif" type='image/webp' media="(max-width: 680px)" />
+													}
+
+													@if (!String.IsNullOrWhiteSpace(nested.LockedDesktopNextGenImage))
+													{
+														<source data-srcset="@nested.LockedDesktopNextGenImage" srcset="/common/images/img-loader.gif" type='image/webp' />
+													}
+
+													@if (!String.IsNullOrWhiteSpace(nested.LockedDesktopImage))
+													{
+														<img class='b-lazy' src='/common/images/img-loader.gif' data-src='@nested.LockedDesktopImage' />
+													}
+												</picture>
+
+												@if (!String.IsNullOrWhiteSpace(nested.PreviewPdf))
+												{
+													<a data-pdf="@(domain + nested.PreviewPdf)" href="javascript:void(0)" class="prevOverlyBx" onclick="commonLayer('learn-365','@detailData');">
+														<span><img src="/common/images/icon-pdf.png" width="1" height="1" alt=""> Click to see worksheets</span>
+													</a>
+												}
+											</div>
+											<div class='card-cont'>
+												<div class="card-dscptn">
+													@if (!String.IsNullOrWhiteSpace(nested.Title))
+													{
+														<div class="card-title">@nested.Title</div>
+													}
+
+													@Html.Raw(nested.Description)
+												</div>
+
+											</div>
+
+										</div>
+									</div>
+								}
+								else
+								{
+									<div class='item-col'>
+										<div class='card-box'>
+											<div class='card-img'>
+												<picture>
+													@if (!String.IsNullOrWhiteSpace(nested.MobileImagesSrc))
+													{
+														<source class='b-lazy' alt="@nested.MobileAltText" data-src="@nested.MobileImagesSrc" src="/common/images/img-loader.gif" media="(max-width: 680px)" />
+													}
+
+													@if (!String.IsNullOrWhiteSpace(nested.MobileNextGenImage))
+													{
+														<source data-srcset="@nested.MobileNextGenImage" srcset="/common/images/img-loader.gif" type='image/webp' media="(max-width: 680px)" />
+													}
+
+													@if (!String.IsNullOrWhiteSpace(nested.NextGenImage))
+													{
+														<source data-srcset="@nested.NextGenImage" srcset="/common/images/img-loader.gif" type='image/webp' />
+													}
+
+													@if (!String.IsNullOrWhiteSpace(nested.ImagesSrc))
+													{
+														<img class='b-lazy' alt="@nested.AltText" src='/common/images/img-loader.gif' data-src='@nested.ImagesSrc' />
+													}
+												</picture>
+
+												@if (!String.IsNullOrWhiteSpace(nested.PreviewPdf))
+												{
+													<a data-pdf="@(domain + nested.PreviewPdf)" href="javascript:void(0)" class="prevOverlyBx" onclick="commonLayer('learn-365','@detailData');">
+														<span><img src="/common/images/icon-pdf.png" width="1" height="1" alt=""> Click to see worksheets</span>
+													</a>
+													@*<a href="@nested.PreviewPdf" class="prevOverlyBx" onclick="commonLayer('learn-365','@detailData');">
+															<span><img src="/common/images/icon-pdf.png" width="1" height="1" alt=""> Click to see worksheets</span>
+														</a>*@
+
+												}
+											</div>
+											<div class='card-cont'>
+												<div class="card-dscptn">
+													@if (!String.IsNullOrWhiteSpace(nested.Title))
+													{
+														<div class="card-title">@nested.Title</div>
+													}
+
+													@Html.Raw(nested.Description)
+
+
+												</div>
+
+											</div>
+
+										</div>
+									</div>
+								}
+							}
+						</div>
+					</div>
+
+
+				}
+
+				@if (Model.WorkSheets != null && Model.WorkSheets.Count > 0)
+				{
+					var worksheetCnt = Model?.WorkSheets?.FirstOrDefault()?.NestedItems.Count();
+					<input type="hidden" name="DisplayCount" id="DisplayCount" value="@worksheetCnt" />
+				}
+
+				@if (Model.LoadMore > 0)
+				{
+					<div class="load-more" id="worksSheetByIdLoadMore"><a href="javascript:void(0);"></a></div>
+				}
+			</div>
+		}
+	}
+	catch { }
+}

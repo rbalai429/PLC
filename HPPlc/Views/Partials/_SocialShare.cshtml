@@ -1,0 +1,153 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	string referralUrl = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.UserReferralCode);
+	referralUrl = System.Configuration.ConfigurationManager.AppSettings["SiteUrl"].ToString() + "my-account/login?referralcode=" + referralUrl;
+	//var socialShareContent = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+	//			.Where(x => x.ContentType.Alias == "referEarn")?
+	//			.OfType<ReferEarn>()?.FirstOrDefault();
+
+	var socialShareContent = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+							.Where(x => x?.ContentType.Alias == "structureProgramRoot").OfType<StructureProgramRoot>().FirstOrDefault();
+
+
+	string sharecontent, sharewith = String.Empty;
+	if (ViewData["sharecontent"] != null)
+	{
+		sharecontent = (string)ViewData["sharecontent"];
+	}
+	else
+	{
+		sharecontent = "Share with";
+	}
+	if (ViewData["sharewith"] != null)
+	{
+		sharewith = (string)ViewData["sharewith"];
+	}
+	else
+	{
+		sharewith = "Copy link";
+	}
+
+	var pageName = !string.IsNullOrEmpty(Convert.ToString(Model.Name)) ? Convert.ToString(Model.Name) : "";
+
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	string domain = System.Configuration.ConfigurationManager.AppSettings["SiteUrl"].ToString();
+	string referralText = string.Empty;
+	string mailContent = string.Empty;
+	string facebookContent = string.Empty;
+	string whatsappContent = string.Empty;
+
+	HPPlc.Models.LoggedIn loggedin = new HPPlc.Models.LoggedIn();
+	loggedin = HPPlc.Models.SessionManagement.GetCurrentSession<HPPlc.Models.LoggedIn>(HPPlc.Models.SessionType.LoggedInDtls);
+
+	if (UserLoggedInOrNot == true)
+	{
+		if (!String.IsNullOrWhiteSpace(socialShareContent.ReferralContent.ToString()) && !String.IsNullOrWhiteSpace(loggedin.ReferralCode))
+		{
+			referralText = socialShareContent.ReferralContent.ToString().ToString().Replace("<p>", "").Replace("</p>", "");
+
+			referralText = referralText.Replace("{referal}", loggedin.ReferralCode);
+
+			referralText = referralText.Replace("{loginurl}", domain + "my-account/login?referralcode=" + loggedin.ReferralCode);
+
+			if (!String.IsNullOrEmpty(socialShareContent.MailContent))
+			{
+				mailContent = socialShareContent.MailContent.Replace("{worksheeturl}", domain);
+
+				if (!String.IsNullOrEmpty(referralText))
+				{
+					mailContent = mailContent.Replace("{referal}", referralText);
+				}
+				else
+				{
+					mailContent = mailContent.Replace("{referal}", "");
+					mailContent = mailContent + "`" + "Referral Content";
+				}
+			}
+			if (!String.IsNullOrEmpty(socialShareContent.FacebookContent))
+			{
+				facebookContent = socialShareContent.FacebookContent.Replace("{worksheeturl}", domain);
+
+				if (!String.IsNullOrEmpty(facebookContent))
+				{ facebookContent = facebookContent.Replace("{referal}", referralText); }
+				else
+				{
+					facebookContent = facebookContent.Replace("{referal}", "");
+				}
+			}
+
+			if (!String.IsNullOrEmpty(socialShareContent.WhatsAppContent))
+			{
+				whatsappContent = socialShareContent.WhatsAppContent.Replace("{worksheeturl}", domain);
+
+				if (!String.IsNullOrEmpty(referralText))
+				{ whatsappContent = whatsappContent.Replace("{referal}", referralText); }
+				else
+				{
+					whatsappContent = whatsappContent.Replace("{referal}", "");
+				}
+			}
+		}
+	}
+}
+
+
+<div class="aftermsgshare">
+	<ol>
+		<li>
+			@if (socialShareContent != null)
+			{
+				//foreach (ShareItem item in socialShareContent.Items)
+				//{
+				//if (item.Name != null && item.Name.Equals("Copy link", StringComparison.OrdinalIgnoreCase))
+				//{
+						<span id="copylinkId">@sharewith</span>
+						<a href="javascript:void(0)" class="aCopyText" onclick="commonLayer('@pageName','Copy Icon');">
+							<span style="display:none">
+								@Html.Raw(mailContent.Replace("Happy learning!", " Happy learning!"))
+							</span>
+							<img id="copyImageId" src="https://www.printlearncenter.com/media/nfeduvzp/icon-copy.png" alt="Copy link" />
+						</a>
+				//}
+				//}
+			}
+		</li>
+		<li>
+			<span>@sharecontent</span>
+			@if (socialShareContent != null && socialShareContent.ReferralContent != null)
+			{
+				//foreach (ShareItem item in socialShareContent.Items)
+				//{
+				if (!String.IsNullOrEmpty(whatsappContent))
+				{
+					<a href="javascript:void(0)" class="aWHTAppSH" onclick="commonShareLayer('Share_whatsapp','Referral');">
+						<span style="display:none">@Html.Raw(whatsappContent.Trim())</span>
+						<img src="https://www.printlearncenter.com/media/g4rcrggp/icon-whatsapp.png" alt="Whatsapp">
+					</a>
+				}
+				if (!String.IsNullOrEmpty(facebookContent))
+				{
+					<a href="javascript:void(0)" class="aFBShare" onclick="commonShareLayer('Share_facebook','Referral');">
+						<span style="display:none">@Html.Raw(facebookContent.Trim())</span>
+						<img src="https://www.printlearncenter.com/media/bh0pyuof/facebook.png" alt="Facebook">
+					</a>
+				}
+				@*else if (!String.IsNullOrEmpty(facebookContent))
+				{
+					<a href="javascript:void(0)" class="aMSGShare">
+						<span style="display:none">@Html.Raw(socialShareContent?.ShareMessage + "\r\n") @referralUrl</span>
+						<img src="@(item?.Logo?.Url())" alt="@item.Name">
+					</a>
+				}*@
+				if (!String.IsNullOrEmpty(mailContent))
+				{
+					<a href="javascript:void(0)" class="aMailSh" onclick="commonShareLayer('Share_mail','Referral');">
+						<span style="display:none">@Html.Raw(mailContent.Trim())`'Referral Program</span>
+						<img src="https://www.printlearncenter.com/media/odgjy1ox/icon-mails.png" alt="Mail">
+					</a>
+				}
+				//}
+			}
+		</li>
+	</ol>
+</div>

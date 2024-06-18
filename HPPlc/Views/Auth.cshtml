@@ -1,0 +1,99 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+
+	string mobMasking = string.Empty;
+	string mailMasking = string.Empty;
+	HPPlc.Models.TempUserJourneyDtls tempUserJourneyDtls = new HPPlc.Models.TempUserJourneyDtls();
+	tempUserJourneyDtls = HPPlc.Models.SessionManagement.GetCurrentSession<HPPlc.Models.TempUserJourneyDtls>(HPPlc.Models.SessionType.TempUserDetails);
+	if (tempUserJourneyDtls == null)
+	{
+		Response.Redirect("/", false);
+	}
+	else
+	{
+		if (!String.IsNullOrWhiteSpace(tempUserJourneyDtls.UserMobile))
+		{ mobMasking = HPPlc.Models.Masking.MobMailMasking.hidePhoneNum(tempUserJourneyDtls.UserMobile); }
+		if (!String.IsNullOrWhiteSpace(tempUserJourneyDtls.UserEmail))
+		{ mailMasking = HPPlc.Models.Masking.MobMailMasking.hideEmailId(tempUserJourneyDtls.UserEmail); }
+	}
+
+	var titleData = Model?.DescendantsOrSelf()?.OfType<AuthenticationOtp>()?.FirstOrDefault();
+
+
+}
+
+<input type="hidden" id="InvalidOtp" value="@titleData.InvalidOtp" />
+<input type="hidden" id="EnterOtpmessage" value="@titleData.EnterOtpmessage" />
+<input type="hidden" id="oTPAttemptMaximumLimit" value="@titleData.OTpattemptMaximumLimit" />
+
+<input type="hidden" id="maskingEmail" value="@titleData.EmailMaskingTitle" />
+<input type="hidden" id="maskingEmailMobile" value="@titleData.EmailAndMobileMaskingTitle" />
+<input type="hidden" id="mobmasking" value="@mobMasking" />
+<input type="hidden" id="mailmasking" value="@mailMasking" />
+<input type="hidden" id="maskingTitle" value="@titleData.TimerLeft" />
+
+<input type="hidden" id="resendOtpTimerTitle" value="@titleData.ResendBlockingMessage" />
+<input type="hidden" id="validateAttemptTitle" value="@titleData.ValidateAttemptTitle" />
+
+
+<div class="main-wrp">
+
+	<div class="container-grey">
+		<div class="container-box">
+
+			<div class="container-inr">
+				<div class="subscription-block-set">
+
+					<div class="subinr subinrfulw nopadding">
+						<form method="POST" id="registrationForm" autocomplete="off" autofill="off">
+							@Html.AntiForgeryToken()
+							<div class="signin-section accountFrm">
+								<div id="OtpBase">
+									<h2>
+										@titleData.Title
+									</h2>
+
+									<p><span id="MaskingMessage" class="otpmaskingmessage"></span></p>
+
+									<div class="loginpage-otps" data-autosubmit="false" autocomplete="off">
+										<input type="number" id="digit-1" name="digit-1" data-next="digit-2" class="otpfield" maxlength="1" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" />
+										<input type="number" id="digit-2" name="digit-2" data-next="digit-3" class="otpfield" maxlength="1" data-previous="digit-1" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" />
+										<input type="number" id="digit-3" name="digit-3" data-next="digit-4" class="otpfield" maxlength="1" data-previous="digit-2" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" />
+										<input type="number" id="digit-4" name="digit-4" data-previous="digit-3" class="otpfield" maxlength="1" onkeyup="if(/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" onKeyPress="if(this.value.length==1) return false" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" />
+									</div>
+									<div class="cclear">
+										<a id="clear" href="javascript:void(0);" style="display:none" onclick="ClearOtp()" class="resendotp clearhide">Clear OTP</a>
+									</div>
+									<div class="resend-login">
+										<a id="resendotp" href="javascript:void(0);" style="cursor:pointer" onclick="ResendOtp('@titleData.TimerLeft')" class="resendotp disnone">@titleData.ResendOtptitle</a>
+										<div id="timerdiv"> <span id="timer"></span></div>
+									</div>
+									<div class="loginpage-btn getverify">
+										<button id="VerifyRegistration" type="button" class="styledisable">@titleData.VerifyTitle</button>
+									</div>
+
+									<div>
+										<span id="MsgOtp" class="error" style="display:none;"></span>
+									</div>
+
+
+								</div>
+								<div id="countdown" style="display:none" class="countdownStyle"> <div class="labeltext"><span id="timerMsg"></span></div></div>
+							</div>
+
+							
+						</form>
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section CustomJsFiles
+{
+	<script src="/MyScripts/Auth.js?v4"></script>
+}

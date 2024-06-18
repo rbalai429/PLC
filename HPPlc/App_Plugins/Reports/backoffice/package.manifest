@@ -1,0 +1,23 @@
+{
+  "reports": [
+    {
+      "alias": "Reports",
+      "name": "Reports"
+    }
+  ],
+  "javascript": [
+    "~/App_Plugins/Reports/backoffice/Angular/Services/ReportsService.js",
+    "~/App_Plugins/Reports/backoffice/Angular/WebinarController.js",
+    "~/App_Plugins/Reports/backoffice/Angular/ImportExcelFileLocalController.js",
+    "~/App_Plugins/Reports/backoffice/Angular/ImportExcelFileSFTPController.js",
+    "~/App_Plugins/Reports/backoffice/Angular/FAQRequestController.js",
+    "~/App_Plugins/Reports/backoffice/Angular/UserLoginController.js",
+    "~/App_Plugins/Reports/backoffice/Angular/WorkSheetDownloadController.js",
+    "~/App_Plugins/Reports/backoffice/Angular/CouponCodeController.js",
+    "~/App_Plugins/Reports/backoffice/Angular/CouponCodeLogController.js"
+
+  ],
+  "css": [
+    "~/App_Plugins/Reports/backoffice/Css/reports.css"
+  ]
+}

@@ -1,0 +1,116 @@
+﻿@inherits UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+
+	//Check user is loggedIn or not
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.CheckUserLoggedIn("Subsptn");
+
+	var titleData = Model?.DescendantsOrSelf()?.OfType<MyReferrals>()?.FirstOrDefault();
+
+	var ageGroup = Model?.Root()?.SiblingsAndSelf()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()
+		?.Children()?.Where(x => x.ContentType.Alias == "masterRoot")?.FirstOrDefault()?.Children()
+		?.Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault()?.Children()?.OfType<NameListItem>();
+
+	
+	//get data from database
+	//HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+	//HPPlc.Models.MyProfile myprofile = new HPPlc.Models.MyProfile();
+	//myprofile = db.GetProfile();
+
+	string cultureISO = String.Empty;
+	string myaccount = String.Empty;
+	string mysubscriptions = String.Empty;
+	string myreferrals = String.Empty;
+	HPPlc.Models.GetYourReferralDetails referralDetails = new HPPlc.Models.GetYourReferralDetails();
+	try
+	{
+		//get referral details
+		HPPlc.Models.dbProxy _db = new HPPlc.Models.dbProxy();
+		int UserId = HPPlc.Models.SessionManagement.GetCurrentSession<int>(HPPlc.Models.SessionType.UserId);
+		List<HPPlc.Models.SetParameters> sp = new List<HPPlc.Models.SetParameters>()
+{
+			new HPPlc.Models.SetParameters{ ParameterName = "@QType", Value = "11" },
+			new HPPlc.Models.SetParameters{ ParameterName = "@UserId", Value = UserId.ToString() },
+			new HPPlc.Models.SetParameters{ ParameterName = "@Culture", Value = "en-US" }
+	};
+		referralDetails = _db.GetData<HPPlc.Models.GetYourReferralDetails>("usp_getdata", referralDetails, sp);
+
+		//cultureISO = HPPlc.Models.CultureName.GetCultureName();
+		//myaccount = cultureISO + "/my-account/";
+		//mysubscriptions = cultureISO + "/my-account/my-subscriptions/";
+		//myreferrals = cultureISO + "/my-account/my-referrals/";
+	}
+	catch { }
+
+	var referAndEarnContent = Umbraco?.ContentAtRoot()
+	?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()
+	?.Children?.Where(x => x.ContentType.Alias == "referEarn").OfType<ReferEarn>().FirstOrDefault();
+}
+
+<input type="hidden" id="ReferralCodeText" readonly="readonly" name="ReferralCode" value="@referralDetails.ReferralCode" />
+<div class="main-wrp">
+	@Html.Partial("_Breadcrumb")
+	<div class="container-fluid ref-column1">
+		<div class="profile-wrp">
+			<div class="prf-lft-tb">
+				@Html.Partial("/Views/Partials/_MyAccountTab.cshtml")
+			</div>
+			<div class="prf-rgt-tb">
+				<div class="prf-rgt-pd">
+					@*<div class="congratmsg">@titleData.CongratulationMessage</div>*@
+					<div class="prf-rgt-tit">
+						<h1 class="titleforhtag">@titleData.TitleOnPage</h1>
+					</div>
+					<div class="prf-rgt-cont">
+						<div class="prf-refer-wrap">
+							<div class="ref-row">
+								@if (referralDetails != null)
+								{
+									string ReferralReward = referralDetails.ReferralReward + " Days";
+									<ul>
+										@*<li><span>@titleData.ReferralSent</span><p>@referralDetails.TotalReferralSent</p></li>*@
+										<li><span>@titleData.ReferralConverted</span><p>@referralDetails.TotalReferralConverted</p></li>
+										<li><span>@titleData.ReferralRewards</span><p><em>@ReferralReward</em></p></li>
+									</ul>
+								}
+							</div>
+							<div class="ref-frd">
+								<div class="ref-frdtit">@titleData.ReferAfriend</div>
+								<div class="msgbx">
+									<p>
+										<span>
+											@Html.Raw(referAndEarnContent?.ShortDescription)
+										</span>
+										@Html.Raw(referAndEarnContent?.LongDescription)
+
+										<span class="couponBold">@Html.Raw(referralDetails?.ReferralCode)</span>
+									</p>
+
+									@*@if (Model.GenerateReferralCodeButton != null)
+									{
+										using (Html.BeginUmbracoForm("GenerateReferralCode", "Home", null, new Dictionary<string, object> { { "id", "GenerateReferralcodeForm" } }))
+										{
+											<input type="submit" class="sbcptn-btn" onclick="commonLayer('ReferEarn','@Model.GenerateReferralCodeButton.Name');" value="@(Model.GenerateReferralCodeButton?.Name)" />
+										}
+									}*@
+								</div>
+
+								<div class="aftermsg2">
+									@if (!String.IsNullOrEmpty(referralDetails.ReferralCode))
+									{
+										@Html.Partial("/Views/Partials/_SocialShare.cshtml")
+									}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section CustomJsFiles
+{
+    <script src="/MyScripts/UpdateProfile.js"></script>
+}

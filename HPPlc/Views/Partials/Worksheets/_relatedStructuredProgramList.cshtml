@@ -1,0 +1,212 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<HPPlc.Models.WorkSheet.WorkSheetVideoModel>
+@using HPPlc.Models.WorkSheet;
+@using System.Globalization;
+@using System.Text.RegularExpressions;
+
+@{
+    var model = Model;
+    string pageName = HPPlc.Models.GetPageName.pagename();
+    string classForQuiz = string.Empty;
+    bool tobeDisplayQuiButton = false;
+    bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+
+    string RecentlyDownloaded = Umbraco.GetDictionaryValue("RecentlyDownloaded");
+
+    string Paid = Umbraco.GetDictionaryValue("Paid");
+    string Free = Umbraco.GetDictionaryValue("Free");
+}
+
+@if (model != null && Model.WorkSheets != null && Model.WorkSheets.Any() && Model.WorkSheets.Count() > 0)
+{
+    <div class="crslItm4">
+        @foreach (WorkSheetVideoItems item in Model.WorkSheets)
+        {
+            if (item != null && item.NestedItems != null && item.NestedItems.Any() && item.NestedItems.Count() > 0)
+            {
+                foreach (dynamic nested in item.NestedItems)
+                {
+                    if (nested.IsWorkSheet)
+                    {
+                        var detailData = string.Empty;
+                        if (!string.IsNullOrEmpty(nested?.Title))
+                        {
+                            detailData = nested.Title;
+                        }
+                        if (nested?.SelectedClasses != null)
+                        {
+                            detailData = detailData + " - " + string.Join(",", nested.SelectedClasses);
+                        }
+                        if (nested?.SelectedSubjects != null)
+                        {
+                            detailData = detailData + " - " + string.Join(",", nested.SelectedSubjects);
+                        }
+                        if (nested?.SelectedTopics != null)
+                        {
+                            detailData = detailData + " - " + string.Join(",", nested.SelectedTopics);
+                        }
+                        <items>
+                            <div class="item-col">
+                                <div class="card-box">
+                                    @if (nested.RecentlyDownloaded)
+                                    {
+                                        <div class="tagBox">@RecentlyDownloaded</div>
+                                    }
+                                    <div class="card-img">
+                                        <a href="@Url.Content("~/" + nested.WorksheetDetailsUrl)" onclick="commonLayer('@pageName','@(detailData + " - Details Page")');">
+                                            <picture>
+                                                @if (!string.IsNullOrWhiteSpace(nested.MobileImagesSrc))
+                                                {
+                                                    <source class='b-lazy' alt="@nested.MobileAltText" data-src="/common/images/img-loader.gif" src="@nested.MobileImagesSrc" media="(max-width: 680px)" />
+                                                }
+
+                                                @if (!string.IsNullOrWhiteSpace(nested.MobileNextGenImage))
+                                                {
+                                                    <source data-srcset="/common/images/img-loader.gif" srcset="@nested.MobileNextGenImage" type='image/webp' media="(max-width: 680px)" />
+                                                }
+
+                                                @if (!string.IsNullOrWhiteSpace(nested.NextGenImage))
+                                                {
+                                                    <source data-srcset="/common/images/img-loader.gif" srcset="@nested.NextGenImage" type='image/webp' />
+                                                }
+
+                                                @if (!string.IsNullOrWhiteSpace(nested.ImagesSrc))
+                                                {
+                                                    <img class="b-lazy b-loaded" alt="@nested.AltText" src='@nested.ImagesSrc' data-src='/common/images/img-loader.gif' width="200" height="200" />
+                                                }
+                                            </picture>
+                                        </a>
+                                        @if (nested.IsPaid)
+                                        {
+                                            <div class="paidIcon">
+                                                <em></em><i>@Paid</i>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="freeLab">
+                                                @Free
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="card-cont">
+                                        <div class="card-dscptn">
+                                            <div class="card-title">@nested.Title</div>
+                                        </div>
+                                        <div class="prntDonld">
+                                            @if (nested.socialItems != null && (nested.socialItems.FBShare != null || nested.socialItems.EmailShare != null || nested.socialItems.WhatAppShare != null))
+                                            {
+                                                var detailShareData = string.Empty;
+                                                try
+                                                {
+                                                    if (!string.IsNullOrEmpty(item.Title))
+                                                    {
+                                                        detailShareData = item.Title;
+                                                    }
+                                                    if (!string.IsNullOrEmpty(nested.Volume))
+                                                    {
+                                                        detailShareData += detailShareData + "-" + nested.Volume;
+                                                    }
+                                                    if (!string.IsNullOrEmpty(nested.Description.ToString()))
+                                                    {
+                                                        System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex("<[^>]*>");
+                                                        string dtls = rx.Replace(nested.Description.ToString(), "").Replace("\n", "");
+
+                                                        detailShareData += detailShareData + "-" + dtls;
+                                                    }
+                                                }
+                                                catch { }
+                                                <div class='card-social-icon'>
+                                                    <div class='share-icon'>
+                                                        <div class='share-box'>
+                                                            <ul>
+                                                                @if (nested.socialItems.FBShare != null)
+                                                                {
+                                                                    <li><a href='javascript:void(0)' class='fb-icon aFBShare' onclick="commonShareLayer('Share_facebook','@detailShareData');"><span style='display:none'>@nested.socialItems.FBShare</span></a></li>
+                                                                }
+                                                                @if (nested.socialItems.WhatAppShare != null)
+                                                                {
+                                                                    <li>
+                                                                        <a href='javascript:void(0)' class='whatsapp-icon aWHTAppSH' onclick="commonShareLayer('Share_whatsapp','@detailShareData');">
+                                                                            <span style='display:none'>
+                                                                                @nested.socialItems.WhatAppShare
+                                                                            </span>
+                                                                        </a>
+                                                                    </li>
+                                                                }
+                                                                @if (nested.socialItems.EmailShare != null)
+                                                                {
+                                                                    <li>
+                                                                        <a href='javascript:void(0)' class='mail-icon aMailSh' onclick="commonShareLayer('Share_mail','@detailShareData');">
+                                                                            <span style='display:none'>
+                                                                                @nested.socialItems.EmailShare
+                                                                            </span>
+                                                                        </a>
+                                                                    </li>
+                                                                }
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            <div class="prntDonld">
+                                                <div class="print-col">
+                                                    @if (UserLoggedInOrNot == true)
+                                                    {
+                                                        <a href="javascript:void(0);" onclick="downloadDocmnt('print','@nested.subscriptionStatus.DownloadString','@(nested.IsPaid ? "Paid" : "Free")','@(detailData + " - Print")','worksheet','@nested.WorksheetId')"></a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a href="javascript:void(0)" onclick="Login('print','@nested.subscriptionStatus.DownloadUrl','@(nested.IsPaid ? "Paid" : "Free")','@(detailData + " - Print")','worksheet','@nested.WorksheetId')"></a>
+                                                    }
+                                                </div>
+                                                <div class="downld-col">
+                                                    @if (UserLoggedInOrNot == true)
+                                                    {
+                                                        <a href="javascript:void(0);" onclick="downloadDocmnt('dwnld','@nested.subscriptionStatus.DownloadUrl','@(nested.IsPaid ? "Paid" : "Free")','@(detailData + " - Download")','worksheet','@nested.WorksheetId')"></a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a href="javascript:void(0)" onclick="Login('dwnld','@nested.subscriptionStatus.DownloadUrl','@(nested.IsPaid ? "Paid" : "Free")','@(detailData + " - Download")','worksheet','@nested.WorksheetId')"></a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-dscptnNew">
+                                        @if (nested.SubTitle.Length > 71)
+                                        {
+                                            <p>@Html.Raw(string.Concat(nested.SubTitle.Substring(0, 71), "...."))</p>
+                                        }
+                                        else
+                                        {
+                                            <p>@Html.Raw(nested.SubTitle)</p>
+                                        }
+                                    </div>
+                                    <div class="sheetTag">
+                                        <ul>
+                                            @if (nested.SelectedClasses != null)
+                                            {
+                                                foreach (var SelectedClass in nested.SelectedClasses)
+                                                {
+                                                    <li>@SelectedClass </li>
+                                                }
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </items>
+                    }
+                }
+            }
+            else
+            {
+                <div class='fit-hd' style="text-align:center"><h5>@Umbraco.GetDictionaryValue("No Result Found", "No Result Found")</h5></div>
+            }
+        }
+    </div>
+}
+else
+{
+    <div class='fit-hd' style="text-align:center"><h5>@Umbraco.GetDictionaryValue("No Result Found", "No Result Found")</h5></div>
+}

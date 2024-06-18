@@ -1,0 +1,648 @@
+﻿<div ng-controller="CouponCodeController" ng-init="init()">
+    <div class="umb-panel umb-editor-wrapper ng-scope">
+        <div data-element="editor-header" class="umb-editor-header flex items-center">
+            <h1 class="umb-panel-header-name ">{{Title}}</h1>
+        </div>
+    </div>
+    <div data-element="editor-container" class="umb-editor-container umb-panel-body umb-scrollable row-fluid ">
+        <div class="umb-pane">
+            <div class="umb-editor-sub-header__content-right">
+                <div class="form-search -no-margin-bottom custom-form-search">
+                    <div class="inner-addon left-addon">
+                        <i class="icon icon-search"></i>
+                        <input class="form-control search-input" type="text" placeholder="Search for Coupon code" ng-model="search" ng-change="GetCouponCodeList(currentPage,itemsPerPage,status)">
+                    </div>
+                    <div class="inner-addon left-addon">
+                        <label>Start Date</label>
+                        <input class="form-control search-input" type="date" placeholder="Start Date" ng-model="startDate" ng-change="GetCouponCodeList(currentPage,itemsPerPage,status)">
+                    </div>
+                    <div class="inner-addon left-addon">
+                        <label>End Date</label>
+                        <input class="form-control search-input" type="date" placeholder="End Date" ng-model="endDate" ng-change="GetCouponCodeList(currentPage=1,itemsPerPage,status)">
+                    </div>
+                    <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="ResetSearch()">
+                        <span> Reset</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="umb-pane">
+            <div class="text-right pb-5">
+
+                <ng-form id="CouponCodeUploadForm" enctype="multipart/form-data" method="POST" name="CouponCodeUploadForm" class="ng-pristine ng-valid ng-valid-required" val-form-manager>
+
+                    <input type="file" ng-disabled="FileUploaded" id="fileupload" name="fileupload" multiple onchange="angular.element(this).scope().FileSelected(this)" accept=".xlsx, .xls, .csv" />
+
+                    <button mat-button color="warn" type="button" data-hotkey="ctrl+s" ng-disabled="FileUploaded" class="btn umb-button__button btn-success umb-button-- umb-outline float-right" ng-click="FileUpload()">
+                        <span ng-if="!FileUploaded">Upload File</span>
+                        <span ng-if="FileUploaded"> Upload..</span>
+                        <ul ng-if="FileUploaded" class="umb-load-indicator animated -half-second">
+                            <li class="umb-load-indicator__bubble"></li>
+                            <li class="umb-load-indicator__bubble"></li>
+                            <li class="umb-load-indicator__bubble"></li>
+                        </ul>
+                    </button>
+                </ng-form>
+                <button ng-if="CouponCodeList.length>0" class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="ExportToExcel()">
+                    <span ng-if="!RequestDownload"> Export To Excel</span>
+                    <span ng-if="RequestDownload"> Exporting..</span>
+                </button>
+                <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="AddNewCouponCode()">
+                    <span> Add New</span>
+                </button>
+                <button ng-if="CouponCodeList.length>0" class="btn umb-button__button btn-danger umb-button-- umb-outline float-right" type="button" ng-click="DeleteCouponCode()">
+                    <span> Delete</span>
+                </button>
+            </div>
+            <div class="umb-table" id="import" ng-if="!CouponCodeLoad">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>
+                                Select
+                                <!--{{SelectAll}}  <input class="form-check-input" type="checkbox" ng-model="SelectAll" id="SelectAll" name="SelectAll" ng-click="SelectAllCouponCode($event.target.checked)">-->
+                            </th>
+                            <th>Coupon Code</th>
+                            <th>Source</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <!--<th>Status</th>-->
+                            <!--<th>Action</th>-->
+                        </tr>
+                    </thead>
+                    <tbody ng-if="CouponCodeList.length>0">
+                        <tr ng-repeat="item in CouponCodeList">
+                            <td>
+                                <input class="form-check-input" type="checkbox" ng-model="item.Selected" name="Select_{{item.CouponCodeId}}" id="Select_{{item.CouponCodeId}}" ng-checked="item.Selected" ng-click="SelectCouponCode($event.target.checked,item.CouponCodeId)">
+                            </td>
+                            <td>{{item.CouponCodeName}}</td>
+                            <td>{{item.CouponSource}}</td>
+                            <td>{{item.ValidityStartDate|date}}</td>
+                            <td>{{item.ValidityEndDate|date}}</td>
+                            <!--<td>
+                                <button id="IsActivebtn" type="button" ng-click="CouponChangeStatusChange(item)" ng-class="{ 'umb-toggle--checked': item.Status}" class="umb-toggle  ">
+                                    <div class="umb-toggle__toggle">
+                                        <i class="umb-toggle__icon umb-toggle__icon--left icon-check"></i>
+                                        <i class="umb-toggle__icon umb-toggle__icon--right icon-wrong"></i>
+                                        <div class="umb-toggle__handler"></div>
+                                    </div>
+                                    <span class="ng-scope">
+                                        <span class="umb-toggle__label umb-toggle__label--right">
+
+                                        </span>
+                                    </span>
+                                </button>
+                            </td>-->
+                            <td>
+                                <!--<button class="btn umb-button__button btn-primary umb-button-- umb-outline float-right" type="button" ng-click="GetCopuponCodeDetails(item.CouponCodeId)"> <span class="icon icon-info"></span></button>-->
+                                <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" ng-click="EditCopuponCodeDetails(item.CouponCodeId)" type="button"> <span class="icon icon-edit"></span></button>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                    <tfoot ng-show="totalPages > 1">
+                        <tr>
+                            <th colspan="6">
+                                <div class="pagination pagination-right" page-number="currentPage" total-pages="totalPages">
+                                    <ul>
+
+                                        <li ng-class="{disabled: currentPage == 1}" ng-click="currentPage == 1 || GetCouponCodeList(currentPage -1,itemsPerPage,status)">
+                                            <a href="javascript:void(0)">Prev Page</a>
+                                        </li>
+                                        <li ng-repeat="i in rangeCreator(currentStart,totalPages)" ng-class="{disabled: currentPage == i}" ng-click="currentPage == i || GetCouponCodeList(i,itemsPerPage,status)"><a href="javascript:void(0)">{{i}}</a></li>
+
+                                        <li ng-class="{disabled: currentPage == totalPages}" ng-click="currentPage == totalPages || GetCouponCodeList(currentPage + 1,itemsPerPage,status)">
+                                            <a href="javascript:void(0)">Next Page</a>
+                                        </li>
+                                        <li><a href="javascript:void(0)">Page Per Items</a></li>
+                                        <li>
+                                            <select ng-change="GetCouponCodeList(currentPage,itemsPerPage,status)" ng-model="itemsPerPage" class="form-control">
+                                                <option value="5">5</option>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="500">500</option>
+                                                <option value="1000">1000</option>
+                                                <option value="2000">2000</option>
+                                            </select>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </th>
+                        </tr>
+                    </tfoot>
+                    <tbody ng-if="CouponCodeList.length==0">
+                        <tr>
+                            <td colspan="4"> <localize key="content_listViewNoItems"></localize></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <ul class="umb-load-indicator animated -half-second" ng-if="CouponCodeLoad">
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+            </ul>
+        </div>
+    </div>
+    <div class="umb-editors" ng-if="model.show">
+        <div class="umb-editor   umb-editor--large umb-editor--infiniteMode umb-editor--n1 umb-editor--level1">
+            <form name="CreateCouponCodeForm" class="css-form" novalidate>
+                <div class="umb-panel umb-editor-wrapper">
+                    <div class="umb-editor-header  ">
+
+                        <div class="flex items-center" style="height: 100%;" aria-hidden="false">
+                            <h1 ng-if="CouponCode.CouponCodeId==0" class="umb-panel-header-name  ">
+                                Create New Coupon Code
+                            </h1>
+                            <h1 ng-if="CouponCode.CouponCodeId>0" class="umb-panel-header-name  ">
+                                Edit Coupon Code - {{CouponCode.CouponCodeName}}
+                            </h1>
+                        </div>
+                        <div class="umb-loader-wrapper" ng-if="model.showing || model.saving">
+                            <div class="umb-loader"></div>
+                        </div>
+                    </div>
+                    <div class="umb-pane custom-umb-pan" ng-if="!model.showing">
+                        <div id="CreateCouponCode">
+                            <div class="umb-box ">
+                                <div class="umb-box-content ">
+                                    <div class="history">
+                                        <input type="hidden" id="TransactionId" ng-model="CouponCode.TransactionId" name="TransactionId" value="" />
+                                        <input type="hidden" id="CouponCodeId" ng-model="CouponCode.CouponCodeId" name="CouponCodeId" value="" />
+                                        <div class="umb-group-builder__property flax-220">
+                                            <div class="umb-group-builder__property-meta" ng-if="CouponCode.CouponTypeList!=null && CouponCode.CouponTypeList.length>0">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Coupon Type <i class="text-danger">*</i></h5>
+                                                    <div class="coupon-code-body">
+                                                        <div ng-repeat="CouponType in CouponCode.CouponTypeList">
+                                                            <label> <input type="radio" ng-disabled="CouponCode.CouponCodeId>0" class="form-control" ng-model="CouponCode.CouponType" ng-checked="CouponType.Selected" name="CouponType" value="{{CouponType.CouponTypeId}}" />{{CouponType.CouponTypeName}}</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-if="CouponCode.CouponCodeId==0" class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Prefix Coupon Code <i class="text-danger">*</i></h5>
+                                                    <div class="coupon-code-body">
+                                                        <!--ng-change="GenerateCouponCode(CouponCode.CouponCodePrefix,CouponCode.NoOfCouponCode)"-->
+                                                        <input type="text" ng-disabled="CouponCode.CouponCodeId>0" disallow-spaces only-Char ng-model="CouponCode.CouponCodePrefix" ng-class="{ 'text-success-border': CreateCouponCodeForm.CouponCodePrefix.$valid, 'text-danger-border': CreateCouponCodeForm.$submitted || CreateCouponCodeForm.CouponCodePrefix.$touched }" name="CouponCodePrefix" value="" ng-pattern="/^(?=.*[a-zA-Z])([a-zA-Z]+)$/" required />
+                                                    </div>
+                                                    <div ng-show="CreateCouponCodeForm.$submitted || CreateCouponCodeForm.CouponCodePrefix.$touched">
+                                                        <div ng-show="CreateCouponCodeForm.CouponCodePrefix.$error.required" class="text-danger">Coupon Code Prefix Required.</div>
+                                                        <div ng-show="CreateCouponCodeForm.CouponCodePrefix.$error.pattern" class="text-danger">Coupon Code Only allow Character.</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-if="CouponCode.CouponCodeId==0" class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>How many Coupon Code <i class="text-danger">*</i></h5>
+                                                    <!--ng-change="GenerateCouponCode(CouponCode.CouponCodePrefix,CouponCode.NoOfCouponCode)"-->
+                                                    <div class="coupon-code-body">
+                                                        <input type="text" ng-disabled="CouponCode.CouponCodeId>0" disallow-spaces ng-model="CouponCode.NoOfCouponCode" ng-class="{ 'text-success-border': CreateCouponCodeForm.NoOfCouponCode.$valid, 'text-danger-border': CreateCouponCodeForm.$submitted || CreateCouponCodeForm.NoOfCouponCode.$touched }" name="NoOfCouponCode" value="" only-digits ng-pattern="onlyNumbers" required />
+                                                    </div>
+                                                    <div ng-show="CreateCouponCodeForm.$submitted || CreateCouponCodeForm.NoOfCouponCode.$touched">
+                                                        <div ng-show="CreateCouponCodeForm.NoOfCouponCode.$error.required" class="text-danger">How many Coupon Code Required.</div>
+                                                        <div ng-show="CreateCouponCodeForm.NoOfCouponCode.$error.pattern" class="text-danger">How many Coupon Code Only allow Number.</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-if="CouponCode.CouponCodeId>0 && (CouponCode.TransactionId==null || CouponCode.TransactionId=='')" class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Coupon Code <i class="text-danger">*</i></h5>
+                                                    <div class="coupon-code-body">
+                                                        <input type="text" ng-disabled="CouponCode.CouponCodeId>0" disallow-spaces ng-model="CouponCode.CouponCodeName" ng-class="{ 'text-success-border': CreateCouponCodeForm.CouponCode.$valid, 'text-danger-border': CreateCouponCodeForm.$submitted || CreateCouponCodeForm.CouponCode.$touched }" name="CouponCode" value="" ng-pattern="/^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/" required />
+                                                    </div>
+                                                    <div ng-show="CreateCouponCodeForm.$submitted || CreateCouponCodeForm.CouponCode.$touched">
+                                                        <div ng-show="CreateCouponCodeForm.CouponCode.$error.required" class="text-danger">Coupon Code Required.</div>
+                                                        <div ng-show="CreateCouponCodeForm.CouponCode.$error.pattern" class="text-danger">Coupon Code Only allow Number and character.</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+                                        <div class="umb-group-builder__property flax-220">
+                                            <div class="umb-group-builder__property-meta" ng-if="CouponCode.CouponUsagesTypeList!=null && CouponCode.CouponUsagesTypeList.length>0">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Coupon Type Use <i class="text-danger"></i></h5>
+                                                    <div class="coupon-code-body">
+                                                        <div ng-repeat="CouponUsagesType in CouponCode.CouponUsagesTypeList">
+                                                            <label> <input ng-disabled="CouponCode.CouponCodeId>0"  type="radio" class="form-control" ng-model="CouponCode.CouponUsagesType" ng-checked="CouponUsagesType.Selected" ng-change="CouponUsagesTypeChange(CouponCode.CouponUsagesType)" name="CouponTypeUse" value="{{CouponUsagesType.CouponUsagesTypeId}}" />{{CouponUsagesType.CouponUsagesTypeName}}</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>No of Usage <i class="text-danger">*</i></h5>
+                                                    <div class="coupon-code-body">
+                                                        <input type="text" ng-disabled="CouponCode.CouponCodeId>0"  ng-model="CouponCode.NoOfUsages" ng-disabled="CouponCode.CouponUsagesType==1" ng-class="{ 'text-success-border': CreateCouponCodeForm.NoOfUsages.$valid, 'text-danger-border': CreateCouponCodeForm.$submitted || CreateCouponCodeForm.NoOfUsages.$touched }" only-digits name="NoOfUsages" ng-pattern="onlyNumbers" value="1" required />
+                                                    </div>
+                                                    <div ng-show="CreateCouponCodeForm.$submitted || CreateCouponCodeForm.NoOfUsages.$touched">
+                                                        <div ng-show="CreateCouponCodeForm.NoOfUsages.$error.required" class="text-danger">No of Usage Required.</div>
+                                                        <div ng-show="CreateCouponCodeForm.NoOfUsages.$error.pattern" class="text-danger">Please valid No of Usage.</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Source</h5>
+                                                    <div class="coupon-code-body">
+                                                        <input type="text" ng-disabled="CouponCode.CouponCodeId>0"  ng-model="CouponCode.CouponSource" name="CouponSource" value="" />
+                                                    </div>
+                                                    <!--ng-class="{ 'text-success-border': (CreateCouponCodeForm.$submitted && CreateCouponCodeForm.CouponSource.$valid), 'text-danger-border': CreateCouponCodeForm.$submitted && CreateCouponCodeForm.CouponSource.$touched }" <div ng-show="CreateCouponCodeForm.$submitted || CreateCouponCodeForm.CouponSource.$touched">
+                                                        <div ng-show="CreateCouponCodeForm.CouponSource.$error.required" class="text-danger">Coupon Code Required.</div>
+                                                    </div>-->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--<div class="umb-group-builder__property flax-220 " ng-if="CouponCode.CouponCodeList!=null && CouponCode.CouponCodeList.length>0">
+                                            <div class="umb-group-builder__property-meta pt-5">
+                                                <p>List Of Coupon Code(display first 5 records)</p>
+                                                <div class="display-inline">
+                                                    <div ng-repeat="CouponCode in CouponCode.CouponCodeList|limitTo:5" class="form-check form-check-inline">
+                                                        <label class="form-check-label" id="{{CouponCode.Id}}">{{CouponCode.Id}}.{{CouponCode.Name}}</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>-->
+                                        <div class="umb-group-builder__property flax-220 ">
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Start Date <i class="text-danger">*</i></h5>
+                                                    <div class="coupon-code-body">
+
+                                                        <input ng-model="CouponCode.ValidityStartDate" ng-change="CheckValidEndDate(CouponCode.ValidityStartDate,CouponCode.ValidityEndDate)" type="date" class="" ng-class="{ 'text-success-border': CreateCouponCodeForm.ValidityStartDate.$valid, 'text-danger-border':CouponCode.CouponCodeId==0 && (CreateCouponCodeForm.$submitted || CreateCouponCodeForm.ValidityStartDate.$touched) }" name="ValidityStartDate" min-date="cstartDate" required ng-disabled="IsStartDateValid" />
+                                                    </div>
+                                                    <div ng-show="CreateCouponCodeForm.$submitted || CreateCouponCodeForm.ValidityStartDate.$touched">
+                                                        <div ng-show="CreateCouponCodeForm.ValidityStartDate.$error.required" class="text-danger">Start Date Required.</div>
+
+                                                        <div ng-show="CouponCode.CouponCodeId==0 && !CreateCouponCodeForm.ValidityStartDate.$error.required && CreateCouponCodeForm.ValidityStartDate.$error.minDate" class="text-danger">Please Select Valid Date.</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>End Date <i class="text-danger">*</i></h5>
+                                                    <div class="coupon-code-body">
+                                                        <input type="date" ng-model="CouponCode.ValidityEndDate" ng-class="{ 'text-success-border': CreateCouponCodeForm.ValidityEndDate.$valid && EndDateErrorMessage=='', 'text-danger-border': CreateCouponCodeForm.$submitted || CreateCouponCodeForm.ValidityEndDate.$touched ||EndDateErrorMessage==null}" name="ValidityEndDate" ng-change="CheckValidEndDate(CouponCode.ValidityStartDate,CouponCode.ValidityEndDate)" required />
+                                                    </div>
+                                                    <div ng-show="CreateCouponCodeForm.$submitted || CreateCouponCodeForm.ValidityEndDate.$touched">
+                                                        <div ng-show="CreateCouponCodeForm.ValidityEndDate.$error.required" class="text-danger">End Date Required.</div>
+                                                        <div ng-show="EndDateErrorMessage!=null && EndDateErrorMessage!=''" class="text-danger">{{EndDateErrorMessage}}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta" ng-if="CouponCode.DiscountTypesList!=null && CouponCode.DiscountTypesList.length>0">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Discont Type</h5>
+                                                    <div class="coupon-code-body">
+                                                        <div ng-repeat="DiscontType in CouponCode.DiscountTypesList">
+                                                            <label> <input type="radio" ng-disabled="CouponCode.CouponCodeId>0" class="form-control" ng-model="CouponCode.DiscountType" ng-checked="DiscontType.Selected" name="DiscontType" value="{{DiscontType.DiscountType}}" />{{DiscontType.DiscountTypeName}}</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Discount Amount <i class="text-danger">*</i></h5>
+                                                    <div ng-if="CouponCode.DiscountType==1">
+                                                        <div class="coupon-code-body">
+                                                            <div class="coupon-code-body">
+                                                                <input type="text" ng-disabled="CouponCode.CouponCodeId>0" ng-model="CouponCode.DiscountValue" ng-class="{ 'text-success-border': CreateCouponCodeForm.DiscountValue.$valid, 'text-danger-border': CreateCouponCodeForm.$submitted || CreateCouponCodeForm.DiscountValue.$touched }" name="DiscountValue" ng-pattern="onlyNumbers" only-digits ng-maxlength="2" value="" required />
+                                                            </div>
+                                                        </div>
+                                                        <div ng-show="CreateCouponCodeForm.$submitted || CreateCouponCodeForm.DiscountValue.$touched">
+                                                            <div ng-show="CreateCouponCodeForm.DiscountValue.$error.required" class="text-danger">Discount Amount Required.</div>
+                                                            <div ng-show="!CreateCouponCodeForm.DiscountValue.$error.required && (CreateCouponCodeForm.DiscountValue.$error.pattern || CreateCouponCodeForm.DiscountValue.$error.maxlength)" class="text-danger">Please Enter Valid Discount Percent.</div>
+                                                        </div>
+                                                    </div>
+                                                    <div ng-if="CouponCode.DiscountType==2">
+                                                        <div class="coupon-code-body">
+                                                            <div class="coupon-code-body">
+                                                                <input type="text" ng-disabled="CouponCode.CouponCodeId>0" ng-model="CouponCode.DiscountValue" ng-class="{ 'text-success-border': CreateCouponCodeForm.DiscountValue.$valid, 'text-danger-border': CreateCouponCodeForm.$submitted || CreateCouponCodeForm.DiscountValue.$touched }" name="DiscountValue" ng-pattern="onlyNumbers" only-digits ng-maxlength="3" value="" required />
+                                                            </div>
+                                                        </div>
+                                                        <div ng-show="CreateCouponCodeForm.$submitted || CreateCouponCodeForm.DiscountValue.$touched">
+                                                            <div ng-show="CreateCouponCodeForm.DiscountValue.$error.required" class="text-danger">Discount Amount Required.</div>
+                                                            <div ng-show="!CreateCouponCodeForm.DiscountValue.$error.required && (CreateCouponCodeForm.DiscountValue.$error.pattern || CreateCouponCodeForm.DiscountValue.$error.maxlength)" class="text-danger">Please Enter Valid Discount Amount.</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--<div class="umb-group-builder__property flax-220 " ng-if="CouponCode.DomainNameMasterList!=null && CouponCode.DomainNameMasterList.length>0">
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Domain Name</h5>
+                                                    <div class="coupon-code-body">
+                                                        <div ng-repeat="DiscontType in CouponCode.DomainNameMasterList">
+                                                            <label> <input type="radio" class="form-control" ng-model="CouponCode.DomainId" ng-checked="DiscontType.Selected" name="DomainId" value="{{DiscontType.DomainId}}" />{{DiscontType.DomainName}}</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>-->
+                                    </div>
+                                    <div class="umb-group-builder__property flax-300 pt-5">
+                                        <div class="umb-group-builder__property-meta pt-5">
+                                            <button type="button" ng-disabled="CouponCode.CouponCodeId>0" ng-click="CouponCode.IsAppliedForMultipleUserType=!CouponCode.IsAppliedForMultipleUserType" ng-class="{ 'umb-toggle--checked': CouponCode.IsAppliedForMultipleUserType}" class="umb-toggle  ">
+                                                <div class="umb-toggle__toggle">
+                                                    <i class="umb-toggle__icon umb-toggle__icon--left icon-check"></i>
+                                                    <i class="umb-toggle__icon umb-toggle__icon--right icon-wrong"></i>
+                                                    <div class="umb-toggle__handler"></div>
+                                                </div>
+                                                <span class="ng-scope">
+                                                    <span class="umb-toggle__label umb-toggle__label--right">Select User Type</span>
+                                                </span>
+
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                    <div class="umb-group-builder__property flax-300 pt-5">
+                                        <div ng-disabled="CouponCode.CouponCodeId>0" ng-show="CouponCode.IsAppliedForMultipleUserType && CouponCode.UserTypeList!=null && CouponCode.UserTypeList.length>0" class="umb-group-builder__property-meta">
+                                            <h5>User Type <i class="text-danger">*</i></h5>
+                                            <div class="display-inline">
+                                                <div ng-repeat="UserType in CouponCode.UserTypeList" class="form-check form-check-inline">
+                                                    <input ng-disabled="CouponCode.CouponCodeId>0" class="form-check-input" type="checkbox" data-UserTypeId="{{UserType.UserTypeId}}" id="{{UserType.UserTypeName}}"
+                                                           value="{{UserType.Selected}}" ng-checked="UserType.Selected" ng-click="UserType.Selected=!UserType.Selected" ng-model="UserTypeItems">
+                                                    <label class="form-check-label" for="{{UserType.UserTypeName}}">{{UserType.UserTypeName}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="umb-group-builder__property flax-300 pt-5">
+                                        <div class="umb-group-builder__property-meta pt-5">
+                                            <button ng-disabled="CouponCode.CouponCodeId>0" type="button" ng-click="CouponCode.IsAppliedForSubscription=!CouponCode.IsAppliedForSubscription" ng-class="{ 'umb-toggle--checked': CouponCode.IsAppliedForSubscription}" class="umb-toggle  ">
+                                                <div class="umb-toggle__toggle">
+                                                    <i class="umb-toggle__icon umb-toggle__icon--left icon-check"></i>
+                                                    <i class="umb-toggle__icon umb-toggle__icon--right icon-wrong"></i>
+                                                    <div class="umb-toggle__handler"></div>
+                                                </div>
+                                                <span class="ng-scope">
+                                                    <span class="umb-toggle__label umb-toggle__label--right">Is Applied On Subscription</span>
+                                                </span>
+
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div ng-show="CouponCode.IsAppliedForSubscription" class="umb-group-builder__property flax-300 pt-5">
+                                        <div class="umb-group-builder__property-meta pt-5">
+                                            <p>List Of Subscription <i class="text-danger">*</i></p>
+                                            <div class="display-inline">
+                                                <div ng-repeat="subscription in CouponCode.SubscriptionsItemForCouponCodeList" class="form-check form-check-inline">
+                                                    <input ng-disabled="CouponCode.CouponCodeId>0" class="form-check-input" type="checkbox" data-AgeGroupId="{{subscription.SubscriptionId}}" id="{{subscription.SubscriptionName}}" value="{{subscription.Selected}}" ng-checked="subscription.Selected" ng-click="subscription.Selected=!subscription.Selected" ng-model="SubscriptionItems">
+                                                    <label class="form-check-label" for="{{subscription.SubscriptionName}}">{{subscription.SubscriptionName}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="umb-group-builder__property flax-300 pt-5">
+                                        <div class="umb-group-builder__property-meta pt-5">
+                                            <button type="button" ng-disabled="CouponCode.CouponCodeId>0" ng-click="CouponCode.IsCouponAppliedForAgeGroup=!CouponCode.IsCouponAppliedForAgeGroup" ng-class="{ 'umb-toggle--checked': CouponCode.IsCouponAppliedForAgeGroup}" class="umb-toggle  ">
+                                                <div class="umb-toggle__toggle">
+                                                    <i class="umb-toggle__icon umb-toggle__icon--left icon-check"></i>
+                                                    <i class="umb-toggle__icon umb-toggle__icon--right icon-wrong"></i>
+                                                    <div class="umb-toggle__handler"></div>
+                                                </div>
+                                                <span class="ng-scope">
+                                                    <span class="umb-toggle__label umb-toggle__label--right">Is Coupon Applied For Age Group</span>
+                                                </span>
+
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div ng-show="CouponCode.IsCouponAppliedForAgeGroup" class="umb-group-builder__property flax-300 pt-5">
+                                        <div class="umb-group-builder__property-meta pt-5">
+                                            <p>List Of Age Group <i class="text-danger">*</i></p>
+                                            <div class="display-inline">
+                                                <div ng-repeat="Age in CouponCode.AgeGroupItemForCouponCodeList" class="form-check form-check-inline">
+                                                    <input ng-disabled="CouponCode.CouponCodeId>0" class="form-check-input" type="checkbox" data-AgeGroupId="{{Age.AgeGroupId}}" id="{{Age.AgeGroupName}}" ng-checked="Age.Selected" value="{{Age.Selected}}" ng-click="Age.Selected=!Age.Selected" ng-model="AgeGroupItems">
+                                                    <label class="form-check-label" for="{{Age.AgeGroupName}}">{{Age.AgeGroupName}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="umb-group-builder__property flax-300 pt-5">
+                                        <p>**If you not selecting Subscription Item or Age group then this coupon discount amount will appear in total amount .</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="umb-editor-footer ">
+                        <div class="umb-editor-footer-content">
+                            <div ng-show="CouponCode.IsAppliedForSubscription || CouponCode.IsCouponAppliedForAgeGroup"></div>
+                            <div class="text-danger" ng-show="ErrorForAgeRequired!=''">{{ErrorForAgeRequired}}</div>
+                            <div class="text-danger" ng-show="ErrorForSubscriptionRequired!=''">{{ErrorForSubscriptionRequired}}</div>
+                            <div class="text-danger" ng-show="ErrorForMultipleUserType!=''">{{ErrorForMultipleUserType}}</div>
+                            <div class="umb-editor-footer-content__right-side ">
+                                <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" ng-disabled="model.saving" type="submit" ng-click="SaveCouponCode(CreateCouponCodeForm,CouponCode)">
+                                    <span ng-if="CouponCode.CouponCodeId==0"> Save</span>
+                                    <span ng-if="CouponCode.CouponCodeId>0"> Update</span>
+                                </button>
+                                <button ng-click="model.show=!model.show" class="btn umb-button__button btn-info umb-button-- umb-outline">  Close  </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="umb-editors" ng-if="modelDetails.show">
+        <div class="umb-editor   umb-editor--small umb-editor--infiniteMode umb-editor--n1 umb-editor--level1">
+            <div class="umb-panel umb-editor-wrapper">
+                <div class="umb-editor-header  ">
+
+                    <div class="flex items-center" style="height: 100%;" aria-hidden="false">
+                        <div ng-if="!modelDetails.showing" class="umb-panel-header-name  " style="display: contents;">
+                            Coupon Code- <button title="Copy Coupon Code" class="border-dotted btn umb-button__button btn-success umb-button-- umb-outline" style="padding:10px;" name="{{CouponCode.CouponCodeName}}" id="CouponCodeName"> {{CouponCode.CouponCodeName}}</button>
+                        </div>
+                        <ul class="umb-load-indicator animated -half-second" ng-if="modelDetails.showing">
+                            <li class="umb-load-indicator__bubble"></li>
+                            <li class="umb-load-indicator__bubble"></li>
+                            <li class="umb-load-indicator__bubble"></li>
+                        </ul>
+                    </div>
+                    <div class="umb-loader-wrapper" ng-if="modelDetails.showing">
+                        <div class="umb-loader"></div>
+                    </div>
+                </div>
+                <div class="umb-pane custom-umb-pan" ng-if="!modelDetails.showing">
+                    <div id="ViewCouponCode">
+                        <div class="umb-box ">
+                            <div class="umb-box-content border-dotted">
+                                <div class="history">
+                                    <div class="umb-group-builder__property flax-200">
+                                        <div class="umb-group-builder__property-meta">
+                                            <div class="umb-control-group clearfix">
+                                                <h5> Coupon Type </h5>
+                                                <div class="coupon-code-body" ng-repeat="CouponType in CouponCode.CouponTypeList">
+                                                    <div ng-if="CouponType.Selected">{{CouponType.CouponTypeName}}</div>
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>No of Usage <i class="text-danger">*</i></h5>
+                                                    <div class="coupon-code-body">
+                                                        {{CouponCode.NoOfUsages}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Coupon Type Use</h5>
+
+                                                    <div class="coupon-code-body" ng-repeat="CouponUsage in CouponCode.CouponUsagesTypeList">
+                                                        <div ng-if="CouponUsage.Selected">{{CouponUsage.CouponUsagesTypeName}}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Start Date</h5>
+
+                                                    <div class="coupon-code-body">
+                                                        {{CouponCode.ValidityStartDate|date}}
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Discont Type</h5>
+
+                                                    <div class="coupon-code-body" ng-repeat="DiscountType in CouponCode.DiscountTypesList">
+                                                        <div ng-if="DiscountType.Selected">{{DiscountType.DiscountTypeName}}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta ">
+                                                <div class="umb-control-group clearfix pt-5">
+                                                    <span>Is Coupon Applied For AgeGroup</span>
+                                                    <button type="button" ng-class="{ 'umb-toggle--checked': CouponCode.IsCouponAppliedForAgeGroup}" class="umb-toggle pt-4">
+                                                        <div class="umb-toggle__toggle umb-toggle__toggle-with">
+                                                            <i class="umb-toggle__icon umb-toggle__icon--left icon-check"></i>
+                                                            <i class="umb-toggle__icon umb-toggle__icon--right icon-wrong"></i>
+                                                            <div class="umb-toggle__handler"></div>
+                                                        </div>
+                                                        <span class="ng-scope">
+                                                            <span class="umb-toggle__label umb-toggle__label--right"></span>
+                                                        </span>
+
+                                                    </button>
+
+
+                                                </div>
+                                            </div>
+                                            <div ng-if="CouponCode.IsCouponAppliedForAgeGroup" class="umb-group-builder__property-meta pt-5">
+                                                <div class="umb-control-group clearfix">
+                                                    <ul ng-repeat="Age in CouponCode.AgeGroupItemForCouponCodeList" ng-if="Age.Selected"><li>{{Age.AgeGroupName}}</li></ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="umb-group-builder__property-meta">
+                                            <div class="umb-group-builder__property-meta ">
+                                                <div class="umb-control-group clearfix">
+                                                    <span>Is Applied For Multiple User Type</span>
+                                                    <button type="button" ng-class="{ 'umb-toggle--checked': CouponCode.IsAppliedForMultipleUserType}" class="umb-toggle pt-4">
+                                                        <div class="umb-toggle__toggle umb-toggle__toggle-with">
+                                                            <i class="umb-toggle__icon umb-toggle__icon--left icon-check"></i>
+                                                            <i class="umb-toggle__icon umb-toggle__icon--right icon-wrong"></i>
+                                                            <div class="umb-toggle__handler"></div>
+                                                        </div>
+                                                        <span class="ng-scope">
+                                                            <span class="umb-toggle__label umb-toggle__label--right"></span>
+                                                        </span>
+
+                                                    </button>
+
+
+                                                </div>
+                                            </div>
+                                            <div ng-if="CouponCode.IsAppliedForMultipleUserType" class="umb-control-group clearfix">
+                                                <h5>User Type</h5>
+                                                <div ng-repeat="UserType in CouponCode.UserTypeList" class="coupon-code-body">
+                                                    <div ng-if="UserType.Selected">{{UserType.UserTypeName}}</div>
+                                                </div>
+                                            </div>
+                                            <div ng-if="!CouponCode.IsAppliedForMultipleUserType" class="umb-control-group clearfix pt-45">
+                                                <h5></h5>
+                                                <div class="coupon-code-body pt-5">
+                                                    <div></div>
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Coupon Code Source</h5>
+                                                    <div class="coupon-code-body">
+                                                        <div>{{CouponCode.CouponSource}}</div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Start End</h5>
+
+                                                    <div class="coupon-code-body">
+                                                        {{CouponCode.ValidityEndDate|date}}
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta">
+                                                <div class="umb-control-group clearfix">
+                                                    <h5>Discount Amount <i class="text-danger">*</i></h5>
+                                                    <div class="coupon-code-body">
+                                                        {{CouponCode.DiscountValue}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="umb-group-builder__property-meta ">
+                                                <div class="umb-control-group clearfix pt-5">
+                                                    <span>Is Coupon Applied For Subscription</span>
+                                                    <button type="button" ng-class="{ 'umb-toggle--checked': CouponCode.IsAppliedForSubscription}" class="umb-toggle pt-4">
+                                                        <div class="umb-toggle__toggle umb-toggle__toggle-with">
+                                                            <i class="umb-toggle__icon umb-toggle__icon--left icon-check"></i>
+                                                            <i class="umb-toggle__icon umb-toggle__icon--right icon-wrong"></i>
+                                                            <div class="umb-toggle__handler"></div>
+                                                        </div>
+                                                        <span class="ng-scope">
+                                                            <span class="umb-toggle__label umb-toggle__label--right"></span>
+                                                        </span>
+
+                                                    </button>
+
+
+                                                </div>
+                                            </div>
+                                            <div ng-if="CouponCode.IsAppliedForSubscription" class="umb-group-builder__property-meta pt-5">
+                                                <div class="umb-control-group clearfix">
+                                                    <ul ng-repeat="subscription in CouponCode.SubscriptionsItemForCouponCodeList" ng-if="subscription.Selected"><li>{{subscription.SubscriptionName}}</li></ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="umb-editor-footer ">
+                        <div class="umb-editor-footer-content">
+                            <div class="umb-editor-footer-content__right-side ">
+                                <button ng-click="modelDetails.show=!modelDetails.show" class="btn umb-button__button btn-info umb-button-- umb-outline">  Close  </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

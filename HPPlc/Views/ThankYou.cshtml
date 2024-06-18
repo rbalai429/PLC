@@ -1,0 +1,135 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.ThankYou>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpage.cshtml";
+	var titleData = Model?.DescendantsOrSelf()?.OfType<ThankYou>()?.FirstOrDefault();
+
+	var resendCount = HPPlc.Models.SessionManagement.GetCurrentSession<int>(HPPlc.Models.SessionType.resendCnt);
+}
+
+<div class="main-wrp">
+	<div class="container-grey">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="signin-section">
+					<div class="signin-form" id="step-3">
+						<h2>@titleData.PageTitle</h2>
+						<h2>@titleData.ConfirmationTitle</h2>
+						<div class="resend-otp">
+							@titleData.ResendLinkText
+							<a href="javascritp:void(0);" id="aResendLink">@titleData.ResendButtonText</a>
+						</div>
+						<div style="margin-top:20px">
+							<span class="error" id="emailMsg" style="display:none">@titleData.MailSendTitle</span>
+						</div>
+
+						<input type="hidden" id="hdnResendClickCount" value="@titleData.ResendLinkClickable" />
+						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+@section CustomJsFiles
+{
+	<script>
+		$(document).ready(function () {
+			const urlSearchParams = new URLSearchParams(window.location.search);
+			const params = Object.fromEntries(urlSearchParams.entries());
+
+			var id = params.id;
+			if (id != undefined && id != "") {
+				$("#loader").css('display', 'block');
+				$.ajax({
+					type: "POST",
+					contentType: "application/json",
+					dataType: "JSON",
+					url: "/umbraco/Surface/Home/ValidateUser",
+					data: JSON.stringify({ "userId": id }),
+					success: function (e) {
+						if (e.status == "Success") {
+							$("#step-1").hide();
+							$("#step-2").show();
+							return false;
+						}
+						else if (e.status == "Fail") {
+							$("#step-1").hide();
+							$("#step-2").hide();
+						}
+						else if (e.status == "Error") {
+							$("#msgBox").show();
+							$("#msgBox").html("Something went wrong.");
+							return false;
+						}
+
+					},
+					error: function (error) {
+						$("#loader").css('display', 'none');
+					}, complete: function () {
+						$("#loader").css('display', 'none');
+					}
+				});
+			}
+			else {
+				$("#step-2").hide();
+			}
+
+			var totalCnt = $("#hdnResendClickCount").val();
+			@*if (@resendCount >= totalCnt) {
+				$(".resend-otp").hide();
+			}*@
+			$("#aResendLink").click(function () {
+				$("#loader").css('display', 'block');
+				$("#emailMsg").hide();
+				$.ajax({
+					type: "GET",
+					contentType: "application/json; charset=utf-8",
+					dataType: "JSON",
+					url: "/umbraco/Surface/Home/ResendRegistrationEmail",
+					data: { "subject": "HP Print Learn Center Registration Link", "type": "registration" },
+					success: function (e) {
+						if (e.status == "Success") {
+							$("#emailMsg").show();
+							$("#emailMsg").html("Email has been sent to your registered Email ID.");
+							var resendCnt = e.mailResendCnt;
+
+							//if (resendCnt >= totalCnt) {
+							//	$(".resend-otp").hide();
+							//}
+							return false;
+						}
+					},
+					error: function (error) {
+						$("#loader").css('display', 'none');
+					}, complete: function () {
+						$("#loader").css('display', 'none');
+					}
+				});
+			});
+		});
+	</script>
+}
+@*<script>
+		function ResendRegistrationEmail() {
+			$.ajax({
+				type: "GET",
+				contentType: "application/json; charset=utf-8",
+				dataType: "JSON",
+				url: "/umbraco/Surface/Home/ResendRegistrationEmail",
+				data: { "subject": "HP Print Learn Center Registration Link", "type": "registration" },
+				success: function (e) {
+					if (e.status == "Success") {
+						$("#emailMsg").show();
+						$("#emailMsg").html("Email has been sent to your registered Email ID.");
+						return false;
+					}
+				},
+				error: function (error) {
+
+				}
+			});
+		}
+	</script>*@

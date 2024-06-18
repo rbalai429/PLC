@@ -1,0 +1,70 @@
+﻿<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+
+<div ng-controller="WebinarListController" ng-init="init()" id="divWebinarListController">
+    <div class="umb-panel umb-editor-wrapper ng-scope">
+        <div data-element="editor-header" class="umb-editor-header flex items-center">
+            <h1 class="umb-panel-header-name ">{{Title}}</h1>
+        </div>
+    </div>
+    <div data-element="editor-container" class="umb-editor-container umb-panel-body umb-scrollable row-fluid ">
+        <div class="umb-pane">
+            <p>
+                <input type="text" id="date" style="margin-top:9px;" datepicker ng-model="datevalue" />
+                <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="FilterData(datevalue)">
+                    Search
+                </button>
+                <button ng-if="datevalue.length>0" class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="ResetData()">
+                    Reset
+                </button>
+            </p>
+            <div ng-if="!WebinarLoad">
+                <div class="umb-table" id="export">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Meeting Date</th>
+                                <th>Meeting Title</th>
+                                <th>Meeting Agenda</th>
+                                <th>Meeting Url</th>
+                                <th>Meeting Duration</th>
+                                <th>Author Name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody ng-if="WebinarsList.length>0">
+                            <tr ng-repeat="item in WebinarsList">
+                                <td>{{item.MeetingDate|date:'medium'}}</td>
+                                <td>{{item.MeetingTitle}}</td>
+                                <td>{{item.MeetingAgenda}}</td>
+                                <td>{{item.MeetingUrl}}</td>
+                                <td>{{item.MeetingDuration}}</td>
+                                <td>{{item.AuthorName}}</td>
+                                <td>
+                                    <button class="btn umb-button__button btn-success umb-button-- umb-outline float-right" type="button" ng-click="WebinarEdit(item.id)">
+                                        Edit
+                                    </button> &nbsp;
+                                    <button class="btn umb-button__button btn-error umb-button-- umb-outline float-right" type="button" ng-click="WebinarDelete(item.id)">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                        <tbody ng-if="WebinarsList.length==0">
+                            <tr>
+                                <td colspan="6"> <localize key="content_listViewNoItems"></localize></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <ul class="umb-load-indicator animated -half-second" ng-if="WebinarLoad">
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+                <li class="umb-load-indicator__bubble"></li>
+            </ul>
+        </div>
+    </div>
+</div>

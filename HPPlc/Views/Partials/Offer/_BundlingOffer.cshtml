@@ -1,0 +1,174 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using System.Configuration
+
+@{
+	var content = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()
+						 .Where(x => x.ContentType.Alias == "offer")?.OfType<Offer>().FirstOrDefault();
+
+	string bundlingRedirectUrl = ConfigurationManager.AppSettings["bundlingRedirectUrl"].ToString();
+	//var pageName = UmbracoContext?.PublishedRequest?.PublishedContent.Name;
+
+}
+<!--Popup html start-->
+
+
+<div class="overflowhide">
+	<div class="scrlCstm">
+		<div class="scrlCstmin">
+
+			<div class="congrbar">
+				<div class="claimgiftwrp">
+
+					<div class="titltp"><h1>@content.Title</h1></div>
+					<p class="textpra">@Html.Raw(content.Description)</p>
+					<div class="itemblkwrp">
+						@if (content.OfferType != null && content.OfferType.Any())
+						{
+							foreach (var item in content.OfferType)
+							{
+								<div class="itembl">
+									<div class="title">
+										@item.Title
+										@*@if (item.MediaFile != null)
+											{
+												<i><img src="@item.MediaFile.Url()" alt="@item.Title" /></i>
+											}*@
+									</div>
+									<div class="midcon">
+										@Html.Raw(item.Description)
+										@if (item.NavigationUrl != null)
+										{
+											<div class="btn-row">
+												<a href="@item.NavigationUrl" onclick="OfferTracker('@item.MediaTitle','@item.Title')" class="btn scondry-btn prplbtn">@item.NavigationButton</a>
+											</div>
+										}
+									</div>
+								</div>
+							}
+							@*<div class="itembl">
+									<div class="title">HP Printers <i><img src="/common/images/hpinkicn.png" alt=""></i></div>
+									<div class="midcon">
+										<p>Get an annual pack of <br />2000+worksheets for <span class="strong">899 FREE</span></p>
+										<p><span class="strong">Coupon code&nbsp;:&nbsp;</span>Printer's Serial ID</p>
+										<div class="btn-row"><a href="#" class="btn scondry-btn prplbtn">Claim now</a></div>
+									</div>
+								</div>*@
+						}
+					</div>
+					@*<div class="subheadtitle">What is HP Print Learn Center?</div>
+						<p>A learning hub with expert-designed worksheets and guided video tutorials to strengthen foundational learning of children between 3-12 years.</p>
+						<div class="link"><a href="#">Learn more</a></div>*@
+				</div>
+				@*@if (content.MediaFile != null)
+					{
+						<div class="sideimg">
+							<img src="@content.MediaFile.Url()" alt="@(content.MediaFile.Value<string>("altText"))" />
+						</div>
+					}*@
+				@*<div class="titletp">@content.Title</div>
+					@Html.Raw(content.Description)*@
+			</div>
+
+			@*<div class="clmstep">
+					<div class="titlelbl">@content.StepsToClaimTheOffer</div>
+					<div class="step">
+						@if (content.StepsToClaim != null)
+						{
+							foreach (var item in content.StepsToClaim)
+							{
+								<div class="item">
+									@if (item.MediaFile != null)
+									{
+										<div class="icon">
+											<i>
+												@if (!String.IsNullOrEmpty(item.MediaFile.Url()))
+												{
+													<img src="@item.MediaFile.Url()" alt="@(item.MediaFile.Value<string>("altText"))" />
+												}
+											</i> @item.MediaTitle
+										</div>
+									}
+
+									<div class="steptxt">@item.Title</div>
+									@item.Description
+								</div>
+							}
+						}
+
+					</div>
+					@if (content.ButtonForClaim != null)
+					{
+						<div class="btn-row">
+							<a href="@bundlingRedirectUrl" onclick="commonLayer('','@content.ButtonForClaim')" class="btn scondry-btn prplbtn">@content.ButtonForClaim</a>
+						</div>
+					}
+				</div>*@
+			<div class="wysubrb">
+				@if (content.WhySubscribe != null)
+				{
+					foreach (var item in content.WhySubscribe)
+					{
+						<div class="titlelbl">@item.Title</div>
+						@Html.Raw(item.Description)
+
+						if (item.Steps != null)
+						{
+							<ul>
+								@foreach (var steps in item.Steps)
+								{
+									<li>@steps</li>
+								}
+							</ul>
+						}
+
+					}
+				}
+				<div class="exprbtn">
+					@if (content.ExploreWorksheetLink != null)
+					{
+						<a href="@content.ExploreWorksheetLink.Url" onclick="commonLayer('Offer','@content.ExploreWorksheetLink.Name')">
+							@if (content.ExploreWorksheetIcon != null)
+							{
+								<i>
+									<img src="@content.ExploreWorksheetIcon.Url()" />
+								</i>
+							}
+							@content.ExploreWorksheetLink.Name
+						</a>
+					}
+				</div>
+			</div>
+			@if (content.TermsConditions != null)
+			{
+				foreach (var tc in content.TermsConditions)
+				{
+					<div class="trmpopup">
+						@tc.Title <i>
+							@if (tc.Icon != null)
+							{
+								<img src="@tc.Icon.Url()" alt="" />
+							}
+						</i>
+						<div class="trmspoupdtl">
+							@if (tc.Steps != null)
+							{
+								<ul>
+									@foreach (var steps in tc.Steps)
+									{
+										<li>@steps</li>
+									}
+								</ul>
+							}
+							@if (content.ReadMoreSource != null)
+							{
+								<p><a href="@content.ReadMoreSource.Url" onclick="commonLayer('','@content.ReadMoreSource.Name')" target="@content.ReadMoreSource.Target">@content.ReadMoreSource.Name</a></p>
+							}
+						</div>
+					</div>
+				}
+			}
+		</div>
+	</div>
+</div>
+
+

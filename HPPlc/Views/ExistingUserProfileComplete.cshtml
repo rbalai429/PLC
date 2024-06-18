@@ -1,0 +1,135 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.ExistingUserPasswordSet>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpage.cshtml";
+
+	string culture = HPPlc.Models.CultureName.GetCultureName();
+
+	var validationTitleData = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault().DescendantsOrSelf()?
+						.Where(x => x.ContentType.Alias == "registration")?.OfType<Registration>().FirstOrDefault();
+
+	List<NameListItem> ageGroups;
+	ageGroups = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+						.Where(x => x.ContentType.Alias == "ageMaster")?.FirstOrDefault()?.Children?
+						.OfType<NameListItem>().Where(x => x.IsActice).ToList();
+
+	HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+	HPPlc.Models.MyProfile myprofile = new HPPlc.Models.MyProfile();
+	var emailId = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.emailid);
+	if (!String.IsNullOrWhiteSpace(emailId))
+	{
+		//get data from database
+		myprofile = db.GetProfileByEmail(emailId);
+	}
+}
+
+
+<div class="main-wrp">
+	<div class="container-grey">
+		<div class="container-box">
+			<div class="container-inr">
+
+				<div class="signinsect-cmn">
+					<div class="subs-details">
+						<div class="sub-cmn">
+							<label>@validationTitleData.Password <sup class="mandatory">*</sup></label>
+							<input type="password" class="enterEvent" id="regpassword" name="regpassword" maxlength="10" tabindex="6" autocomplete="off" oncopy="return false" onpaste="return false" />
+							<i class="fa-eye" onClick="showPass('password')"></i>
+							<span class="error" id="passwordRequired" style="display:none;">@validationTitleData.PasswordRequired</span>
+							<span class="error" id="passwordLength" style="display:none;">@validationTitleData.PasswordLength</span>
+							<span class="error" id="passwordFormat" style="display:none;">@validationTitleData.PasswordFormat</span>
+						</div>
+
+						<div class="sub-cmn">
+							<label>@validationTitleData.ConfirmPassword <sup class="mandatory">*</sup></label>
+							<input type="password" class="enterEvent" id="confirmpassword" name="confirmpassword" maxlength="10" tabindex="7" autocomplete="off" oncopy="return false" onpaste="return false" />
+							<i class="fa-eye" onClick="showPass('password')"></i>
+							<span class="error" id="confirmPasswordRequired" style="display:none;">@validationTitleData.ConfirmPassword</span>
+							<span class="error" id="confirmPasswordMatch" style="display:none;">@validationTitleData.PasswordSameRequired</span>
+						</div>
+					</div>
+					<h2>@Model.Title</h2>
+					<div class="selectage-group">
+						<p>@Model.SubTitle</p>
+						<em><img src="/common/images/drop-arrow-black.png" /></em>
+					</div>
+					<div class="selectage-inputs">
+						<ul>
+							@if (ageGroups != null && ageGroups.Any())
+							{
+								if (myprofile != null && !String.IsNullOrWhiteSpace(myprofile.SelectedAgeGroup))
+								{
+									foreach (var items in ageGroups.Where(x => x.IsActice))
+									{
+										string[] selectedAge = myprofile.SelectedAgeGroup.Split(',');
+										if (selectedAge != null)
+										{
+											string ValueExists = Array.Find(selectedAge, e => e == items?.ItemValue);
+											if (!String.IsNullOrEmpty(ValueExists))
+											{
+												<li>
+													<label class="container-label">
+														<input type="checkbox" name="ageSelected" id="ageSelected" value="@items.ItemValue" selected disabled />
+														<span class="checkmark-label" style="background: rgb(27, 142, 212);"></span>@items.ItemName
+													</label>
+												</li>
+											}
+											else
+											{
+												<li>
+													<label class="container-label">
+														<input type="checkbox" name="ageSelected" id="ageSelected" value="@items.ItemValue" />
+														<span class="checkmark-label"></span>@items.ItemName
+													</label>
+												</li>
+											}
+										}
+									}
+								}
+								else
+								{
+									foreach (var items in ageGroups.Where(x => x.IsActice))
+									{
+										<li>
+											<label class="container-label">
+												<input type="checkbox" name="ageSelected" id="ageSelected" value="@items.ItemValue" />
+												<span class="checkmark-label"></span>@items.ItemName
+											</label>
+										</li>
+
+									}
+								}
+							}
+						</ul>
+					</div>
+					<div>
+						<span id="msgbox" class="error"></span>
+					</div>
+					<div class="lds-roller" id="addagegroup" style="display:none"></div>
+					<div class="selected-itemdiv">
+						<button id="btnAddExistingUserValidation" type="button" class="btn">@Model.ButtonSubmitTitle</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--Popup html start-->
+@Html.Partial("~/Views/Partials/MyAccount/_AccountVerification.cshtml")
+<!--Popup html end-->
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="~/MyScripts/registration.js"></script>
+
+
+	<script type="text/javascript">
+		$(".selectage-group").click(function () {
+			$(this).find("em").toggleClass("active");
+			$(".selectage-inputs").slideToggle();
+		});
+	</script>
+}
+
+

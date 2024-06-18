@@ -1,0 +1,291 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = "masterpage.cshtml";
+
+	string culture = HPPlc.Models.CultureName.GetCultureName().Replace("/", "");
+	string selectedAgegroup = String.Empty;
+	string decryptedAgegroup = String.Empty;
+	string subscriptionId = String.Empty;
+	string ranking = String.Empty;
+	string discountMode = String.Empty;
+	string IsBotRequest = String.Empty;
+
+	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.OfferCodeCouponValidate);
+
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+	if (UserLoggedInOrNot == false)
+	{
+		if (Request.QueryString.AllKeys.Contains("o"))
+		{
+			if (Request.QueryString.Get("o") != null)
+			{
+				string qs = Request.QueryString.Get("o").ToString();
+				if (!String.IsNullOrEmpty(qs) && qs == "n")
+				{
+					HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SplRedirection, Request.RawUrl);
+					HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.OfferCodeCouponValidate, "Yes");
+
+					//if (Request.QueryString.AllKeys.Contains("subscriptionid"))
+					//{
+					//	if (Request.QueryString.Get("subscriptionid") != null && Request.QueryString.Get("subscriptionid") == "BkOPEfonjasVVDDA2YZBkg==")
+					//	{
+					//		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.CouponCode, "HPINK199");
+					//	}
+					//	else
+					//	{
+					//		HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponCode);
+					//	}
+					//}
+				}
+			}
+		}
+
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.SplRedirection, Request.RawUrl);
+
+		Response.Redirect("/my-account/login");
+	}
+
+	if (Request.QueryString.Get("subscriptionid") != null && Request.QueryString.Get("o") == "n")
+	{
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.OfferCodeCouponValidate, "Yes");
+		HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.quizWorksheetId, Request.QueryString.Get("subscriptionid"));
+	}
+
+	if (Request.QueryString.Count > 0)
+	{
+		if (Request.QueryString.AllKeys.Contains("subscriptionid"))
+		{
+			if (Request.QueryString.Get("subscriptionid") != null)
+			{
+				subscriptionId = Request.QueryString.Get("subscriptionid");
+				subscriptionId = HPPlc.Models.clsCommon.Decrypt(subscriptionId);
+
+				if (!String.IsNullOrWhiteSpace(subscriptionId) && Convert.ToInt32(subscriptionId) > 0)
+				{
+					ranking = Umbraco?.Content(subscriptionId)?.DescendantsOrSelf()?.OfType<BonusAddSubscriptions>()?.FirstOrDefault()?.Ranking;
+
+
+					//if (Request.QueryString.Get("subscriptionid") != null && Request.QueryString.Get("subscriptionid") == "BkOPEfonjasVVDDA2YZBkg==" && Request.QueryString.Get("o") == "n")
+					//{
+					//	HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.CouponCode, "HPINK199");
+					//}
+					//else
+					//{
+					//	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponCode);
+					//	HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponTempDtls);
+					//}
+
+				}
+			}
+		}
+		if (Request.QueryString.AllKeys.Contains("age"))
+		{
+			if (Request.QueryString.Get("age") != null)
+			{
+				selectedAgegroup = Request.QueryString.Get("age").ToString();
+
+				decryptedAgegroup = HPPlc.Models.clsCommon.Decrypt(selectedAgegroup);
+			}
+		}
+
+		if (Request.QueryString.AllKeys.Contains("mode"))
+		{
+			if (Request.QueryString.Get("mode") != null)
+			{
+				discountMode = Request.QueryString.Get("mode").ToString();
+
+				discountMode = HPPlc.Models.clsCommon.Decrypt(discountMode);
+			}
+		}
+		else
+		{
+			HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.SubscriptionDiscount);
+		}
+
+
+
+		//manage session before redirection on login page
+		//HPPlc.Models.ManageSessionForSubscription manageSessionForSubscription = new HPPlc.Models.ManageSessionForSubscription();
+		//manageSessionForSubscription.SetSessionForSubs(Model.Url(), Request.QueryString[0].ToString(), selectedAgegroup);
+	}
+
+	//Check user is loggedIn or not
+	//HPPlc.Models.SessionExpireAttribute.CheckUserLoggedIn("Subsptn");
+
+	HPPlc.Models.SubscriptionDetails subscriptionDetails = new HPPlc.Models.SubscriptionDetails();
+	HPPlc.Models.LoggedIn loggedIn = new HPPlc.Models.LoggedIn();
+
+	//Get User Details
+	//loggedIn = HPPlc.Models.SessionManagement.GetCurrentSession<HPPlc.Models.LoggedIn>(HPPlc.Models.SessionType.LoggedInDtls);
+
+	//Get Session Subscription Details
+	subscriptionDetails = HPPlc.Models.SessionManagement.GetCurrentSession<HPPlc.Models.SubscriptionDetails>(HPPlc.Models.SessionType.SubscriptionDtls);
+
+	var titleData = Model?.DescendantsOrSelf()?.OfType<BonusBuyNow>()?.FirstOrDefault();
+
+	string _CouponCode = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.CouponCode);
+
+
+	//string CouponCode = String.Empty;
+	//string UserExistingAndElibigleForDiscount = String.Empty;
+
+	//string UserType = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.RegistrationMode);
+	//string UserAgeGroupEnrolledOrNot = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.AgeGroupExistsOrNot);
+	//string UserSubscribedOrNot = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.SubscribedOrNot);
+
+	////if (!String.IsNullOrEmpty(UserType) && UserType.ToLower() == "existing" && !String.IsNullOrEmpty(UserSubscribedOrNot) && UserSubscribedOrNot.ToLower() == "no")
+	////{
+	////	UserExistingAndElibigleForDiscount = "yes";
+	////}
+
+	//PopupCoupon Code
+	//string IsCouponCodeOffer = "N";
+	//if (Request.QueryString.Count > 0 && Request.QueryString.AllKeys.Contains("o"))
+	//{
+	//	if (Request.QueryString.Get("o") == "n")
+	//	{
+	//		HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponCode);
+	//		HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponTempDtls);
+	//	}
+	//}
+	//else
+	//{
+	//	CouponCode = HPPlc.Models.SessionManagement.GetCurrentSession<string>(HPPlc.Models.SessionType.CouponCode);
+	//	if (!String.IsNullOrWhiteSpace(CouponCode))
+	//	{
+	//		IsCouponCodeOffer = "Y";
+	//	}
+	//	else
+	//	{
+	//		HPPlc.Models.SessionManagement.DeleteFromSession(HPPlc.Models.SessionType.CouponCode);
+	//	}
+	//}
+
+	//string IsOfferUsed = HPPlc.Models.SessionManagement.GetCurrentSession<int>(HPPlc.Models.SessionType.HpOfferRedirection).ToString();
+	//Get All subscription detais for user
+	//HPPlc.Models.GetUserCurrentSubscription UserCurrentSubscription = new HPPlc.Models.GetUserCurrentSubscription();
+	//List<HPPlc.Models.GetUserCurrentSubscription> GetUserAllSubscription = new List<HPPlc.Models.GetUserCurrentSubscription>();
+	//GetUserAllSubscription = HPPlc.Models.SessionManagement.GetCurrentSession<List<HPPlc.Models.GetUserCurrentSubscription>>(HPPlc.Models.SessionType.SubscriptionInDtls);
+
+
+	//HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+	//List<HPPlc.Models.SelectedAgeGroup> myagegroup = new List<HPPlc.Models.SelectedAgeGroup>();
+	//myagegroup = db.GetUserSelectedUserGroup();
+
+	//string maxRanking = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+	//					.Where(x => x.ContentType.Alias == "subscriptionTypeRoot")?.FirstOrDefault()?.Children?
+	//					.Where(x => x.ContentType.Alias == "subscriptionList")?.FirstOrDefault().Children?.OfType<Subscriptions>().ToList().Where(c => c.IsActive).Max(m => m.Ranking);
+}
+
+<input type="hidden" id="SubscriptionPlanId" />
+<input type="hidden" id="ranking" value="@ranking" />
+<input type="hidden" id="culture" value="@culture" />
+<input type="hidden" id="agegroup" value="@decryptedAgegroup" />
+<input type="hidden" id="IsBotRequest" value="@IsBotRequest" />
+<input type="hidden" id="DeleteTitle" value="@titleData.DeleteTitle" />
+<input type="hidden" id="DeleteDetailsMessage" value="@titleData.DeleteDetailsMessage" />
+<input type="hidden" id="DeleteConfirmButtonText" value="@titleData.DeleteConfirmButtonText" />
+<input type="hidden" id="DeleteCancelButtonText" value="@titleData.DeleteCancelButtonText" />
+<input type="hidden" id="cpncd" value="@_CouponCode" />
+@*<input type="hidden" id="IsCouponCodeOffer" value="@IsCouponCodeOffer" />*@
+
+<form method="POST" name="paymentForm" id="paymentForm" action="">
+	@*@Html.AntiForgeryToken()*@
+
+	<div class="main-wrp bonusSubsc">
+		@Html.Partial("_Breadcrumb")
+		<div class="container-grey">
+			<div class="container-box">
+				<div class="container-inr">
+					@*@if (!String.IsNullOrWhiteSpace(IsOfferUsed) && IsOfferUsed.ToLower() == "yes")
+						{
+							<div class="sticky-msg"><span>@Html.Raw(titleData.OfferStickyBannerText)</span></div>
+						}*@
+					@*@if (!String.IsNullOrWhiteSpace(CouponCode) && CouponCode == "TATA899")
+						{
+							<div class="sticky-msg"><span> The TATA899 coupon is available for the 899 plan only for any one of the classes.</span></div>
+						}*@
+					<div class="subscription-block">
+						<div class="subinr nopadding">
+
+							<div class="subleft">
+								
+								@if (!String.IsNullOrEmpty(titleData.Headline))
+								{
+									<h1 class="subscrpHead">@Html.Raw(titleData.Headline)</h1>
+								}
+
+								<div class="duhc" id="SubsCouponCode">
+									@Html.Partial("/Views/Partials/_Couponcode.cshtml")
+								</div>
+
+								<div id="dvSubscriptionCart">
+									@Html.Partial("/Views/Partials/_SubscriptionCartStructurePrm.cshtml")
+								</div>
+
+								<div class="subright" id="SubscriptionPay">
+									@Html.Partial("/Views/Partials/_SubscriptionPayStructurePrm.cshtml")
+								</div>
+
+								<div class="overlayLogin" id="subscriptionplanlist" style="display:none">
+									<div class="loginPopup">
+										<div class="chng-planbox">
+
+											@Html.Partial("/Views/Partials/_SubscriptionlistStructurePrm.cshtml",
+													  new ViewDataDictionary(this.ViewData)
+													  {
+														  { "qstring","addincart" },
+														  { "selectedAgegroup", ""},
+														  { "selectedAgeDecrypted", ""}
+													  })
+										</div>
+									</div>
+								</div>
+
+								@*<div class="subs-details">
+										@if (loggedIn != null)
+										{
+											if (!String.IsNullOrEmpty(loggedIn.u_name))
+											{
+												<div class="sub-cmn">
+													<label>@titleData.NameTitle</label>
+													<div class="subsaved-data">@HPPlc.Models.clsCommon.Decrypt(loggedIn.u_name)</div>
+												</div>
+											}
+											if (!String.IsNullOrEmpty(loggedIn.u_email))
+											{
+												<div class="sub-cmn">
+													<label>@titleData.EmailTitle</label>
+													<div class="subsaved-data">@HPPlc.Models.clsCommon.Decrypt(loggedIn.u_email)</div>
+												</div>
+											}
+											if (!String.IsNullOrEmpty(loggedIn.u_whatsappno))
+											{
+												<div class="sub-cmn">
+													<label>@titleData.WhatsAppTitle</label>
+													<div class="subsaved-data">@HPPlc.Models.clsCommon.Decrypt(loggedIn.u_whatsappno)</div>
+												</div>
+											}
+										}
+									</div>*@
+							</div>
+
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+</form>
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="~/CustumJs/BonusWorksheet/BuyNow.js?v4"></script>
+}
+
+

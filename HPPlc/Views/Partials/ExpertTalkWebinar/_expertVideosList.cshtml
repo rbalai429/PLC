@@ -1,0 +1,71 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<HPPlc.Models.ExpertTalkWebinar.ExpertTalkWebinarModel>
+@using HPPlc.Models.ExpertTalkWebinar;
+@{
+	var model = Model;
+}
+@if (model != null && Model.Videos != null && Model.Videos.Any() && Model.Videos.Count > 0)
+{
+	<div class="list-items dvExpertTalkVideoContainer">
+		@foreach (VideosItems item in Model.Videos)
+		{
+			<div class="item-col">
+				<div class="card-box">
+					<div class="card-video video-open">
+						<a data-id="@item.videoID" href="/@item.videoDetailsUrl">
+							<span class="play-btn"></span>
+							<div class="vidPlchldr2">
+								<picture>
+									@if (item.ImagesSrc != null)
+									{
+										<img class="imgPlacing" alt="" src="@item.ImagesSrc" height="1" width="1" />
+									}
+								</picture>
+								</div>
+						</a>
+					</div>
+					<div class="card-cont">
+						<div class="card-dscptn">
+							<div class="card-title">@item.Title</div>
+						</div>
+						@if (item.IsDisplayShare == true)
+						{
+							<div class='card-social-icon'>
+								<div class='share-icon'>
+									<div class='share-box'>
+										<ul>
+											@if (!String.IsNullOrWhiteSpace(item.facebookContent))
+											{
+												<li><a href='javascript:void(0)' class='fb-icon aFBShare' onclick="commonShareLayer('Share_facebook','Previous Webinar - @item.Title');"><span style='display:none'>@item.facebookContent</span></a></li>
+											}
+											@if (!String.IsNullOrWhiteSpace(item.whatsAppContent))
+											{
+												<li>
+													<a href='javascript:void(0)' class='whatsapp-icon aWHTAppSH' onclick="commonShareLayer('Share_whatsapp','Previous Webinar - @item.Title');">
+														<span style='display:none'>
+															@item.whatsAppContent
+														</span>
+													</a>
+												</li>
+											}
+											@if (!String.IsNullOrWhiteSpace(item.mailContent))
+											{
+												<li>
+													<a href='javascript:void(0)' class='mail-icon aMailSh' onclick="commonShareLayer('Share_mail','Previous Webinar - @item.Title');">
+														<span style='display:none'>
+															@item.mailContent
+														</span>
+													</a>
+												</li>
+											}
+										</ul>
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+
+				</div>
+			</div>
+		}
+	</div>
+}

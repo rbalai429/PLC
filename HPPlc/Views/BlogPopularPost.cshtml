@@ -1,0 +1,162 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using HPPlc.Models.Blog
+@{
+	Layout = "masterpage.cshtml";
+
+	var blogTitle = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+												.Where(x => x.ContentType.Alias == "blogRoute").OfType<BlogRoute>().FirstOrDefault();
+
+	//Popular Blog
+	List<PopularBlog> popularBlog = new List<PopularBlog>();
+	List<BlogContent> blogContent = new List<BlogContent>();
+	HPPlc.Models.dbAccessClass db = new HPPlc.Models.dbAccessClass();
+
+	try
+	{
+		popularBlog = db.GetPopularBlog(0);
+
+		if (popularBlog != null)
+		{
+			//var popularBlg = new List<string>();
+			foreach (var blogId in popularBlog)
+			{
+				//popularBlg.Add(blogId.BlogItemId);
+
+				BlogContent popular = blogTitle?.DescendantsOrSelf().Where(x => x.ContentType.Alias == "blogListing")?
+							.FirstOrDefault()?.Children?.Where(c => c.Id.ToString() == blogId.BlogItemId).OfType<BlogContent>().Where(c => c.IsActive == true).SingleOrDefault();
+
+				if (popular != null)
+				{
+					blogContent.Add(popular);
+				}
+			}
+
+
+
+			//.OrderByDescending(popularBlog.Where(l => l.BlogItemId.ToString()))?
+			//.OrderByDescending(lst => popularBlog.Any(y => lst.Id.ToString() == popularBlog.Any(k => k.BlogItemId == lst.BlogItemId)))
+			//.Take(titleValue.NoOfPopularBlogDisplayOnBlogListingPage).ToList();
+
+			//blogContent = blogContent.OrderBy(lst => popularBlog.All(y => y.BlogItemId == lst.Id.ToString())).ToList();
+		}
+	}
+	catch (Exception ex)
+	{
+		HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+		error.PageName = "Blog Details Page";
+		error.MethodName = "HPBlogSaveViewerLog";
+		error.ErrorMessage = ex.Message;
+
+		HPPlc.Models.dbAccessClass.PostApplicationError(error);
+	}
+}
+
+
+<div class="main-wrp">
+	<div class="banner banner2 nopdbtm">
+		@try
+		{
+			@Html.Partial("/Views/Partials/_Banner.cshtml");
+		}
+		catch { }
+	</div>
+	@Html.Partial("_Breadcrumb")
+
+	<div class="container-fluid educatn-pnl">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="faq-wrp">
+					@Html.Partial("/Views/Partials/Blog/_BlogMenu.cshtml")
+
+					<div style="padding-top:30px;">
+						<div class="container-fluid grayshrbg popl-tgs">
+							<p><h1><strong class="tag-header">@Model.Name</strong></h1></p>
+						</div>
+					</div>
+
+					<div class="articl-wrap">
+						<div class="blog-clm-left">
+							@if (blogContent != null && blogContent.Any())
+							{
+								foreach (var blog in blogContent)
+								{
+									try
+									{
+										<div class="pp-postclm">
+											<div class="pp-postclm-inr">
+												@if (blog.BlogMediaFile != null)
+												{
+													<div class="pp-postclmlft">
+														<a href="@blog.Url()" onclick="commonLayer('@blog.Name','Popular Post - @blog.BlogTitle');">
+															<img src="@Url.GetCropUrl(imageCropperValue: blog.BlogMediaFile, width: 200,height: 200,furtherOptions: "&format=jpg")" class="img-fluid" alt="Blog Image" />
+														</a>
+													</div>
+												}
+												<div class="pp-postclmrgt">
+													<em class="dt">@blog.BlogDate.ToString("MMMM d, yyyy")</em>
+													<p>
+														<a href="@blog.Url()" onclick="commonLayer('@blog.Name','Popular Post - @blog.BlogTitle');">
+															@blog.BlogTitle
+														</a>
+													</p>
+													@Html.Raw(blog.BlogDescription)
+													@*@if (blog.BlogDescription.ToHtmlString().Length > 350)
+														{
+															string blogurl = blog.Url();
+															string link = "<a class='vm-mor' href='" + blogurl + "'  onclick='commonLayer('" + @blog.Name +"', 'Popular Post - '"+ @blog.BlogTitle + "');'> ... </a>";
+															@Html.Raw(blog.BlogDescription.ToHtmlString().Substring(0, 350) + link);
+														}
+														else
+														{
+															@Html.Raw(blog.BlogDescription)
+														}*@
+													<div>
+														<em class="autnm">@blog.AuthorName</em>
+													</div>
+												</div>
+											</div>
+										</div>
+									}
+									catch (Exception ex)
+									{
+										HPPlc.Models.ApplicationError error = new HPPlc.Models.ApplicationError();
+										error.PageName = "Blog Popular Post Bind";
+										error.MethodName = "Html";
+										error.ErrorMessage = ex.Message;
+
+										HPPlc.Models.dbAccessClass.PostApplicationError(error);
+									}
+								}
+							}
+							else
+							{
+								<div class="rltd-artclm">
+									<p>Blog not found</p>
+								</div>
+							}
+
+						</div>
+
+						<div class="articl-clmrigth">
+
+
+							<div class="popl-tgs">
+
+								<strong>@blogTitle.PopularTagsTitle</strong>
+
+								<div class="pptg-clm">
+
+									@Html.Partial("/Views/Partials/Blog/_BlogPopularTag.cshtml")
+
+								</div>
+							</div>
+
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+

@@ -1,0 +1,51 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+
+@{
+	var titleData = Umbraco?.ContentAtRoot()?.Where(x => x?.ContentType?.Alias == "home")?.FirstOrDefault()?.DescendantsOrSelf()?
+		.Where(x => x?.ContentType?.Alias == "offerRoot")?.OfType<OfferRoot>()?.FirstOrDefault();
+
+}
+
+@*Free Downloads*@
+<div class="overlaySD" id="freeDwnldSpecialOffer" style="display:none">
+	<div class="sdPopup">
+		<div class="sdPopupCont">
+			<span class="sdClose"></span>
+			<div class="sdHd">
+				<h5>@titleData.DownloadTitle</h5>
+			</div>
+			<div class="sdImg"><img src="/common/images/Bonus/Bonus3.jpg" alt=""></div>
+			<div class="sdBtm">
+				
+					@Html.Raw(titleData?.DownloadDescription)
+				
+				<div class="sdBtnRow" style="justify-content:center">
+					<a href="javascript:void(0);" class="btn secndryBtn payCloseSpecialOffer">@(titleData?.CloseTitle)</a>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+@*Free Downloads Just Login*@
+<div class="overlaySD" id="freeDwnldJustAfterLoginSpecialOffer" style="display:none">
+	<div class="sdPopup">
+		<div class="sdPopupCont">
+			<span class="sdClose payCloselgn"></span>
+			<div class="sdHd">
+				<h5>@titleData.DownloadTitle</h5>
+			</div>
+			<div class="sdImg"><img src="/common/images/Bonus/Bonus3.jpg" alt="" /></div>
+			<div class="sdBtm">
+
+				@Html.Raw(titleData?.DownloadDescription)
+
+				<div class="sdBtnRow" style="justify-content:center">
+					<a href="javascript:void(0);" class="btn secndryBtn payCloselgnSpecialOffer">@(titleData?.CloseTitle)</a>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>

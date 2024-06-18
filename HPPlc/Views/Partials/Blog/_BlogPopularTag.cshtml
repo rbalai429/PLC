@@ -1,0 +1,17 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+
+@{
+	var BlogPopularTag = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+														.Where(x => x.ContentType.Alias == "blogRoute")?.FirstOrDefault()?.Children?
+														.Where(x => x.ContentType.Alias == "blogTagDetails").FirstOrDefault().Children.OfType<TagDetails>();
+
+	var pageName = UmbracoContext.PublishedRequest.PublishedContent.Name;
+}
+
+@if (BlogPopularTag != null)
+{
+	foreach (var item in BlogPopularTag)
+	{
+		<span><a href="@item.Url()" onclick="commonLayer('@pageName','Tag - @item.Name');">@item.Name</a></span>
+	}
+}

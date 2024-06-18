@@ -1,0 +1,23 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+	
+@{
+	var menu = Umbraco?.ContentAtRoot()?.Where(x => x.ContentType.Alias == "home")?.FirstOrDefault()?.Children?
+						  .Where(x => x.ContentType.Alias == "blogRoute")?.OfType<BlogRoute>().FirstOrDefault();
+
+	var pageName = UmbracoContext.PublishedRequest.PublishedContent.Name;
+}
+
+@if (menu != null)
+{
+	<div class="faq-nv">
+		<ul class="navigationblog">
+			@foreach (var item in menu.BlogMenu)
+			{
+				if (item != null)
+				{
+					<li><a href="@item.ContentItem.Url" onclick="commonLayer('@pageName','@item.ContentItem.Name');">@item.ContentItem.Name</a></li>
+				}
+			}
+		</ul>
+	</div>
+}

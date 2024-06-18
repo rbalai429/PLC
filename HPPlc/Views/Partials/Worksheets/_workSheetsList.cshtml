@@ -1,0 +1,368 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<HPPlc.Models.WorkSheet.WorkSheetModel>
+@using HPPlc.Models.WorkSheet;
+@using System.Globalization;
+
+@{
+	var model = Model;
+	string pageName = HPPlc.Models.GetPageName.pagename();
+
+	string classForQuiz = string.Empty;
+	bool tobeDisplayQuiButton = false;
+
+	bool UserLoggedInOrNot = HPPlc.Models.SessionExpireAttribute.UserLoggedIn();
+}
+@if (model != null && Model.WorkSheets != null && Model.WorkSheets.Any() && Model.WorkSheets.Count() > 0)
+{
+	<div class="list-items">
+
+		@foreach (WorkSheetItems item in Model.WorkSheets)
+		{
+			if (item != null && item.NestedItems != null && item.NestedItems.Any())
+			{
+				string seeMore = String.Empty;
+				string seeMoreText = String.Empty;
+				seeMoreText = item.SeeMore.VideoDetailsUrl;
+				if (item.SeeMore != null && item?.NestedItems.Count > 5)
+				{
+					seeMore = item.SeeMore.VideoDetailsUrl;
+				}
+
+				<div class="rowPlc">
+					<div class='fit-hd'>
+						<h2 class="hdtitl">
+							@if (!String.IsNullOrWhiteSpace(Model.Mode) && Model.Mode == "related")
+							{
+								<a href="@seeMore">Related Worksheets </a>
+							}
+							else if (!String.IsNullOrWhiteSpace(seeMoreText))
+							{
+								<a href="@seeMoreText">@item.WorksheetTitle </a>
+							}
+							else
+							{
+								@item.WorksheetTitle
+							}
+						</h2>
+					</div>
+					@*<div class="incldRt">
+							<div class="chkBxItem ritInpt chkBxItemWht">
+								<div class="cstm-chckbx">
+									<label for="CBSE2">
+										<span>Include CBSE Content </span>
+										<input type="checkbox" checked id="CBSE2" class="checbx chkFilterSubCategory" />
+										<strong class="chkInf"></strong>
+									</label>
+								</div>
+							</div>
+
+						</div>*@
+				</div>
+				<div class='video-thum-row'>
+					<div class='video-thum-slider'>
+						@if (item?.NestedItems != null)
+						{
+							foreach (NestedItems nested in item?.NestedItems)
+							{
+
+								var detailData = string.Empty;
+								if (!string.IsNullOrEmpty(item.Title))
+								{
+									detailData = item.Title;
+								}
+								if (!string.IsNullOrEmpty(nested.Volume))
+								{
+									detailData = detailData + "-" + nested.Volume;
+								}
+								if (!string.IsNullOrEmpty(nested.Subject))
+								{
+									detailData = detailData + "-" + nested.Subject;
+								}
+
+								<items>
+									<div class='item-col'>
+										<div class='card-box'>
+											<div class='card-img'>
+												<div class="cardImgPlchldr">
+													<picture>
+														@if (!String.IsNullOrWhiteSpace(nested.MobileImagesSrc))
+														{
+															<source class='b-lazy' alt="@nested.MobileAltText" data-src="@nested.MobileImagesSrc" src="/common/images/img-loader.gif" media="(max-width: 680px)" />
+														}
+
+														@if (!String.IsNullOrWhiteSpace(nested.MobileNextGenImage))
+														{
+															<source data-srcset="@nested.MobileNextGenImage" srcset="/common/images/img-loader.gif" type='image/webp' media="(max-width: 680px)" />
+														}
+
+														@if (!String.IsNullOrWhiteSpace(nested.NextGenImage))
+														{
+															<source data-srcset="@nested.NextGenImage" srcset="/common/images/img-loader.gif" type='image/webp' />
+														}
+
+														@if (!String.IsNullOrWhiteSpace(nested.ImagesSrc))
+														{
+															<img class='b-lazy imgPlacing' alt="@nested.AltText" src='/common/images/img-loader.gif' data-src='@nested.ImagesSrc' width="1" height="1" />
+														}
+													</picture>
+												</div>
+
+												@if (nested.IsQuizWorksheet == true)
+												{
+													<a href="javascript:void(0);" class="quizLabl">Quiz</a>
+												}
+
+												@if (nested.IsEnabledForDetailsPage == true)
+												{
+													<a href="@nested.WorksheetDetailsUrl" class="prevOverlyBx" onclick="commonLayer('@pageName','@(detailData + "- Worksheet Details Page")');">
+														<span><img src="/common/images/icon-pdf.png" width="1" height="1" alt=""> Click to see details</span>
+													</a>
+												}
+												else if (nested.IsEnabledForDetailsPage == false && !String.IsNullOrWhiteSpace(nested.PreviewPdf))
+												{
+													<a href="@nested.PreviewPdf" target="_blank" class="prevOverlyBx" onclick="commonLayer('@pageName','@(detailData + "-PreviewPDF")');">
+														<span><img src="/common/images/icon-pdf.png" width="1" height="1" alt=""> Click to see worksheets</span>
+													</a>
+												}
+											</div>
+
+											<div class='card-cont'>
+
+												<div class='card-dscptn'>@Html.Raw(nested.Description)</div>
+
+												@if (nested.subscriptionStatus != null)
+												{
+													if (nested.subscriptionStatus.Condition1 || nested.subscriptionStatus.Condition3 || nested.subscriptionStatus.Condition4 || nested.subscriptionStatus.Condition5)
+													{
+														if (nested.socialItems != null && (nested.socialItems.FBShare != null || nested.socialItems.EmailShare != null || nested.socialItems.WhatAppShare != null))
+														{
+														<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@nested.subscriptionStatus.DownloadString</span><span style='display:none'>@detailData</span></a></div>
+															var detailShareData = string.Empty;
+															try
+															{
+																if (!string.IsNullOrEmpty(item.Title))
+																{
+																	detailShareData = item.Title;
+																}
+																if (!string.IsNullOrEmpty(nested.Volume))
+																{
+																	detailShareData = detailShareData + "-" + nested.Volume;
+																}
+																if (!string.IsNullOrEmpty(nested.Description.ToString()))
+																{
+																	System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex("<[^>]*>");
+																	string dtls = rx.Replace(nested.Description.ToString(), "").Replace("\n", "");
+
+																	detailShareData = detailShareData + "-" + dtls;
+																}
+															}
+															catch { }
+
+														<div class='card-social-icon'>
+															<div class='share-icon'>
+																<div class='share-box'>
+																	<ul>
+																		@if (nested.socialItems.FBShare != null)
+																		{
+																			<li><a href='javascript:void(0)' class='fb-icon aFBShare' onclick="commonShareLayer('Share_facebook','@detailShareData');"><span style='display:none'>@nested.socialItems.FBShare</span></a></li>
+																		}
+																		@if (nested.socialItems.WhatAppShare != null)
+																		{
+																			<li>
+																				<a href='javascript:void(0)' class='whatsapp-icon aWHTAppSH' onclick="commonShareLayer('Share_whatsapp','@detailShareData');">
+																					<span style='display:none'>
+																						@nested.socialItems.WhatAppShare
+																					</span>
+																				</a>
+																			</li>
+																		}
+																		@if (nested.socialItems.EmailShare != null)
+																		{
+																			<li>
+																				<a href='javascript:void(0)' class='mail-icon aMailSh' onclick="commonShareLayer('Share_mail','@detailShareData');">
+																					<span style='display:none'>
+																						@nested.socialItems.EmailShare
+																					</span>
+																				</a>
+																			</li>
+																		}
+																	</ul>
+																</div>
+															</div>
+														</div>
+														}
+													}
+												}
+												</div>
+											<div class='card-btn-print'>
+												@if (nested.subscriptionStatus != null)
+												{
+													string culture = HPPlc.Models.CultureName.GetCultureName().Replace("/", "");
+													if (String.IsNullOrWhiteSpace(culture))
+													{ culture = "en-US"; }
+
+													System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
+													string downloadButton = String.Empty;
+													if (UserLoggedInOrNot == true)
+													{
+														downloadButton = Umbraco.GetDictionaryValue("Download Button");
+													}
+													else
+													{
+														downloadButton = Umbraco.GetDictionaryValue("FreeDownload");
+													}
+
+													string subscribeToDownload = Umbraco.GetDictionaryValue("Subscribe to download");
+													string upgradeToPremium = Umbraco.GetDictionaryValue("Upgrade to Premium");
+													string buyNewSubscription = Umbraco.GetDictionaryValue("BuyNewSubscription");
+
+													//string asf = HPPlc.Models.clsCommon.GetDictionaryValueForLanguage("Download Button",null,null);
+
+													//var detailData = item.Title + "-" + nested.Volume + "-" + nested.Category;
+
+
+													if (nested.IsQuizWorksheet == true && (nested.subscriptionStatus.Condition1 == true || nested.subscriptionStatus.Condition3 == true || nested.subscriptionStatus.Condition4 == true || nested.subscriptionStatus.Condition5 == true))
+													{
+														tobeDisplayQuiButton = true;
+														classForQuiz = "btn-half";
+													}
+													else
+													{
+														tobeDisplayQuiButton = false;
+														classForQuiz = "btn-full";
+													}
+
+													if (nested.subscriptionStatus.Condition1)
+													{
+														<div class="btn-col @classForQuiz">
+															<a href="@nested.subscriptionStatus.DownloadUrl" class='btn downllink' onclick="return addDownloadDataLayer('@detailData','@downloadButton','@pageName');">@downloadButton <span class='download-icon'></span></a>
+														</div>
+
+														@*<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@nested.subscriptionStatus.DownloadString</span><span style='display:none'>@detailData</span></a></div>*@
+													}
+													//2. if user not loggedin and worksheet not mapped with isguestuser true
+													else if (nested.subscriptionStatus.Condition2)
+													{
+														<div class='btn-col @classForQuiz'>
+															<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="addSubscribeDataLayer('@detailData','@subscribeToDownload','@nested.subscriptionStatus.SubscriptionUrl','@pageName');">@subscribeToDownload <span class='download-icon'></span></a>
+															@*<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="return SubscriptionChange('@detailData','@subscribeToDownload','@nested.subscriptionStatus.SubscriptionUrl','@pageName')">@subscribeToDownload <span class='download-icon'></span></a>*@
+														</div>
+													}
+													// 3.1 if User have free subscription and have referral
+													else if (nested.subscriptionStatus.Condition3)
+													{
+														<div class='btn-col @classForQuiz'>
+															<a href="@nested.subscriptionStatus.DownloadUrl" class='btn downllink' onclick="return addDownloadDataLayer('@detailData','@downloadButton','@pageName');"> @downloadButton<span class='download-icon'></span></a>
+														</div>
+														@*<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@nested.subscriptionStatus.DownloadString</span><span style='display:none'>@detailData</span></a></div>*@
+													}
+													// 3.2 if User have loggedin and age group is same with worksheet and worksheet is free
+													else if (nested.subscriptionStatus.Condition4)
+													{
+														<div class='btn-col @classForQuiz'>
+															<a href="@nested.subscriptionStatus.DownloadUrl" class='btn downllink' onclick="return addDownloadDataLayer('@detailData','@downloadButton','@pageName');"> @downloadButton <span class='download-icon'></span></a>
+														</div>
+														@*<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@nested.subscriptionStatus.DownloadString</span><span style='display:none'>@detailData</span></a></div>*@
+													}
+													else if (nested.subscriptionStatus.Condition5)
+													{
+														<div class='btn-col @classForQuiz'>
+															<a href="@nested.subscriptionStatus.DownloadUrl" class='btn downllink' onclick="return addDownloadDataLayer('@detailData','@downloadButton','@pageName');"> @downloadButton <span class='download-icon'></span></a>
+														</div>
+														@*<div class='print-col'><a class='clsPrintDoc'><span style='display:none;'>@nested.subscriptionStatus.DownloadString</span><span style='display:none'>@detailData</span></a></div>*@
+													}
+													else if (nested.subscriptionStatus.Condition6)
+													{
+														<div class='btn-col @classForQuiz'>
+															<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="addSubscribeDataLayer('@detailData','@upgradeToPremium','@nested.subscriptionStatus.SubscriptionUrl','@pageName');"> @upgradeToPremium <span class='download-icon'></span></a>
+															@*<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="return SubscriptionChange('@detailData','@upgradeToPremium','@nested.subscriptionStatus.SubscriptionUrl','@pageName')">@upgradeToPremium <span class='download-icon'></span></a>*@
+															@*<span style='display:none'>@nested.subscriptionStatus.SubscriptionUrl</span>*@
+														</div>
+													}
+													else if (nested.subscriptionStatus.Condition7)
+													{
+														<div class='btn-col @classForQuiz'>
+															<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="addSubscribeDataLayer('@detailData','@buyNewSubscription','@nested.subscriptionStatus.SubscriptionUrl','@pageName');"> @buyNewSubscription <span class='download-icon'></span></a>
+															@*<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="return SubscriptionChange('@detailData','@buyNewSubscription','@nested.subscriptionStatus.SubscriptionUrl','@pageName')">@buyNewSubscription <span class='download-icon'></span></a>*@
+															@*<span style='display:none'>@nested.subscriptionStatus.SubscriptionUrl</span>*@
+														</div>
+													}
+													else if (nested.subscriptionStatus.Condition8)
+													{
+														<div class='btn-col @classForQuiz'>
+															<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="addSubscribeDataLayer('@detailData','@buyNewSubscription','@nested.subscriptionStatus.SubscriptionUrl','@pageName');"> @buyNewSubscription <span class='download-icon'></span></a>
+															@*<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="return SubscriptionChange('@detailData','@buyNewSubscription','@nested.subscriptionStatus.SubscriptionUrl','@pageName')">@buyNewSubscription <span class='download-icon'></span></a>*@
+															@*<span style='display:none'>@nested.subscriptionStatus.SubscriptionUrl</span>*@
+														</div>
+													}
+													else if (nested.subscriptionStatus.Condition9)
+													{
+														<div class='btn-col @classForQuiz'>
+															<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="addSubscribeDataLayer('@detailData','@buyNewSubscription','@nested.subscriptionStatus.SubscriptionUrl','@pageName');"> @buyNewSubscription <span class='download-icon'></span></a>
+															@*<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="return SubscriptionChange('@detailData','@buyNewSubscription','@nested.subscriptionStatus.SubscriptionUrl','@pageName')">@buyNewSubscription <span class='download-icon'></span></a>*@
+															@*<span style='display:none'>@nested.subscriptionStatus.SubscriptionUrl</span>*@
+														</div>
+													}
+													else if (nested.subscriptionStatus.Condition10)
+													{
+														<div class='btn-col @classForQuiz'>
+															<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="addSubscribeDataLayer('@detailData','@subscribeToDownload','@nested.subscriptionStatus.SubscriptionUrl','@pageName');">@subscribeToDownload <span class='download-icon'></span></a>
+															@*<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="return SubscriptionChange('@detailData','@subscribeToDownload','@nested.subscriptionStatus.SubscriptionUrl','@pageName')">@subscribeToDownload <span class='download-icon'></span></a>*@
+														</div> 
+													}
+													else
+													{
+														<div class='btn-col @classForQuiz'>
+															<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="addSubscribeDataLayer('@detailData','@buyNewSubscription','@nested.subscriptionStatus.SubscriptionUrl','@pageName');"> @buyNewSubscription <span class='download-icon'></span></a>
+															@*<a href="javascript:void(0)" class='btn subs-downllink dvdatalayer' onclick="return SubscriptionChange('@detailData','@buyNewSubscription','@nested.subscriptionStatus.SubscriptionUrl','@pageName')">@buyNewSubscription <span class='download-icon'></span></a>*@
+															@*<span style='display:none'>@nested.subscriptionStatus.SubscriptionUrl</span>*@
+														</div>
+													}
+
+													@*if (nested.IsQuizWorksheet == true && tobeDisplayQuiButton == true)
+														{
+															<div class="btn-col @classForQuiz">
+																<a href="" class="btn secndryBtn downllink">Launch Quiz <span class="download-icon"></span></a>
+															</div>
+														}*@
+												}
+											</div>
+										</div>
+									</div>
+								</items>
+							}
+						}
+						@*See More*@
+						@if (!String.IsNullOrWhiteSpace(seeMore))
+						{
+							<items>
+								<div class='item-col'>
+									<div class='card-box'>
+										<div class='card-img'>
+											<a href='@item.SeeMore.VideoDetailsUrl'>
+												<span class='see-more-btn'>@Umbraco.GetDictionaryValue("See More", "See More")</span>
+												<picture>
+													@if (item.SeeMore.NextGenMediaUrl != null)
+													{
+														<source srcset='@item.SeeMore.NextGenMediaUrl' type='image/webp' media="(max-width: 680px)">
+													}
+													@if (item.SeeMore.MediaUrl != null)
+													{
+														<img alt='@item.SeeMore.MediaAltText' src='@item.SeeMore.MediaUrl' width="1" height="1" />
+													}
+												</picture>
+											</a>
+										</div>
+									</div>
+								</div>
+							</items>
+						}
+					</div>
+				</div>
+			}
+		}
+	</div>
+}
+else
+{
+	<div class='fit-hd' style="text-align:center"><h5>@Umbraco.GetDictionaryValue("No Result Found", "No Result Found")</h5></div>
+}

@@ -1,0 +1,69 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@{
+	Layout = null;
+
+	var currentPageId = Model.Id;
+	var currentPage = Umbraco.Content(currentPageId);
+
+	//string breadCrum = String.Empty;
+
+	List<HPPlc.Models.BreadCrumbSchema> breadCrumb = new List<HPPlc.Models.BreadCrumbSchema>();
+}
+
+<div class="breadcrmb">
+	@try
+	{
+		if (currentPage != null)
+		{
+			int counter = 1;
+			foreach (var content in currentPage.Ancestors().Reverse())
+			{
+				if (content != null && content?.Value<bool>("isEnableForBreadcrumb") == true)
+				{
+					breadCrumb.Add(new HPPlc.Models.BreadCrumbSchema { type = "ListItem", position = counter, item = content.Url(), name = content.Name });
+					//breadCrum += "{"@@type": "ListItem","position":" + counter +","item": '" + content.Url() + "','name': '" + content.Name + "'},";
+					//string teachersURL = "teachersnursery teacherslkg teachersukg teachersclass-1 teachersclass-2 teachersclass-3 teachersclass-4 teachersclass-5 teachersclass-6";
+					//var strArray = teachersURL.Split(' ');
+					//var teachersURLValid = strArray.Count(x => x == content.Url().Replace("/", ""));
+
+					//if (teachersURLValid == 0)
+					//{
+						<span>
+							@if (content.Url() != null && content.Url().Replace("/", "") == "teachers-subscription")
+							{
+								<a class="breadcrumb-item" href="/subscription?mode=tchrs">
+									@content.Name
+								</a>
+							}
+							else
+							{
+								<a class="breadcrumb-item" href="@(content.Url())">
+									@content.Name
+								</a>
+							}
+
+						</span>
+					//}
+				}
+
+				counter++;
+			}
+
+			<a class="breadcrumb-item" style="display:none" href="@("https://www.printlearncenter.com" + currentPage.Url())">
+				@currentPage.Name
+			</a>
+			<span>@currentPage.Name</span>
+
+			breadCrumb.Add(new HPPlc.Models.BreadCrumbSchema { type = "ListItem", position = counter, item = currentPage.Url(), name = currentPage.Name });
+			//breadCrum += "{'@@type': 'ListItem','position':" + (counter + 1) + ",'item': '" + currentPage.Url() + "','name': '" + currentPage.Name+ "'}";
+		}
+
+		if (breadCrumb != null)
+		{
+			HPPlc.Models.SessionManagement.StoreInSession(HPPlc.Models.SessionType.IsBotRequest, breadCrumb);
+		}
+	}
+	catch { }
+</div>
+
+

@@ -1,0 +1,102 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.FreeDownloads>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+	Layout = "masterpage.cshtml";
+
+	var CultureInfo = Model.GetCultureFromDomains();
+	//var vrNoreId = Model.Id;
+	//var CurrentPageDetails = Umbraco?.Content(vrNoreId);
+}
+
+@section metatags
+{
+	@Html.Partial("/Views/Partials/_MetaDataBind.cshtml")
+}
+
+<div class="main-wrp">
+	<input id="hdnCultureInfo" type="hidden" value="@CultureInfo" />
+
+
+	@try
+	{
+		@Html.Partial("/Views/Partials/_Banner.cshtml");
+	}
+	catch (Exception ex) { }
+
+	@Html.Partial("_Breadcrumb")
+	<div class="container-fluid ContnPlc">
+		<div class="container-box">
+			<div class="container-inr">
+				<div class="ContnPlcin">
+					@if (Model.HasProperty("title"))
+					{
+						<div class="descTitlePlc">
+							<h1 class="titleforhtag">@Html.Raw(Model.Value("title"))</h1>
+						</div>
+					}
+
+					@if (Model.HasProperty("description"))
+					{
+						IHtmlString description = Model.Value<IHtmlString>("description");
+
+						string descp = System.Text.RegularExpressions.Regex.Replace(description.ToString(), "<.*?>", String.Empty).Replace("\n", "");
+						if (!String.IsNullOrWhiteSpace(descp))
+						{
+							<div class="descContPlc">
+								@Html.Raw(Model.Value("description"))
+							</div>
+						}
+					}
+
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="video-tutorials fullWidePage ListingMnPlc topSpace0">
+
+		<div class="container-fluid">
+			<div class="container-box">
+				<div class="container-inr">
+
+					<div class="ctgryListMn">
+
+						<div class="ctgryListSld">
+							@Html.Partial("/Views/Partials/FreeDownloads/_FreeDownloadsMenu.cshtml")
+						</div>
+					</div>
+
+					<div class="ListingMnPlcin">
+						
+						<div id="festival-offers-WorksheetList">
+
+							@*@Html.Partial("/Views/Partials/FreeDownloads/_freeDownloads.cshtml")*@
+						</div>
+
+
+						<div id="faqbox">
+							@Html.CachedPartial("_footerSEOContent", Model, 3600)
+							@Html.Partial("_footerContentData")
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+
+
+
+
+
+</div>
+
+
+@section CustomJsFiles
+{
+	<script type="text/javascript" src="/CustumJs/FreeDownloads.js"></script>
+}
