@@ -995,6 +995,9 @@
     <Compile Include="App_Data\Models\Videos.generated.cs" />
     <Compile Include="App_Data\Models\VolumeMaster.generated.cs" />
     <Compile Include="App_Data\Models\Webinars.generated.cs" />
+    <Compile Include="App_Data\Models\WhatsappEvent.generated.cs" />
+    <Compile Include="App_Data\Models\WhatsappNotificationEvent.generated.cs" />
+    <Compile Include="App_Data\Models\WhatsappNotifications.generated.cs" />
     <Compile Include="App_Data\Models\Worksheet.generated.cs" />
     <Compile Include="App_Data\Models\WorksheetCategory.generated.cs" />
     <Compile Include="App_Data\Models\WorksheetListingAgeWise.generated.cs" />
