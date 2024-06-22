@@ -21,6 +21,11 @@ namespace HPPlc.Models.WhatsApp
 		public string ComWithWhatsApp { get; set; }
 		public string UserUniqueCode { get; set; } = "";
 		public int NoOfDays { get; set; } = 0;
+
+		//Added by v
+		public Int32 PlanRemainingDays { get; set; }
+		public string NotificationTypeCode { get; set; }
+		public string CustomerType { get; set; }
 	}
 
 	public class NotificationLog

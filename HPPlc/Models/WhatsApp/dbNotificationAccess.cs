@@ -26,6 +26,8 @@ namespace HPPlc.Models.WhatsApp
 				QType = "2";
 			else if (!String.IsNullOrWhiteSpace(notificationType) && notificationType.ToLower() == "bulk")
 				QType = "4";
+			else if (!String.IsNullOrWhiteSpace(notificationType) && notificationType.ToLower() == "whatsapp")
+				QType = "5";
 			else
 				QType = "3";
 

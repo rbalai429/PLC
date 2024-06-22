@@ -45,11 +45,11 @@ namespace Umbraco.Web.PublishedModels
 		// properties
 
 		///<summary>
-		/// Event
+		/// Banner Url
 		///</summary>
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "8.12.2")]
-		[ImplementPropertyType("event")]
-		public global::System.Collections.Generic.IEnumerable<global::Umbraco.Web.PublishedModels.WhatsappEvent> Event => this.Value<global::System.Collections.Generic.IEnumerable<global::Umbraco.Web.PublishedModels.WhatsappEvent>>("event");
+		[ImplementPropertyType("bannerUrl")]
+		public string BannerUrl => this.Value<string>("bannerUrl");
 
 		///<summary>
 		/// Event Code
@@ -66,10 +66,45 @@ namespace Umbraco.Web.PublishedModels
 		public string EventName => this.Value<string>("eventName");
 
 		///<summary>
+		/// Is Active
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "8.12.2")]
+		[ImplementPropertyType("isActive")]
+		public bool IsActive => this.Value<bool>("isActive");
+
+		///<summary>
+		/// Is Banner
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "8.12.2")]
+		[ImplementPropertyType("isBanner")]
+		public bool IsBanner => this.Value<bool>("isBanner");
+
+		///<summary>
+		/// NotificationSubject
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "8.12.2")]
+		[ImplementPropertyType("notificationSubject")]
+		public string NotificationSubject => this.Value<string>("notificationSubject");
+
+		///<summary>
+		/// Notification Url
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "8.12.2")]
+		[ImplementPropertyType("notificationUrl")]
+		public string NotificationUrl => this.Value<string>("notificationUrl");
+
+		///<summary>
 		/// Number Of Days
 		///</summary>
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "8.12.2")]
 		[ImplementPropertyType("numberOfDays")]
 		public string NumberOfDays => this.Value<string>("numberOfDays");
+
+		///<summary>
+		/// Video Url
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "8.12.2")]
+		[ImplementPropertyType("videoUrl")]
+		public string VideoUrl => this.Value<string>("videoUrl");
 	}
 }
