@@ -87,10 +87,6 @@ Umbraco.Core.Migrations.Upgrade.V_8_0_0.VariantsMigration, Umbraco.Core, Version
 Umbraco.Core.Migrations.Upgrade.V_8_0_0.ContentVariationMigration, Umbraco.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Core.Migrations.Upgrade.V_8_0_0.DataTypes.PreValueMigratorComposer, Umbraco.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Core.Services.Implement.KeyValueService+InitializeMigration, Umbraco.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
-Our.Umbraco.TheDashboard.TheDashboardComposer, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
-Our.Umbraco.TheDashboard.TheDashboardDashboard, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
-Our.Umbraco.TheDashboard.Install.PackageActions.RemoveOldInstallation, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
-Our.Umbraco.TheDashboard.Controllers.TheDashboardController, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
 HPPlc.ApplicationComposer, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 HPPlc.CustomSection.Reports.TreeController.ReportsTreeController, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 HPPlc.CustomSection.Reports.Composers.SectionComposer, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
@@ -127,24 +123,13 @@ HPPlc.Controllers.WebinarManagementController, HPPlc, Version=1.0.0.0, Culture=n
 HPPlc.Controllers.WorkSheetController, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 HPPlc.Controllers.ZoomJwtController, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 HPPlc.Controllers.ImportExcel.ImportExcelFileAuthorizeApiController, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.PackageActions.AddRedirectsModuleAction, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Models.Outbound.OutboundRedirectPropertyValueConverter, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Migrations.AddDestinationColumns, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Migrations.CreateTable, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Migrations.FixRootKeyValue, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Dashboards.RedirectsDashboard, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Controllers.Api.RedirectsController, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Composers.MigrationComposer, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Composers.RedirectsComposer, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
 Our.Umbraco.DocTypeGridEditor.Bootstrap, Our.Umbraco.DocTypeGridEditor, Version=1.2.7757.21567, Culture=neutral, PublicKeyToken=null
 Our.Umbraco.DocTypeGridEditor.Web.Controllers.DocTypeGridEditorApiController, Our.Umbraco.DocTypeGridEditor, Version=1.2.7757.21567, Culture=neutral, PublicKeyToken=null
 Our.Umbraco.DocTypeGridEditor.Composing.DocTypeGridEditorComposer, Our.Umbraco.DocTypeGridEditor, Version=1.2.7757.21567, Culture=neutral, PublicKeyToken=null
-Umbraco.ModelsBuilder.Embedded.ModelsBuilderDashboard, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
-Umbraco.ModelsBuilder.Embedded.Compose.ModelsBuilderComposer, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
-Umbraco.ModelsBuilder.Embedded.BackOffice.MediaTypeModelValidator, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
-Umbraco.ModelsBuilder.Embedded.BackOffice.MemberTypeModelValidator, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
-Umbraco.ModelsBuilder.Embedded.BackOffice.ModelsBuilderDashboardController, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
-Umbraco.ModelsBuilder.Embedded.BackOffice.ContentTypeModelValidator, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Our.Umbraco.TheDashboard.TheDashboardComposer, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
+Our.Umbraco.TheDashboard.TheDashboardDashboard, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
+Our.Umbraco.TheDashboard.Install.PackageActions.RemoveOldInstallation, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
+Our.Umbraco.TheDashboard.Controllers.TheDashboardController, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Controllers.UmbProfileController, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Controllers.UmbLoginStatusController, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Controllers.UmbRegisterController, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
@@ -349,8 +334,23 @@ Umbraco.Web.Cache.MemberGroupCacheRefresher, Umbraco.Web, Version=8.0.0.0, Cultu
 Umbraco.Web.Cache.PublicAccessCacheRefresher, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Cache.TemplateCacheRefresher, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Cache.UserCacheRefresher, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
-Umbraco.Storage.S3.Media.BucketMediaFileSystemComposer, Umbraco.Storage.S3.Media, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.PackageActions.AddRedirectsModuleAction, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Models.Outbound.OutboundRedirectPropertyValueConverter, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Migrations.AddDestinationColumns, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Migrations.CreateTable, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Migrations.FixRootKeyValue, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Dashboards.RedirectsDashboard, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Controllers.Api.RedirectsController, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Composers.MigrationComposer, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Composers.RedirectsComposer, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
 Skybrud.Umbraco.GridData.GridPropertyValueConverter, Skybrud.Umbraco.GridData, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null
+Umbraco.ModelsBuilder.Embedded.ModelsBuilderDashboard, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Umbraco.ModelsBuilder.Embedded.Compose.ModelsBuilderComposer, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Umbraco.ModelsBuilder.Embedded.BackOffice.MediaTypeModelValidator, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Umbraco.ModelsBuilder.Embedded.BackOffice.MemberTypeModelValidator, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Umbraco.ModelsBuilder.Embedded.BackOffice.ModelsBuilderDashboardController, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Umbraco.ModelsBuilder.Embedded.BackOffice.ContentTypeModelValidator, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Umbraco.Storage.S3.Media.BucketMediaFileSystemComposer, Umbraco.Storage.S3.Media, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 
 Umbraco.Core.Composing.IComposer
 
@@ -361,14 +361,11 @@ Umbraco.Core.Compose.RelateOnCopyComposer, Umbraco.Core, Version=8.0.0.0, Cultur
 Umbraco.Core.Compose.RelateOnTrashComposer, Umbraco.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Core.Runtime.CoreInitialComposer, Umbraco.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Core.Migrations.Upgrade.V_8_0_0.DataTypes.PreValueMigratorComposer, Umbraco.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
-Our.Umbraco.TheDashboard.TheDashboardComposer, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
 HPPlc.ApplicationComposer, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 HPPlc.CustomSection.Reports.Composers.SectionComposer, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Composers.MigrationComposer, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Composers.RedirectsComposer, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
 Our.Umbraco.DocTypeGridEditor.Bootstrap, Our.Umbraco.DocTypeGridEditor, Version=1.2.7757.21567, Culture=neutral, PublicKeyToken=null
 Our.Umbraco.DocTypeGridEditor.Composing.DocTypeGridEditorComposer, Our.Umbraco.DocTypeGridEditor, Version=1.2.7757.21567, Culture=neutral, PublicKeyToken=null
-Umbraco.ModelsBuilder.Embedded.Compose.ModelsBuilderComposer, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Our.Umbraco.TheDashboard.TheDashboardComposer, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.SignalR.PreviewHubComposer, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Runtime.WebInitialComposer, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Runtime.WebFinalComposer, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
@@ -387,6 +384,9 @@ Umbraco.Web.Compose.PublicAccessComposer, Umbraco.Web, Version=8.0.0.0, Culture=
 Umbraco.Web.Compose.NestedContentPropertyComposer, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Compose.DatabaseServerRegistrarAndMessengerComposer, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Cache.DistributedCacheBinderComposer, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Composers.MigrationComposer, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Composers.RedirectsComposer, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
+Umbraco.ModelsBuilder.Embedded.Compose.ModelsBuilderComposer, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Storage.S3.Media.BucketMediaFileSystemComposer, Umbraco.Storage.S3.Media, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 
 Umbraco.Core.PropertyEditors.IPropertyValueConverter
@@ -412,7 +412,6 @@ Umbraco.Core.PropertyEditors.ValueConverters.TextStringValueConverter, Umbraco.C
 Umbraco.Core.PropertyEditors.ValueConverters.TinyMceValueConverter, Umbraco.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Core.PropertyEditors.ValueConverters.UploadPropertyConverter, Umbraco.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Core.PropertyEditors.ValueConverters.YesNoValueConverter, Umbraco.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Models.Outbound.OutboundRedirectPropertyValueConverter, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.PropertyEditors.ValueConverters.BlockListPropertyValueConverter, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.PropertyEditors.ValueConverters.MultiUrlPickerValueConverter, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.PropertyEditors.ValueConverters.FlexibleDropdownPropertyValueConverter, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
@@ -425,6 +424,7 @@ Umbraco.Web.PropertyEditors.ValueConverters.ContentPickerValueConverter, Umbraco
 Umbraco.Web.PropertyEditors.ValueConverters.MarkdownEditorValueConverter, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.PropertyEditors.ValueConverters.TextStringValueConverter, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.PropertyEditors.ValueConverters.RteMacroRenderingValueConverter, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Models.Outbound.OutboundRedirectPropertyValueConverter, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
 Skybrud.Umbraco.GridData.GridPropertyValueConverter, Skybrud.Umbraco.GridData, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null
 
 Umbraco.Web.Mvc.PluginController
@@ -464,7 +464,6 @@ Umbraco.Web.Mvc.RenderMvcController, Umbraco.Web, Version=8.0.0.0, Culture=neutr
 
 Umbraco.Web.WebApi.UmbracoApiController
 
-Our.Umbraco.TheDashboard.Controllers.TheDashboardController, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
 HPPlc.CustomSection.Reports.TreeController.ReportsTreeController, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 HPPlc.Controllers.PLCFrontEndAPIsController, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 HPPlc.Controllers.AssessmentModuleController, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
@@ -475,9 +474,8 @@ HPPlc.Controllers.ReportAuthorizeApiController, HPPlc, Version=1.0.0.0, Culture=
 HPPlc.Controllers.ReportsAuthorizeApiController, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 HPPlc.Controllers.WebHooksController, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 HPPlc.Controllers.ImportExcel.ImportExcelFileAuthorizeApiController, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Controllers.Api.RedirectsController, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
 Our.Umbraco.DocTypeGridEditor.Web.Controllers.DocTypeGridEditorApiController, Our.Umbraco.DocTypeGridEditor, Version=1.2.7757.21567, Culture=neutral, PublicKeyToken=null
-Umbraco.ModelsBuilder.Embedded.BackOffice.ModelsBuilderDashboardController, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Our.Umbraco.TheDashboard.Controllers.TheDashboardController, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Trees.LogViewerTreeController, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Trees.FilesTreeController, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Trees.ContentBlueprintTreeController, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
@@ -550,6 +548,8 @@ Umbraco.Web.Editors.ContentTypeController, Umbraco.Web, Version=8.0.0.0, Culture
 Umbraco.Web.Editors.MediaTypeController, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Editors.SectionController, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Editors.MediaController, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Controllers.Api.RedirectsController, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
+Umbraco.ModelsBuilder.Embedded.BackOffice.ModelsBuilderDashboardController, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 
 Umbraco.Web.Mvc.SurfaceController
 
@@ -586,8 +586,6 @@ Umbraco.Core.Dashboards.IDashboard
 
 Umbraco.Core.Manifest.ManifestDashboard, Umbraco.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Our.Umbraco.TheDashboard.TheDashboardDashboard, Our.Umbraco.TheDashboard, Version=8.0.5.0, Culture=neutral, PublicKeyToken=null
-Skybrud.Umbraco.Redirects.Dashboards.RedirectsDashboard, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
-Umbraco.ModelsBuilder.Embedded.ModelsBuilderDashboard, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Dashboards.ContentDashboard, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Dashboards.ExamineDashboard, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Dashboards.FormsDashboard, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
@@ -598,6 +596,8 @@ Umbraco.Web.Dashboards.ProfilerDashboardDashboard, Umbraco.Web, Version=8.0.0.0,
 Umbraco.Web.Dashboards.PublishedStatusDashboard, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Dashboards.RedirectUrlDashboard, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.Dashboards.SettingsDashboard, Umbraco.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
+Skybrud.Umbraco.Redirects.Dashboards.RedirectsDashboard, Skybrud.Umbraco.Redirects, Version=2.1.4.0, Culture=neutral, PublicKeyToken=null
+Umbraco.ModelsBuilder.Embedded.ModelsBuilderDashboard, Umbraco.ModelsBuilder.Embedded, Version=8.0.0.0, Culture=neutral, PublicKeyToken=null
 
 Umbraco.Core.PropertyEditors.IDataEditor
 
@@ -763,6 +763,8 @@ Umbraco.Web.PublishedModels.TitleDescriptionAndNested, HPPlc, Version=1.0.0.0, C
 Umbraco.Web.PublishedModels.TitleDescriptionMultipleContent, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.PublishedModels.TitleSubTitleDescriptionAndMedia, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.PublishedModels.TitleWithMultipleItems, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+Umbraco.Web.PublishedModels.WhatsappEvent, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+Umbraco.Web.PublishedModels.WhatsappNotificationEvent, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 
 Umbraco.Core.Models.PublishedContent.PublishedContentModel
 
@@ -917,6 +919,7 @@ Umbraco.Web.PublishedModels.VideoListingAgeWise, HPPlc, Version=1.0.0.0, Culture
 Umbraco.Web.PublishedModels.Videos, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.PublishedModels.VolumeMaster, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.PublishedModels.Webinars, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+Umbraco.Web.PublishedModels.WhatsappNotifications, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.PublishedModels.Worksheet, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.PublishedModels.WorksheetCategory, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
 Umbraco.Web.PublishedModels.WorksheetListingAgeWise, HPPlc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null

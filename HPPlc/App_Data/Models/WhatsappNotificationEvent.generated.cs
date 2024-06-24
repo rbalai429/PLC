@@ -80,11 +80,18 @@ namespace Umbraco.Web.PublishedModels
 		public bool IsBanner => this.Value<bool>("isBanner");
 
 		///<summary>
-		/// NotificationSubject
+		/// Notification Subject
 		///</summary>
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "8.12.2")]
 		[ImplementPropertyType("notificationSubject")]
 		public string NotificationSubject => this.Value<string>("notificationSubject");
+
+		///<summary>
+		/// Notification Type
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "8.12.2")]
+		[ImplementPropertyType("notificationType")]
+		public string NotificationType => this.Value<string>("notificationType");
 
 		///<summary>
 		/// Notification Url
